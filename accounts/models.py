@@ -11,3 +11,5 @@ class User(AbstractUser):
         unique = True,
         error_messages = {'unique': '이미 존재하는 이메일입니다.'}
     )
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = []
