@@ -3,7 +3,6 @@ from .models import BaseProgram, Location, Booth, BoothNotice, Product, BoothRev
 
 # Register your models here.
 
-admin.site.register(BaseProgram)
 admin.site.register(Location)
 admin.site.register(Booth)
 admin.site.register(BoothNotice)

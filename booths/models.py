@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.postgres.fields import DateTimeRangeField
+from django.contrib.postgres.fields import ArrayField, DateTimeRangeField
 from django_nanoid.models import NANOIDField
 from django.conf import settings
 from utils.choices import LocationChoices, BoothCategoryChoices, BoothHostChoices
@@ -25,9 +25,9 @@ class BaseProgram(models.Model):
         null=True,
         blank=True,
     )
-    schedule = models.ArrayField(
+    schedule = ArrayField(
         help_text="시간",
-        base_field=models.DateTimeRangeField(),
+        base_field=DateTimeRangeField(),
         default=list,
     )
     location = models.ForeignKey(
@@ -42,7 +42,7 @@ class BaseProgram(models.Model):
         null=True,
         blank=True,
     )
-    sns = models.ArrayField(
+    sns = ArrayField(
         help_text="SNS 링크",
         base_field=models.URLField(),
         size=2,
@@ -93,7 +93,7 @@ class Booth(BaseProgram):
     )
     host = models.CharField(
         help_text = "주관",
-        max_length = 10,
+        max_length = 20,
         choices = BoothHostChoices.choices,
     )
 
@@ -163,7 +163,6 @@ class Product(models.Model):
     def __str__(self):
         return f"{self.booth.name} - {self.name}"
 
-
 class BoothReviewUser(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -206,7 +205,7 @@ class BoothReview(models.Model):
     def __str__(self):
         return f"{self.user.booth.name} - 익명 {self.user.number}"
     
-class BoothScrap(models.model):
+class BoothScrap(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         help_text="사용자",

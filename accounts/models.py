@@ -14,17 +14,15 @@ class User(AbstractUser):
         error_messages={'unique': '이미 존재하는 이메일입니다.'},
     )
     permission_booth = models.ManyToManyField(
-        'Booth',
+        'booths.Booth',
         help_text="부스 권한",
-        on_delete=models.CASCADE,
         related_name="user",
         null=True,
         blank=True,
     )
     permission_show = models.ManyToManyField(
-        'Show',
+        'shows.Show',
         help_text="공연 권한",
-        on_delete=models.CASCADE,
         related_name="user",
         null=True,
         blank=True,
