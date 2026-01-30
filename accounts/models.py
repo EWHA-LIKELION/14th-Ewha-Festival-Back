@@ -2,8 +2,6 @@ from string import ascii_lowercase, digits
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from .managers import UserManager
-from booths.models import Booth
-from shows.models import Show
 
 class User(AbstractUser):
     username = None

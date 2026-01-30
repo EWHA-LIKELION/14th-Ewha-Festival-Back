@@ -31,6 +31,10 @@ class Setlist(models.Model):
         on_delete=models.CASCADE,
         related_name="setlist",
     )
+    name = models.CharField(
+        help_text="이름",
+        max_length=20,
+    )
 
     def __str__(self):
         return f"{self.show.name} - {self.name}"
