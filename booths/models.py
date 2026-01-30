@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.postgres.fields import DateTimeRangeField
 from django_nanoid.models import NANOIDField
+from django.conf import settings
 from utils.choices import LocationChoices, BoothCategoryChoices, BoothHostChoices
 
 # Create your models here.
@@ -124,3 +125,23 @@ class BoothNotice(models.Model):
 
     def __str__(self):
         return f"{self.booth.name} - {self.title}"
+    
+class BoothReviewUser(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        help_text="사용자",
+        on_delete=models.CASCADE,
+        related_name="booth_review_user",
+    )
+    booth = models.ForeignKey(
+        'Booth',
+        help_text="부스",
+        on_delete=models.CASCADE,
+        related_name="booth_review_user",
+    )
+    number = models.IntegerField(
+        help_text="익명 번호",
+    )
+
+    def __str__(self):
+        return f"{self.booth.name} - 익명 {self.number}"
