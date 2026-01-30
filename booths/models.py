@@ -145,3 +145,25 @@ class BoothReviewUser(models.Model):
 
     def __str__(self):
         return f"{self.booth.name} - 익명 {self.number}"
+    
+class BoothReview(models.Model):
+    user = models.ForeignKey(
+        'BoothReviewUser',
+        help_text="부스 후기 작성자",
+        on_delete=models.CASCADE,
+        related_name="booth_review",
+    )
+    content = models.TextField(
+        help_text="내용",
+    )
+    created_at = models.DateTimeField(
+        help_text="생성일시",
+        auto_now_add=True,
+    )
+    updated_at = models.DateTimeField(
+        help_text="수정일시",
+        auto_now=True,
+    )
+
+    def __str__(self):
+        return f"{self.user.booth.name} - 익명 {self.user.number}"
