@@ -12,11 +12,6 @@ class BaseProgram(models.Model):
         primary_key=True,
         max_length=20,
     )
-    thumbnail = models.ImageField(
-        help_text="썸네일",
-        null=True,
-        blank=True,
-    )
     name = models.CharField(
         help_text="이름",
         max_length=20
@@ -35,18 +30,13 @@ class BaseProgram(models.Model):
         base_field=models.DateTimeRangeField(),
         default=list,
     )
-    # location = models.ForeignKey(
-    #     "Location",
-    #     on_delete=models.PROTECT
-    # )
+    location = models.ForeignKey(
+        "Location",
+        on_delete=models.PROTECT,
+    )
     location_description = models.CharField(
         help_text="위치 설명",
         max_length=50,
-        null=True,
-        blank=True,
-    )
-    roadview = models.ImageField(
-        help_text="로드뷰 사진",
         null=True,
         blank=True,
     )
@@ -82,10 +72,22 @@ class Location(models.Model):
         return f"{self.building} - {self.number}"
 
 class Booth(BaseProgram):
+    thumbnail = models.ImageField(
+        help_text="썸네일",
+        null=True,
+        blank=True,
+        upload_to="booth/thumbnail/",
+    )
     cateory = models.CharField(
         help_text = "카테고리",
         max_length=10,
         choices = BoothCategoryChoices.choices,
+    )
+    roadview = models.ImageField(
+        help_text="로드뷰 사진",
+        null=True,
+        blank=True,
+        upload_to="booth/roadview/",
     )
     host = models.CharField(
         help_text = "주관",
