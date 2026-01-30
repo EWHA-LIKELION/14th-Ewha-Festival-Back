@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'rest_framework_simplejwt',
+    'accounts.apps.AccountsConfig',
     'searchs',
     'booths',
     'shows',
@@ -62,7 +63,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'configs.wsgi.application'
 
-AUTH_USER_MODEL = 'auth.User'
+AUTH_USER_MODEL = 'accounts.User'
 
 
 # Password validation
