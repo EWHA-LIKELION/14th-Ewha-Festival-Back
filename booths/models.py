@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.postgres.fields import DateTimeRangeField
 from django_nanoid.models import NANOIDField
-from utils.choices import BoothCategoryChoices, BoothHostChoices
+from utils.choices import LocationChoices, BoothCategoryChoices, BoothHostChoices
 
 # Create your models here.
 
@@ -67,6 +67,19 @@ class BaseProgram(models.Model):
     def __str__(self):
         return self.name
 
+class Location(models.Model):
+    building = models.CharField(
+        help_text = "위치",
+        max_length=50,
+        choices=LocationChoices.choices,
+    )
+    number = models.IntegerField(
+        help_text="부스 번호/공연 시작 시각"
+    )
+
+    def __str__(self):
+        return f"{self.building} - {self.number}"
+
 class Booth(BaseProgram):
     cateory = models.CharField(
         help_text = "카테고리",
@@ -78,3 +91,36 @@ class Booth(BaseProgram):
         max_length = 10,
         choices = BoothHostChoices.choices,
     )
+
+class BoothNotice(models.Model):
+    booth = models.ForeignKey(
+        'Booth',
+        help_text="부스",
+        on_delete=models.CASCADE,
+        related_name="booth_notice",
+    )
+    title = models.CharField(
+        help_text="제목",
+        max_length=20,
+    )
+    content = models.CharField(
+        help_text="내용",
+        max_length=200,
+    )
+    image = models.ImageField(
+        help_text="사진",
+        upload_to="booth_notice/image/",
+        blank=True,
+        null=True,
+        )
+    created_at = models.DateTimeField(
+        help_text="생성일시",
+        auto_now_add=True,
+    )
+    updated_at = models.DateTimeField(
+        help_text="수정일시",
+        auto_now=True,
+    )
+
+    def __str__(self):
+        return f"{self.booth.name} - {self.title}"
