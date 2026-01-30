@@ -74,7 +74,7 @@ class ShowReviewUser(models.Model):
     )
 
     def __str__(self):
-        return f"{self.show.name} - {self.number}"
+        return f"{self.show.name} - 익명 {self.number}"
 
 class ShowReview(models.Model):
     user = models.ForeignKey(
