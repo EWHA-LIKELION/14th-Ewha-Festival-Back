@@ -32,7 +32,9 @@ class BaseProgram(models.Model):
     )
     location = models.ForeignKey(
         "Location",
-        on_delete=models.PROTECT,
+        help_text="위치",
+        on_delete=models.CASCADE,
+        related_name="base_program",
     )
     location_description = models.CharField(
         help_text="위치 설명",
