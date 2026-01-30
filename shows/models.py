@@ -1,4 +1,5 @@
 from django.db import models
+from django.conf import settings
 from booths.models import BaseProgram
 from utils.choices import ShowCategoryChoices
 
@@ -54,3 +55,23 @@ class ShowNotice(models.Model):
 
     def __str__(self):
         return f"{self.show.name} - {self.title}"
+
+class ShowReviewUser(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        help_text="사용자",
+        on_delete=models.CASCADE,
+        related_name="show_review_user",
+    )
+    show = models.ForeignKey(
+        'Show',
+        help_text="공연",
+        on_delete=models.CASCADE,
+        related_name="show_review_user",
+    )
+    number = models.IntegerField(
+        help_text="익명 번호",
+    )
+
+    def __str__(self):
+        return f"{self.show.name} - {self.number}"
