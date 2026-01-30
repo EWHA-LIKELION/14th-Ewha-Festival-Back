@@ -10,3 +10,14 @@ class Show(BaseProgram):
         max_length=10,
         choices=ShowCategoryChoices.choices,
     )
+
+class Setlist(models.Model):
+    show = models.ForeignKey(
+        'Show',
+        help_text="공연",
+        on_delete=models.CASCADE,
+        related_name="setlist",
+    )
+
+    def __str__(self):
+        return f"{self.show.name} - {self.name}"
