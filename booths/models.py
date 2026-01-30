@@ -31,10 +31,10 @@ class BaseProgram(models.Model):
         default=list,
     )
     location = models.ForeignKey(
-        "Location",
+        "booths.Location",
         help_text="위치",
         on_delete=models.CASCADE,
-        related_name="base_program",
+        related_name="%(class)s_program",
     )
     location_description = models.CharField(
         help_text="위치 설명",
