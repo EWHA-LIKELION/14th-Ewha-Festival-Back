@@ -5,7 +5,7 @@ from .forms import CustomUserChangeForm, CustomAdminUserCreationForm
 
 class CustomUserAdmin(UserAdmin):
     fieldsets = (
-        (None, {"fields": ("email","password","name","profile_image",)}),
+        (None, {"fields": ("email","password",)}),
         ("Permissions", {"fields": ("is_active","is_staff","is_superuser","groups","user_permissions",)}),
         ("Important dates", {"fields": ("date_joined","last_login",)}),
     )
