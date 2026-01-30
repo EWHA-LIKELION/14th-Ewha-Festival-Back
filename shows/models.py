@@ -41,8 +41,8 @@ class ShowNotice(models.Model):
     image = models.ImageField(
         help_text="사진",
         upload_to="show_notice/image/",
-        blank=True,
         null=True,
+        blank=True,
         )
     created_at = models.DateTimeField(
         help_text="생성일시",
