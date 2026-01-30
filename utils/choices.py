@@ -20,3 +20,19 @@ class LocationChoices(TextChoices):
     HAK_GWAN = "HAK_GWAN", "학관"
     EDUCATION_BUILDING = "EDUCATION_BUILDING", "교육관"
     EWHA_SHINSEGAE_BUILDING = "EWHA_SHINSEGAE_BUILDING", "신세계관"
+
+class BoothCategoryChoices(TextChoices):
+    FOOD = "FOOD", "음식"
+    GOODS = "GOODS", "굿즈"
+    EXPERIENCE = "EXPERIENCE", "체험"
+
+class BoothHostChoices(TextChoices):
+    STUDENT = "STUDENT", "학생"
+    COMMITTEE = "COMMITTEE", "축준위"
+    SPONSOR = "SPONSOR", "협찬"
+    FLEA_MARKET = "FLEA_MARKET", "플리마켓"
+
+class ShowCategoryChoices(TextChoices):
+    BAND = "BAND", "밴드"
+    DANCE = "DANCE", "댄스"
+    THEATER = "THEATER", "연극"
