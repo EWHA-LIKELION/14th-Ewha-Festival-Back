@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.postgres.fields import DateTimeRangeField
 from django_nanoid.models import NANOIDField
-from utils.choices import BoothCategoryChoices, BoothHostChoices
+from utils.choices import LocationChoices, BoothCategoryChoices, BoothHostChoices
 
 # Create your models here.
 
@@ -78,3 +78,16 @@ class Booth(BaseProgram):
         max_length = 10,
         choices = BoothHostChoices.choices,
     )
+
+class Location(models.Model):
+    building = models.CharField(
+        help_text = "위치",
+        max_length=50,
+        choices=LocationChoices.choices,
+    )
+    number = models.IntegerField(
+        help_text="부스 번호/공연 시작 시각"
+    )
+
+    def __str__(self):
+        return f"{self.building} - {self.number}"
