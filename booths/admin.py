@@ -1,9 +1,8 @@
 from django.contrib import admin
-from .models import BaseProgram, Location, Booth, BoothNotice, Product, BoothReviewUser, BoothReview, BoothScrap
+from .models import Booth, BoothNotice, Product, BoothReviewUser, BoothReview, BoothScrap
 
 # Register your models here.
 
-admin.site.register(Location)
 admin.site.register(Booth)
 admin.site.register(BoothNotice)
 admin.site.register(Product)
