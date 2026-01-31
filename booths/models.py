@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.contrib.postgres.fields import ArrayField
 from utils.abstracts import BaseProgram
 from utils.choices import BoothCategoryChoices, BoothHostChoices
 
@@ -12,10 +13,13 @@ class Booth(BaseProgram):
         blank=True,
         upload_to="booth/thumbnail",
     )
-    cateory = models.CharField(
-        help_text = "카테고리",
-        max_length=10,
-        choices = BoothCategoryChoices.choices,
+    category = ArrayField(
+        help_text="카테고리",
+        base_field=models.CharField(
+            max_length=10,
+            choices=BoothCategoryChoices.choices,
+        ),
+        default=list,
     )
     roadview = models.ImageField(
         help_text="로드뷰 사진",
