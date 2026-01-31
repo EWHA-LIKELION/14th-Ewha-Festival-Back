@@ -1,6 +1,6 @@
 from django.db import models
 from django.conf import settings
-from booths.models import BaseProgram
+from utils.abstracts import BaseProgram
 from utils.choices import ShowCategoryChoices
 
 # Create your models here.
