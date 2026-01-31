@@ -6,22 +6,10 @@ from utils.choices import ShowCategoryChoices
 # Create your models here.
 
 class Show(BaseProgram):
-    thumbnail = models.ImageField(
-        help_text="썸네일",
-        upload_to="show/thumbnail",
-        null=True,
-        blank=True,
-    )
     category = models.CharField(
         help_text="카테고리",
         max_length=10,
         choices=ShowCategoryChoices.choices,
-    )
-    roadview = models.ImageField(
-        help_text="로드뷰 사진",
-        upload_to="show/roadview/",
-        null=True,
-        blank=True,
     )
 
 class Setlist(models.Model):

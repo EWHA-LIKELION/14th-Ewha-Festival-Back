@@ -7,12 +7,6 @@ from utils.choices import BoothCategoryChoices, BoothHostChoices
 # Create your models here.
 
 class Booth(BaseProgram):
-    thumbnail = models.ImageField(
-        help_text="썸네일",
-        null=True,
-        blank=True,
-        upload_to="booth/thumbnail",
-    )
     category = ArrayField(
         help_text="카테고리",
         base_field=models.CharField(
@@ -20,12 +14,6 @@ class Booth(BaseProgram):
             choices=BoothCategoryChoices.choices,
         ),
         default=list,
-    )
-    roadview = models.ImageField(
-        help_text="로드뷰 사진",
-        null=True,
-        blank=True,
-        upload_to="booth/roadview/",
     )
     host = models.CharField(
         help_text = "주관",

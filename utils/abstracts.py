@@ -3,11 +3,25 @@ from django.contrib.postgres.fields import ArrayField, DateTimeRangeField
 from django_nanoid.models import NANOIDField
 from string import ascii_uppercase, digits
 
+def get_thumbnail_path(instance, filename):
+    class_name = instance.__class__.__name__.lower()
+    return f"{class_name}/thumbnail/{filename}"
+    
+def get_roadview_path(instance, filename):
+    class_name = instance.__class__.__name__.lower()
+    return f"{class_name}/roadview/{filename}"
+
 class BaseProgram(models.Model):
     id = models.CharField(
         help_text="예시:BOOTH_RELEASE",
         primary_key=True,
         max_length=20,
+    )
+    thumbnail = models.ImageField(
+        help_text="썸네일",
+        upload_to=get_thumbnail_path,
+        null=True,
+        blank=True,
     )
     name = models.CharField(
         help_text="이름",
@@ -36,6 +50,12 @@ class BaseProgram(models.Model):
     location_description = models.CharField(
         help_text="위치 설명",
         max_length=50,
+        null=True,
+        blank=True,
+    )
+    roadview = models.ImageField(
+        help_text="로드뷰 사진",
+        upload_to=get_roadview_path,
         null=True,
         blank=True,
     )
