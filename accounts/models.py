@@ -15,14 +15,12 @@ class User(AbstractUser):
         'booths.Booth',
         help_text="부스 권한",
         related_name="user",
-        null=True,
         blank=True,
     )
     permission_show = models.ManyToManyField(
         'shows.Show',
         help_text="공연 권한",
         related_name="user",
-        null=True,
         blank=True,
     )
     objects = UserManager()
