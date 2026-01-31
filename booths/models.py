@@ -1,7 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
-from utils.abstracts import BaseProgram, BaseNotice, BaseReviewUser, BaseReview
+from utils.abstracts import BaseProgram, BaseNotice, BaseReviewUser, BaseReview, BaseScrap
 from utils.choices import BoothCategoryChoices, BoothHostChoices
 
 # Create your models here.
@@ -87,22 +87,12 @@ class BoothReview(BaseReview):
     def __str__(self):
         return f"{self.user.booth.name} - 익명 {self.user.number}"
     
-class BoothScrap(models.Model):
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        help_text="사용자",
-        on_delete=models.CASCADE,
-        related_name="booth_scrap",
-    )
+class BoothScrap(BaseScrap):
     booth = models.ForeignKey(
         'Booth',
         help_text="부스",
         on_delete=models.CASCADE,
         related_name="booth_scrap",
-    )
-    created_at = models.DateTimeField(
-        help_text="생성일시",
-        auto_now_add=True,
     )
 
     def __str__(self):

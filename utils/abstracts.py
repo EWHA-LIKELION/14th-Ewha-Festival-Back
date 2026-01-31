@@ -141,3 +141,18 @@ class BaseReview(models.Model):
 
     class Meta:
         abstract = True
+
+class BaseScrap(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        help_text="사용자",
+        on_delete=models.CASCADE,
+        related_name="%(class)s",
+    )
+    created_at = models.DateTimeField(
+        help_text="생성일시",
+        auto_now_add=True,
+    )
+
+    class Meta:
+        abstract = True
