@@ -8,7 +8,7 @@ from utils.choices import ShowCategoryChoices
 class Show(BaseProgram):
     thumbnail = models.ImageField(
         help_text="썸네일",
-        upload_to="show/thumbnail/",
+        upload_to="show/thumbnail",
         null=True,
         blank=True,
     )
