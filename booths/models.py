@@ -152,7 +152,7 @@ class Product(models.Model):
     )
     image = models.ImageField(
         help_text="사진",
-        upload_to="product/image/",
+        upload_to="product/image",
         null=True,
         blank=True,
         )
