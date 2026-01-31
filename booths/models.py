@@ -34,7 +34,7 @@ class BaseProgram(models.Model):
         "booths.Location",
         help_text="위치",
         on_delete=models.CASCADE,
-        related_name="%(class)s_program",
+        related_name="%(class)s",
     )
     location_description = models.CharField(
         help_text="위치 설명",
