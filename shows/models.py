@@ -1,6 +1,6 @@
 from django.db import models
 from django.conf import settings
-from utils.abstracts import BaseProgram
+from utils.abstracts import BaseProgram, BaseNotice
 from utils.choices import ShowCategoryChoices
 
 # Create your models here.
@@ -27,34 +27,12 @@ class Setlist(models.Model):
     def __str__(self):
         return f"{self.show.name} - {self.name}"
 
-class ShowNotice(models.Model):
+class ShowNotice(BaseNotice):
     show = models.ForeignKey(
         'Show',
         help_text="공연",
         on_delete=models.CASCADE,
         related_name="show_notice",
-    )
-    title = models.CharField(
-        help_text="제목",
-        max_length=20,
-    )
-    content = models.CharField(
-        help_text="내용",
-        max_length=200,
-    )
-    image = models.ImageField(
-        help_text="사진",
-        upload_to="show_notice/image/",
-        null=True,
-        blank=True,
-        )
-    created_at = models.DateTimeField(
-        help_text="생성일시",
-        auto_now_add=True,
-    )
-    updated_at = models.DateTimeField(
-        help_text="수정일시",
-        auto_now=True,
     )
 
     def __str__(self):
