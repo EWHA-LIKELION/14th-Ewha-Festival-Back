@@ -12,6 +12,17 @@ class Show(BaseProgram):
         choices=ShowCategoryChoices.choices,
     )
 
+class ShowNotice(BaseNotice):
+    show = models.ForeignKey(
+        'Show',
+        help_text="공연",
+        on_delete=models.CASCADE,
+        related_name="show_notice",
+    )
+
+    def __str__(self):
+        return f"{self.show.name} - {self.title}"
+
 class Setlist(models.Model):
     show = models.ForeignKey(
         'Show',
@@ -26,17 +37,6 @@ class Setlist(models.Model):
 
     def __str__(self):
         return f"{self.show.name} - {self.name}"
-
-class ShowNotice(BaseNotice):
-    show = models.ForeignKey(
-        'Show',
-        help_text="공연",
-        on_delete=models.CASCADE,
-        related_name="show_notice",
-    )
-
-    def __str__(self):
-        return f"{self.show.name} - {self.title}"
 
 class ShowReviewUser(models.Model):
     user = models.ForeignKey(
