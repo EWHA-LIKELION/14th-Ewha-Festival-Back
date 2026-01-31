@@ -1,6 +1,6 @@
 from django.db import models
 from django.conf import settings
-from utils.abstracts import BaseProgram, BaseNotice, BaseReviewUser
+from utils.abstracts import BaseProgram, BaseNotice, BaseReviewUser, BaseReview
 from utils.choices import ShowCategoryChoices
 
 # Create your models here.
@@ -49,23 +49,12 @@ class ShowReviewUser(BaseReviewUser):
     def __str__(self):
         return f"{self.show.name} - 익명 {self.number}"
 
-class ShowReview(models.Model):
+class ShowReview(BaseReview):
     user = models.ForeignKey(
         'ShowReviewUser',
         help_text="공연 후기 작성자",
         on_delete=models.CASCADE,
         related_name="show_review",
-    )
-    content = models.TextField(
-        help_text="내용",
-    )
-    created_at = models.DateTimeField(
-        help_text="생성일시",
-        auto_now_add=True,
-    )
-    updated_at = models.DateTimeField(
-        help_text="수정일시",
-        auto_now=True,
     )
 
     def __str__(self):

@@ -125,3 +125,19 @@ class BaseReviewUser(models.Model):
 
     class Meta:
         abstract = True
+
+class BaseReview(models.Model):
+    content = models.TextField(
+        help_text="내용",
+    )
+    created_at = models.DateTimeField(
+        help_text="생성일시",
+        auto_now_add=True,
+    )
+    updated_at = models.DateTimeField(
+        help_text="수정일시",
+        auto_now=True,
+    )
+
+    class Meta:
+        abstract = True
