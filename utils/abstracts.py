@@ -47,7 +47,7 @@ class BaseProgram(models.Model):
         default=list,
     )
     location = models.ForeignKey(
-        "booths.Location",
+        "searchs.Location",
         help_text="위치",
         on_delete=models.CASCADE,
         related_name="%(class)s",
@@ -96,7 +96,7 @@ class BaseNotice(models.Model):
     )
     image = models.ImageField(
         help_text="사진",
-        upload_to="show_notice/image/",
+        upload_to=get_notice_image_path,
         null=True,
         blank=True,
         )
