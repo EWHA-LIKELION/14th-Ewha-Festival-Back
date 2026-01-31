@@ -74,7 +74,7 @@ class Location(models.Model):
     )
 
     def __str__(self):
-        return f"{self.building} - {self.number}"
+        return f"{self.building}{self.number}"
 
 class Booth(BaseProgram):
     thumbnail = models.ImageField(
