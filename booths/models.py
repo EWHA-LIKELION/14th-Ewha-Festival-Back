@@ -78,7 +78,7 @@ class Booth(BaseProgram):
         help_text="썸네일",
         null=True,
         blank=True,
-        upload_to="booth/thumbnail/",
+        upload_to="booth/thumbnail",
     )
     cateory = models.CharField(
         help_text = "카테고리",
