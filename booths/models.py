@@ -114,7 +114,7 @@ class BoothNotice(models.Model):
     )
     image = models.ImageField(
         help_text="사진",
-        upload_to="booth_notice/image/",
+        upload_to="booth_notice/image",
         null=True,
         blank=True,
         )
