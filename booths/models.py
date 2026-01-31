@@ -52,6 +52,9 @@ class BaseProgram(models.Model):
     )
     admin_code = NANOIDField(
         help_text="관리자 인증 코드",
+        editable=False,
+        alphabetically=ascii_uppercase+digits,
+        size=10,
     )
 
     class Meta:
