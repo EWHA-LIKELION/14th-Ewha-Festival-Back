@@ -1,7 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
-from utils.abstracts import BaseProgram, BaseNotice
+from utils.abstracts import BaseProgram, BaseNotice, BaseReviewUser
 from utils.choices import BoothCategoryChoices, BoothHostChoices
 
 # Create your models here.
@@ -65,21 +65,12 @@ class Product(models.Model):
     def __str__(self):
         return f"{self.booth.name} - {self.name}"
 
-class BoothReviewUser(models.Model):
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        help_text="사용자",
-        on_delete=models.CASCADE,
-        related_name="booth_review_user",
-    )
+class BoothReviewUser(BaseReviewUser):
     booth = models.ForeignKey(
         'Booth',
         help_text="부스",
         on_delete=models.CASCADE,
         related_name="booth_review_user",
-    )
-    number = models.IntegerField(
-        help_text="익명 번호",
     )
 
     def __str__(self):

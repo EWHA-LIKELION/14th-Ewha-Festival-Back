@@ -1,6 +1,6 @@
 from django.db import models
 from django.conf import settings
-from utils.abstracts import BaseProgram, BaseNotice
+from utils.abstracts import BaseProgram, BaseNotice, BaseReviewUser
 from utils.choices import ShowCategoryChoices
 
 # Create your models here.
@@ -38,21 +38,12 @@ class Setlist(models.Model):
     def __str__(self):
         return f"{self.show.name} - {self.name}"
 
-class ShowReviewUser(models.Model):
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        help_text="사용자",
-        on_delete=models.CASCADE,
-        related_name="show_review_user",
-    )
+class ShowReviewUser(BaseReviewUser):
     show = models.ForeignKey(
         'Show',
         help_text="공연",
         on_delete=models.CASCADE,
         related_name="show_review_user",
-    )
-    number = models.IntegerField(
-        help_text="익명 번호",
     )
 
     def __str__(self):

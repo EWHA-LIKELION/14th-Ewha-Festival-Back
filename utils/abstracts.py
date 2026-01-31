@@ -1,4 +1,5 @@
 from django.db import models
+from django.conf import settings
 from django.contrib.postgres.fields import ArrayField, DateTimeRangeField
 from django_nanoid.models import NANOIDField
 from string import ascii_uppercase, digits
@@ -106,6 +107,20 @@ class BaseNotice(models.Model):
     updated_at = models.DateTimeField(
         help_text="수정일시",
         auto_now=True,
+    )
+
+    class Meta:
+        abstract = True
+
+class BaseReviewUser(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        help_text="사용자",
+        on_delete=models.CASCADE,
+        related_name="%(class)s",
+    )
+    number = models.IntegerField(
+        help_text="익명 번호",
     )
 
     class Meta:
