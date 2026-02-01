@@ -1,7 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
-from utils.abstracts import BaseProgram, BaseNotice, BaseReviewUser, BaseReview, BaseScrap
+from utils.abstract_models import BaseProgram, BaseNotice, BaseReviewUser, BaseReview, BaseScrap
 from utils.choices import BoothCategoryChoices, BoothHostChoices
 from utils.helpers import FilePathBuilder
 
@@ -58,7 +58,7 @@ class Product(models.Model):
         upload_to=FilePathBuilder("image"),
         null=True,
         blank=True,
-        )
+    )
     is_selling = models.BooleanField(
         help_text="판매중 여부",
     )
