@@ -11,3 +11,5 @@ PyJWT==2.10.1
 setuptools==65.5.0
 sqlparse==0.5.5
 tzdata==2025.3
+django-nanoid==0.0.2
+nanoid==2.0.0

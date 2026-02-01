@@ -28,6 +28,9 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'accounts.apps.AccountsConfig',
+    'searchs',
+    'booths',
+    'shows',
 ]
 
 MIDDLEWARE = [
