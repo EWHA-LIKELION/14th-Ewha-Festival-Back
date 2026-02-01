@@ -99,7 +99,7 @@ class BaseNotice(models.Model):
         upload_to=get_notice_image_path,
         null=True,
         blank=True,
-        )
+    )
     created_at = models.DateTimeField(
         help_text="생성일시",
         auto_now_add=True,
