@@ -57,7 +57,7 @@ class Product(models.Model):
         upload_to="product/image",
         null=True,
         blank=True,
-        )
+    )
     is_selling = models.BooleanField(
         help_text="판매중 여부",
     )
