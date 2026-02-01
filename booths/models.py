@@ -3,6 +3,7 @@ from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
 from utils.abstracts import BaseProgram, BaseNotice, BaseReviewUser, BaseReview, BaseScrap
 from utils.choices import BoothCategoryChoices, BoothHostChoices
+from utils.helpers import FilePathBuilder
 
 # Create your models here.
 
@@ -54,7 +55,7 @@ class Product(models.Model):
     )
     image = models.ImageField(
         help_text="사진",
-        upload_to="product/image",
+        upload_to=FilePathBuilder("image"),
         null=True,
         blank=True,
         )

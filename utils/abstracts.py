@@ -3,18 +3,7 @@ from django.conf import settings
 from django.contrib.postgres.fields import ArrayField, DateTimeRangeField
 from django_nanoid.models import NANOIDField
 from string import ascii_uppercase, digits
-
-def get_thumbnail_path(instance, filename):
-    class_name = instance.__class__.__name__.lower()
-    return f"{class_name}/thumbnail/{filename}"
-    
-def get_roadview_path(instance, filename):
-    class_name = instance.__class__.__name__.lower()
-    return f"{class_name}/roadview/{filename}"
-
-def get_notice_image_path(instance, filename):
-    class_name = instance.__class__.__name__.lower()
-    return f"{class_name}/{filename}"
+from .helpers import FilePathBuilder
 
 class BaseProgram(models.Model):
     id = models.CharField(
@@ -24,7 +13,7 @@ class BaseProgram(models.Model):
     )
     thumbnail = models.ImageField(
         help_text="썸네일",
-        upload_to=get_thumbnail_path,
+        upload_to=FilePathBuilder("thumbnail"),
         null=True,
         blank=True,
     )
@@ -60,7 +49,7 @@ class BaseProgram(models.Model):
     )
     roadview = models.ImageField(
         help_text="로드뷰 사진",
-        upload_to=get_roadview_path,
+        upload_to=FilePathBuilder("roadview"),
         null=True,
         blank=True,
     )
@@ -96,7 +85,7 @@ class BaseNotice(models.Model):
     )
     image = models.ImageField(
         help_text="사진",
-        upload_to=get_notice_image_path,
+        upload_to=FilePathBuilder("image"),
         null=True,
         blank=True,
         )
