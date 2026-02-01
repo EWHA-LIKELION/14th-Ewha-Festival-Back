@@ -14,7 +14,7 @@ def get_roadview_path(instance, filename):
 
 def get_notice_image_path(instance, filename):
     class_name = instance.__class__.__name__.lower()
-    return f"{class_name}/{filename}"
+    return f"{class_name}/image/{filename}"
 
 class BaseProgram(models.Model):
     id = models.CharField(
