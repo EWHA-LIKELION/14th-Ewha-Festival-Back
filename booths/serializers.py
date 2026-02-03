@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import Booth, Product, BoothReview, BoothNotice
+from searchs.serializers import LocationSerializer
 
 class BoothProductSerializer(serializers.ModelSerializer):
     class Meta:
@@ -14,7 +15,7 @@ class BoothReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = BoothReview
         fields = (
-            'id', 'content', 'created_at', 'updated_at', 'number',
+            'id', 'number', 'content', 'created_at', 'updated_at',
         )
 
     def get_number(self, obj):
@@ -28,6 +29,7 @@ class BoothNoticeSerializer(serializers.ModelSerializer):
         )
 
 class BoothDetailSerializer(serializers.ModelSerializer):
+    location = LocationSerializer(read_only=True)
     schedule = serializers.SerializerMethodField()
     scraps_count = serializers.IntegerField()
     product = serializers.SerializerMethodField()
