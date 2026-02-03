@@ -30,28 +30,18 @@ class BoothNoticeSerializer(serializers.ModelSerializer):
 class BoothDetailSerializer(serializers.ModelSerializer):
     schedule = serializers.SerializerMethodField()
     scraps_count = serializers.IntegerField()
-    product = BoothProductSerializer(many=True, read_only=True)
+    product = serializers.SerializerMethodField()
     latest_notice = serializers.SerializerMethodField()
     reviews = serializers.SerializerMethodField()
 
     class Meta:
         model = Booth
         fields = (
-            'id', 'thumbnail', 'name', 'is_ongoing', 'description',
-            'schedule', 'location', 'location_description', 'roadview', 'sns',
-            'category', 'host', 'scraps_count', 'product', 'latest_notice', 'reviews',
+            'id', 'thumbnail', 'name', 'category', 'host', 'is_ongoing', 'scraps_count',
+            'description', 'location', 'location_description', 'roadview',
+            'schedule', 'sns', 'product', 'latest_notice', 'reviews',
         )
 
-    def get_latest_notice(self, obj):
-        latest_notice = BoothNotice.objects.filter(booth=obj).order_by('-created_at').first()
-        if latest_notice:
-            return BoothNoticeSerializer(latest_notice).data
-        return None
-
-    def get_reviews(self, obj):
-        reviews = BoothReview.objects.filter(user__booth=obj)
-        return BoothReviewSerializer(reviews, many=True).data
-    
     def get_schedule(self, obj):
         result = []
 
@@ -65,3 +55,17 @@ class BoothDetailSerializer(serializers.ModelSerializer):
             })
 
         return result
+
+    def get_latest_notice(self, obj):
+        latest_notice = BoothNotice.objects.filter(booth=obj).order_by('-created_at').first()
+        if latest_notice:
+            return BoothNoticeSerializer(latest_notice).data
+        return None
+
+    def get_reviews(self, obj):
+        reviews = BoothReview.objects.filter(user__booth=obj)
+        return BoothReviewSerializer(reviews, many=True).data
+    
+    def get_product(self, obj):
+        products = obj.product.filter(is_selling=True)
+        return BoothProductSerializer(products, many=True).data
