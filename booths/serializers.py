@@ -39,7 +39,7 @@ class BoothDetailSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'thumbnail', 'name', 'category', 'host', 'is_ongoing', 'scraps_count',
             'description', 'location', 'location_description', 'roadview',
-            'schedule', 'sns', 'product', 'latest_notice', 'reviews',
+            'schedule', 'sns', 'latest_notice', 'product', 'reviews',
         )
 
     def get_schedule(self, obj):
@@ -62,10 +62,10 @@ class BoothDetailSerializer(serializers.ModelSerializer):
             return BoothNoticeSerializer(latest_notice).data
         return None
 
-    def get_reviews(self, obj):
-        reviews = BoothReview.objects.filter(user__booth=obj)
-        return BoothReviewSerializer(reviews, many=True).data
-    
     def get_product(self, obj):
         products = obj.product.filter(is_selling=True)
         return BoothProductSerializer(products, many=True).data
+
+    def get_reviews(self, obj):
+        reviews = BoothReview.objects.filter(user__booth=obj)
+        return BoothReviewSerializer(reviews, many=True).data
