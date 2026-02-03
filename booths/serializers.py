@@ -28,9 +28,10 @@ class BoothNoticeSerializer(serializers.ModelSerializer):
         )
 
 class BoothDetailSerializer(serializers.ModelSerializer):
+    schedule = serializers.SerializerMethodField()
     scraps_count = serializers.IntegerField()
     product = BoothProductSerializer(many=True, read_only=True)
-    booth_notice = BoothNoticeSerializer(many=True, read_only=True)
+    latest_notice = serializers.SerializerMethodField()
     reviews = serializers.SerializerMethodField()
 
     class Meta:
@@ -38,9 +39,29 @@ class BoothDetailSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'thumbnail', 'name', 'is_ongoing', 'description',
             'schedule', 'location', 'location_description', 'roadview', 'sns',
-            'category', 'host', 'scraps_count', 'product', 'booth_notice', 'reviews',
+            'category', 'host', 'scraps_count', 'product', 'latest_notice', 'reviews',
         )
+
+    def get_latest_notice(self, obj):
+        latest_notice = BoothNotice.objects.filter(booth=obj).order_by('-created_at').first()
+        if latest_notice:
+            return BoothNoticeSerializer(latest_notice).data
+        return None
 
     def get_reviews(self, obj):
         reviews = BoothReview.objects.filter(user__booth=obj)
         return BoothReviewSerializer(reviews, many=True).data
+    
+    def get_schedule(self, obj):
+        result = []
+
+        for r in obj.schedule:
+            start = r.lower
+            end = r.upper
+
+            result.append({
+                "date": start.strftime("%m.%d"),
+                "time": f"{start.strftime('%H:%M')}~{end.strftime('%H:%M')}",
+            })
+
+        return result
