@@ -29,8 +29,8 @@ class BoothNoticeSerializer(serializers.ModelSerializer):
 
 class BoothDetailSerializer(serializers.ModelSerializer):
     scraps_count = serializers.IntegerField()
-    products = BoothProductSerializer(many=True, read_only=True, source='product')
-    notices = BoothNoticeSerializer(many=True, read_only=True, source='booth_notice')
+    product = BoothProductSerializer(many=True, read_only=True)
+    booth_notice = BoothNoticeSerializer(many=True, read_only=True)
     reviews = serializers.SerializerMethodField()
 
     class Meta:
@@ -38,7 +38,7 @@ class BoothDetailSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'thumbnail', 'name', 'is_ongoing', 'description',
             'schedule', 'location', 'location_description', 'roadview', 'sns',
-            'category', 'host', 'scraps_count', 'products', 'notices', 'reviews',
+            'category', 'host', 'scraps_count', 'product', 'booth_notice', 'reviews',
         )
 
     def get_reviews(self, obj):
