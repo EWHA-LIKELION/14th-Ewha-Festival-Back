@@ -1,4 +1,3 @@
-from re import S
 from rest_framework import serializers
 from .models import Show, Setlist, ShowReview, ShowNotice
 from utils.abstract_serializers import BaseProgramDetailSerializer, BaseNoticeSerializer, BaseReviewSerializer
