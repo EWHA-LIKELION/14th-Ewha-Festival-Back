@@ -22,10 +22,7 @@ class ShowDetailSerializer(BaseProgramDetailSerializer):
 
     class Meta(BaseProgramDetailSerializer.Meta):
         model = Show
-        fields = tuple(
-            f for f in BaseProgramDetailSerializer.Meta.fields
-            if f != 'host'
-        ) + ('setlist',)
+        fields = BaseProgramDetailSerializer.Meta.fields + ('setlist',)
 
     def get_notice_serializer(self): return ShowNoticeSerializer
     def get_review_serializer(self): return ShowReviewSerializer
