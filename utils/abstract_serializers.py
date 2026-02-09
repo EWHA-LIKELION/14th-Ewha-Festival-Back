@@ -44,7 +44,7 @@ class BaseProgramDetailSerializer(serializers.ModelSerializer):
     class Meta:
         abstract = True
         fields = (
-            'id', 'thumbnail', 'name', 'category', 'host', 'is_ongoing', 'scraps_count',
+            'id', 'thumbnail', 'name', 'category', 'is_ongoing', 'scraps_count',
             'description', 'location', 'location_description', 'roadview',
             'schedule', 'sns', 'latest_notice', 'reviews',
         )
