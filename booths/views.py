@@ -4,8 +4,8 @@ from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .models import Booth
-from .serializers import BoothDetailSerializer
+from .models import Booth, BoothNotice
+from .serializers import BoothDetailSerializer, BoothNoticeSerializer
 
 # Create your views here.
 
@@ -29,6 +29,23 @@ class BoothDetailView(APIView):
         booth = self.get_object(pk)
         serializer = BoothDetailSerializer(
             booth,
+            context={"request": request},
+        )
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class BoothNoticeView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request: HttpRequest, pk, format=None):
+        notices = (
+            BoothNotice.objects
+            .filter(booth_id=pk)
+            .order_by('-created_at')
+        )
+
+        serializer = BoothNoticeSerializer(
+            notices,
+            many=True,
             context={"request": request},
         )
         return Response(serializer.data, status=status.HTTP_200_OK)
