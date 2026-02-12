@@ -2,6 +2,7 @@ from rest_framework import serializers
 from utils.helpers import time_ago
 from searchs.serializers import LocationSerializer
 
+
 class BaseNoticeSerializer(serializers.ModelSerializer):
     time_ago = serializers.SerializerMethodField()
     is_updated = serializers.SerializerMethodField()
@@ -81,3 +82,21 @@ class BaseProgramDetailSerializer(serializers.ModelSerializer):
     def get_notice_serializer(self): raise NotImplementedError
     def get_review_serializer(self): raise NotImplementedError
     def get_review_model(self): raise NotImplementedError
+    
+
+class ProgramPatchMixin:
+    program_fields = (
+        'thumbnail', 'name', 'is_ongoing', 'description',
+        'location_description', 'roadview', 'sns', 'schedule',
+    )
+
+    def update_program_fields(self, instance, validated_data):
+        changed = False
+        for field in self.program_fields:
+            if field in validated_data:
+                setattr(instance, field, validated_data[field])
+                changed = True
+
+        if changed:
+            instance.save()
+        return instance
