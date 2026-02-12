@@ -16,7 +16,7 @@ from .serializers import BoothDetailSerializer, BoothPatchSerializer
 
 class Conflict(APIException):
     status_code = 409
-    default_detail = "최근 업데이트 전 정보를 보고 있습니다. 상대의 기존 수정 내역을 확인하고 업데이트해 주십시오."
+    default_detail = "최근 업데이트 전 정보를 보고 있습니다. 새로고침하여 최근 업데이트 내역을 확인하고 업데이트해 주십시오."
     default_code = "conflict"
 
 class BoothDetailView(APIView):
@@ -45,6 +45,29 @@ class BoothDetailView(APIView):
     
     def patch(self, request: HttpRequest, pk, format=None):
         booth = self.get_object(pk)
+        
+        client_ts = request.headers.get("X-If-Unmodified-Since")
+        if not client_ts:
+            return Response(
+                {"detail": "X-If-Unmodified-Since 헤더가 누락되었습니다."},
+                status=status.HTTP_428_PRECONDITION_REQUIRED,  
+            )
+        
+        dt = parse_datetime(client_ts)
+        if dt is None:
+            return Response({"detail": "datetime format이 잘못되었습니다."}, status=400)
+        
+        if timezone.is_naive(dt):
+            dt = timezone.make_aware(dt, timezone.get_current_timezone())
+            
+        if booth.updated_at and booth.updated_at > dt:
+            return Response(
+                {
+                    "detail": "Conflict: 부스 정보를 수정하시던 중 다른 사람에 의해 수정되었습니다. 새로고침하여 확인해 주세요.",
+                    "server_updated_at": booth.updated_at.isoformat(),
+                },
+                status=409,
+            )
         
         patch_serializer = BoothPatchSerializer(
             booth,

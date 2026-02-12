@@ -67,6 +67,15 @@ class BaseProgram(models.Model):
         alphabetically=ascii_uppercase+digits,
         size=10,
     )
+    created_at = models.DateTimeField(
+        help_text="생성일시",
+        auto_now_add=True,
+    )
+    updated_at = models.DateTimeField(
+        help_text="수정일시",
+        auto_now=True,
+    )
+    
 
     class Meta:
         abstract = True
@@ -88,10 +97,6 @@ class BaseNotice(models.Model):
         upload_to=FilePathBuilder("image"),
         null=True,
         blank=True,
-    )
-    created_at = models.DateTimeField(
-        help_text="생성일시",
-        auto_now_add=True,
     )
     updated_at = models.DateTimeField(
         help_text="수정일시",
