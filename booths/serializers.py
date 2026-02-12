@@ -9,6 +9,14 @@ class BoothProductSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'name', 'description', 'price', 'image', 'is_selling',
         )
+        
+class BoothProductWriteSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(required=False)
+
+    class Meta:
+        model = Product
+        fields = ('id', 'name', 'description', 'price', 'image', 'is_selling')
+
 
 class BoothNoticeSerializer(BaseNoticeSerializer):
     class Meta(BaseNoticeSerializer.Meta):
@@ -44,7 +52,7 @@ class BoothDetailSerializer(BaseProgramDetailSerializer):
         return BoothReview
 
 class BoothPatchSerializer(serializers.ModelSerializer):
-    product = BoothProductSerializer(many = True, required = False)
+    product = BoothProductWriteSerializer(many = True, required = False)
     
     notice = BoothNoticeWriteSerializer(many = True, required = False)
     
