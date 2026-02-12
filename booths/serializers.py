@@ -53,9 +53,16 @@ class BoothDetailSerializer(BaseProgramDetailSerializer):
 
 class BoothPatchSerializer(serializers.ModelSerializer):
     product = BoothProductWriteSerializer(many = True, required = False)
-    
     notice = BoothNoticeWriteSerializer(many = True, required = False)
     
+    deleted_product_ids = serializers.ListField(
+        child=serializers.IntegerField(),
+        required = False
+    )
+    deleted_notice_ids = serializers.ListField(
+        child=serializers.IntegerField(),
+        required = False
+    )
     class Meta:
         model = Booth
         fields = (
@@ -64,11 +71,15 @@ class BoothPatchSerializer(serializers.ModelSerializer):
             'host',
             'product',
             'notice',
+            'deleted_product_ids', 'deleted_notice_ids',
         )
         
     def update(self, instance, validated_data):
         products_data = validated_data.pop('product', None)
         notices_data = validated_data.pop('notice', None)
+        
+        deleted_product_ids = validated_data.pop('deleted_product_ids', None)
+        deleted_notice_ids = validated_data.pop('deleted_notice_ids', None)
         
         with transaction.atomic():
             for attr, value in validated_data.items():
@@ -87,7 +98,7 @@ class BoothPatchSerializer(serializers.ModelSerializer):
                     qs = instance.product.filter(id=product_id)
                     if not qs.exists():
                         raise serializers.ValidationError({
-                            "product": [f"Invalid product id = {product_id} for this booth."]
+                            "product": [f"{product_id} 번 상품은 이 부스에 속하지 않습니다."]
                         })
                 
                     
@@ -97,6 +108,14 @@ class BoothPatchSerializer(serializers.ModelSerializer):
                             continue
                         setattr(obj, k, v)
                     obj.save()
+                    
+            if deleted_product_ids is not None:
+                qs = instance.product.filter(id__in = deleted_product_ids)
+                if qs.count() != len(set(deleted_product_ids)):
+                    raise serializers.ValidationError({
+                        "deleted_product_ids": ["이 부스에 속하지 않는 상품이 포함되어 있습니다."]
+                })
+                qs.delete()
             
             if notices_data is not None:
                 for n in notices_data:
@@ -109,7 +128,7 @@ class BoothPatchSerializer(serializers.ModelSerializer):
                     qs = instance.booth_notice.filter(id=notice_id)
                     if not qs.exists():
                         raise serializers.ValidationError({
-                             "notice": [f"Invalid notice id={notice_id} for this booth."]
+                             "notice": [f"{notice_id}번 공지는 이 부스에 속하지 않습니다."]
                         })
                         
                     obj = qs.first()
@@ -124,6 +143,14 @@ class BoothPatchSerializer(serializers.ModelSerializer):
 
                     if changed:
                         obj.save()
+                        
+            if deleted_notice_ids is not None:
+                qs = instance.booth_notice.filter(id__in=deleted_notice_ids)
+                if qs.count() != len(set(deleted_notice_ids)):
+                    raise serializers.ValidationError({
+                        "deleted_notice_ids": ["이 부스에 속하지 않는 공지가 포함되어 있습니다."]
+                    })
+                qs.delete()
                 
                 
         return instance
