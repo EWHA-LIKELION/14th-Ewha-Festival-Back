@@ -100,3 +100,69 @@ class ProgramPatchMixin:
         if changed:
             instance.save()
         return instance
+    
+    
+class NestedCollectionPatchMixin:
+    def patch_collection(
+        self,
+        *,
+        instance,
+        items_data,
+        deleted_ids,
+        manager_name: str,      # 예: "product", "booth_notice", "show_notice", "setlist"
+        model_cls,              # Product / BoothNotice / ShowNotice / Setlist
+        parent_fk_name: str,    # "booth" / "show"
+        allowed_fields: set,    # 업데이트 허용 필드 집합 (id 제외)
+        items_field_name: str,   # 예: "product" / "notice" / "setlist"
+        deleted_field_name: str  # 예: "deleted_product_ids" / "deleted_notice_ids" ...
+    ) -> bool:
+        """
+        items_data: list[dict] or None
+        deleted_ids: list[int] or None
+        return: touched(bool)
+        """
+        touched = False
+        manager = getattr(instance, manager_name, None)
+        if manager is None:
+            raise NotImplementedError(f"Invalid manager_name: {manager_name}")
+
+        # upsert
+        if items_data is not None:
+            for item in items_data:
+                item_id = item.get("id")
+
+                if item_id is None:
+                    payload = {k: v for k, v in item.items() if k in allowed_fields}
+                    payload[parent_fk_name] = instance
+                    model_cls.objects.create(**payload)
+                    touched = True
+                    continue
+
+                obj = manager.filter(id=item_id).first()
+                if obj is None:
+                    raise serializers.ValidationError({
+                        items_field_name: [f"{item_id} is not in this resource."]
+                    })
+
+                for k, v in item.items():
+                    if k == "id":
+                        continue
+                    if k not in allowed_fields:
+                        continue
+                    setattr(obj, k, v)
+                obj.save()
+                touched = True
+
+        # delete
+        if deleted_ids is not None:
+            ids = set(deleted_ids)
+            found = set(manager.filter(id__in=ids).values_list("id", flat=True))
+            missing = ids - found
+            if missing:
+                raise serializers.ValidationError({
+                    deleted_field_name: [f"Invalid ids: {sorted(missing)}"]
+                })
+            manager.filter(id__in=ids).delete()
+            touched = True
+
+        return touched
