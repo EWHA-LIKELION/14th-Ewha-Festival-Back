@@ -114,7 +114,7 @@ class NestedCollectionPatchMixin:
         manager_name: str,      # 예: "product", "booth_notice", "show_notice", "setlist"
         model_cls,              # Product / BoothNotice / ShowNotice / Setlist
         parent_fk_name: str,    # "booth" / "show"
-        allowed_fields: set,    # 업데이트 허용 필드 집합 (id 제외)
+        serializer_class,
         items_field_name: str,   # 예: "product" / "notice" / "setlist"
         deleted_field_name: str  # 예: "deleted_product_ids" / "deleted_notice_ids" ...
     ) -> bool:
@@ -134,7 +134,14 @@ class NestedCollectionPatchMixin:
                 item_id = item.get("id")
 
                 if item_id is None:
-                    payload = {k: v for k, v in item.items() if k in allowed_fields}
+                    s = serializer_class(data=item, context=self.context)
+                    try:
+                        s.is_valid(raise_exception=True)
+                    except serializers.ValidationError as e:
+                        raise serializers.ValidationError({items_field_name: e.detail})
+
+                    
+                    payload = dict(s.validated_data)
                     payload[parent_fk_name] = instance
                     model_cls.objects.create(**payload)
                     touched = True
@@ -145,14 +152,10 @@ class NestedCollectionPatchMixin:
                     raise serializers.ValidationError({
                         items_field_name: [f"{item_id} is not in this resource."]
                     })
-
-                for k, v in item.items():
-                    if k == "id":
-                        continue
-                    if k not in allowed_fields:
-                        continue
-                    setattr(obj, k, v)
-                obj.save()
+                
+                s = serializer_class(obj, data=item, partial=True, context=self.context)
+                s.is_valid(raise_exception=True)
+                s.save()
                 touched = True
 
         # delete

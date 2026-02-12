@@ -95,7 +95,7 @@ class BoothPatchSerializer(ProgramPatchMixin, NestedCollectionPatchMixin, serial
                     manager_name="product",
                     model_cls=Product,
                     parent_fk_name="booth",
-                    allowed_fields={"name","description","price","image","is_selling"},
+                    serializer_class=BoothProductWriteSerializer,
                     items_field_name="product",
                     deleted_field_name="deleted_product_ids",
                 )
@@ -107,7 +107,7 @@ class BoothPatchSerializer(ProgramPatchMixin, NestedCollectionPatchMixin, serial
                     manager_name="booth_notice",
                     model_cls=BoothNotice,
                     parent_fk_name="booth",
-                    allowed_fields={"title","content","image"},
+                    serializer_class=BoothNoticeWriteSerializer,
                     items_field_name="notice",
                     deleted_field_name="deleted_notice_ids",
                 )
