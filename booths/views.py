@@ -46,10 +46,10 @@ class BoothDetailView(APIView):
     def patch(self, request: HttpRequest, pk, format=None):
         booth = self.get_object(pk)
         
-        client_ts = request.headers.get("X-If-Unmodified-Since")
+        client_ts = request.headers.get("X-Resource-Version")
         if not client_ts:
             return Response(
-                {"detail": "X-If-Unmodified-Since 헤더가 누락되었습니다."},
+                {"detail": "X-Resource-Version 헤더가 누락되었습니다."},
                 status=status.HTTP_428_PRECONDITION_REQUIRED,  
             )
         
@@ -61,12 +61,11 @@ class BoothDetailView(APIView):
             dt = timezone.make_aware(dt, timezone.get_current_timezone())
             
         if booth.updated_at and booth.updated_at > dt:
-            return Response(
-                {
-                    "detail": "Conflict: 부스 정보를 수정하시던 중 다른 사람에 의해 수정되었습니다. 새로고침하여 확인해 주세요.",
+            raise Conflict(
+                detail={
+                    "detail": "최근 업데이트 전 정보를 보고 있습니다. 새로고침하여 최근 업데이트 내역을 확인하고 업데이트해 주십시오.",
                     "server_updated_at": booth.updated_at.isoformat(),
-                },
-                status=409,
+                }
             )
         
         patch_serializer = BoothPatchSerializer(

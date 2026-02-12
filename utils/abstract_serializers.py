@@ -46,7 +46,7 @@ class BaseProgramDetailSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'thumbnail', 'name', 'category', 'is_ongoing', 'scraps_count',
             'description', 'location', 'location_description', 'roadview',
-            'schedule', 'sns', 'latest_notice', 'reviews',
+            'schedule', 'sns', 'latest_notice', 'reviews', 'updated_at',
         )
 
     def get_schedule(self, obj):
