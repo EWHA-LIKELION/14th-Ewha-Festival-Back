@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from utils.helpers import time_ago
 from searchs.serializers import LocationSerializer
+from django.utils import timezone
 
 
 class BaseNoticeSerializer(serializers.ModelSerializer):
@@ -52,10 +53,11 @@ class BaseProgramDetailSerializer(serializers.ModelSerializer):
 
     def get_schedule(self, obj):
         result = []
+        tz = timezone.get_current_timezone()
 
         for r in obj.schedule:
-            start = r.lower
-            end = r.upper
+            start = timezone.localtime(r.lower, tz)
+            end = timezone.localtime(r.upper, tz)
 
             result.append({
                 "date": start.strftime("%m.%d"),
@@ -166,3 +168,5 @@ class NestedCollectionPatchMixin:
             touched = True
 
         return touched
+    
+

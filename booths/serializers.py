@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import Booth, Product, BoothReview, BoothNotice
 from utils.abstract_serializers import BaseProgramDetailSerializer, BaseNoticeSerializer, BaseReviewSerializer, ProgramPatchMixin, NestedCollectionPatchMixin
+from utils.fields import ScheduleWriteField
 from django.db import transaction
 
 class BoothProductSerializer(serializers.ModelSerializer):
@@ -54,6 +55,7 @@ class BoothDetailSerializer(BaseProgramDetailSerializer):
 class BoothPatchSerializer(ProgramPatchMixin, NestedCollectionPatchMixin, serializers.ModelSerializer):
     product = BoothProductWriteSerializer(many = True, required = False)
     notice = BoothNoticeWriteSerializer(many = True, required = False)
+    schedule = ScheduleWriteField(required=False)
     
     deleted_product_ids = serializers.ListField(
         child=serializers.IntegerField(),
