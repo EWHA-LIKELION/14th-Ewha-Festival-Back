@@ -6,6 +6,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import Booth
 from .serializers import BoothDetailSerializer
+from rest_framework.parsers import JSONParser, MultiPartParser, FormParser
+from .serializers import BoothDetailSerializer, BoothPatchSerializer
 
 # Create your views here.
 
@@ -32,3 +34,19 @@ class BoothDetailView(APIView):
             context={"request": request},
         )
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    def patch(self, request: HttpRequest, pk, format=None):
+        booth = self.get_object(pk)
+        
+        patch_serializer = BoothPatchSerializer(
+            booth,
+            data=request.data,
+            partial=True,
+            context={"request": request},
+        )
+        patch_serializer.is_valid(raise_exception=True)
+        patch_serializer.save()
+        
+        booth = self.get_object(pk)
+        read_serializer = BoothDetailSerializer(booth, context={"request": request})
+        return Response(read_serializer.data, status=status.HTTP_200_OK)
