@@ -1,4 +1,5 @@
 from django.http import HttpRequest, Http404
+from django.shortcuts import get_object_or_404
 from django.db.models import Count
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -37,6 +38,8 @@ class BoothNoticeView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request: HttpRequest, pk, format=None):
+        get_object_or_404(Booth, pk=pk)
+        
         notices = (
             BoothNotice.objects
             .filter(booth_id=pk)
