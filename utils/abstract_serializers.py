@@ -34,6 +34,26 @@ class BaseReviewSerializer(serializers.ModelSerializer):
     def get_time_ago(self, obj):
         return time_ago(obj.created_at)
 
+class BaseScrapSerializer(serializers.ModelSerializer):
+    name = serializers.SerializerMethodField()
+    thumbnail = serializers.SerializerMethodField()
+    scrap_field = ""
+
+    class Meta:
+        abstract = True
+        fields = (
+            'id', 'name', 'thumbnail',
+        )
+
+    def get_target(self, obj):
+        return getattr(obj, self.scrap_field)
+    
+    def get_name(self, obj):
+        return self.get_target(obj).name
+
+    def get_thumbnail(self, obj):
+        return self.get_target(obj).thumbnail
+
 class BaseProgramDetailSerializer(serializers.ModelSerializer):
     location = LocationSerializer(read_only=True)
     schedule = serializers.SerializerMethodField()
