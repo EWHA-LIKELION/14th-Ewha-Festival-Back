@@ -101,3 +101,13 @@ class BaseProgramDetailSerializer(serializers.ModelSerializer):
     def get_notice_serializer(self): raise NotImplementedError
     def get_review_serializer(self): raise NotImplementedError
     def get_review_model(self): raise NotImplementedError
+
+class BaseManagedProgramSerializer(serializers.ModelSerializer):
+    scrap_count = serializers.IntegerField()
+    review_count = serializers.IntegerField()
+
+    class Meta:
+        fields = (
+            "id", "name",
+            "scrap_count", "review_count",
+        )
