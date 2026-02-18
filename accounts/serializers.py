@@ -2,7 +2,7 @@ from rest_framework import serializers
 from .models import User
 from booths.models import Booth
 from shows.models import Show, ShowScrap
-from utils.abstract_serializers from BaseManagedProgramSerializer
+from utils.abstract_serializers import BaseManagedProgramSerializer
 from booths.serializers import BoothScrapSerializer
 from shows.serializers import ShowScrapSerializer
 
@@ -17,8 +17,8 @@ class ManagedShowSerializer(BaseManagedProgramSerializer):
 class MyDataSerializer(serializers.ModelSerializer):
     scrap_count = serializers.SerializerMethodField()
     recent_scraps = serializers.SerializerMethodField()
-    managed_booths = ManagedBoothSerializer(many=True, read_only=True)
-    managed_shows = ManagedShowSerializer(many=True, read_only=True)
+    managed_booths = serializers.SerializerMethodField()
+    managed_shows = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -29,12 +29,11 @@ class MyDataSerializer(serializers.ModelSerializer):
         )
     
     def get_scrap_count(self, obj):
-        scrap_count = obj.show_scrap.count() + obj.booth_scrap.count()
-        return scrap_count
+        return obj.showscrap.count() + obj.boothscrap.count()
     
     def get_recent_scraps(self, obj):
-        shows = obj.show_scrap.select_related('show').order_by('-created_at')[:4]
-        booths = obj.booth_scrap.select_related('booth').order_by('-created_at')[:4]
+        shows = obj.showscrap.select_related('show').order_by('-created_at')[:4]
+        booths = obj.boothscrap.select_related('booth').order_by('-created_at')[:4]
 
         combined = sorted(
             list(shows) + list(booths),
@@ -48,3 +47,15 @@ class MyDataSerializer(serializers.ModelSerializer):
             else BoothScrapSerializer(scrap).data
             for scrap in combined
         ]
+    
+    def get_managed_booths(self, obj):
+        booths = self.context["managed_booths"]
+        return ManagedBoothSerializer(
+            booths, many=True, context=self.context
+        ).data
+
+    def get_managed_shows(self, obj):
+        shows = self.context["managed_shows"]
+        return ManagedShowSerializer(
+            shows, many=True, context=self.context
+        ).data

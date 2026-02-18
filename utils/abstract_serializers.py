@@ -52,7 +52,16 @@ class BaseScrapSerializer(serializers.ModelSerializer):
         return self.get_target(obj).name
 
     def get_thumbnail(self, obj):
-        return self.get_target(obj).thumbnail
+        target = self.get_target(obj)
+        thumbnail = target.thumbnail
+
+        if thumbnail:
+            request = self.context.get("request")
+            if request:
+                return request.build_absolute_uri(thumbnail.url)
+            return thumbnail.url
+
+        return None
 
 class BaseProgramDetailSerializer(serializers.ModelSerializer):
     location = LocationSerializer(read_only=True)
@@ -103,6 +112,7 @@ class BaseProgramDetailSerializer(serializers.ModelSerializer):
     def get_review_model(self): raise NotImplementedError
 
 class BaseManagedProgramSerializer(serializers.ModelSerializer):
+    thumbnail = serializers.SerializerMethodField()
     scrap_count = serializers.IntegerField()
     review_count = serializers.IntegerField()
 
