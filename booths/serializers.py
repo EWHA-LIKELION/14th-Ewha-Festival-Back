@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import Booth, Product, BoothReview, BoothNotice
 from utils.abstract_serializers import BaseProgramDetailSerializer, BaseNoticeSerializer, BaseReviewSerializer, ProgramPatchMixin, NestedCollectionPatchMixin
-from utils.fields import ScheduleWriteField
+from utils.serializer_fields import ScheduleWriteField
 from django.db import transaction
 
 class BoothProductSerializer(serializers.ModelSerializer):
