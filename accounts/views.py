@@ -14,19 +14,19 @@ class MyDataView(APIView):
     
     def get(self, request:HttpRequest, format=None):
         user = User.objects.annotate(
-            show_count=Count("showscrap"),
-            booth_count=Count("boothscrap"),
+            show_count=Count("showscrap", distinct=True),
+            booth_count=Count("boothscrap", distinct=True),
             calculated_scrap_count=F("show_count") + F("booth_count"),
         ).get(pk=request.user.pk)
 
         booths = user.permission_booth.annotate(
-            scrap_count=Count("booth_scrap"),
-            review_count=Count("booth_review_user"),
+            scrap_count=Count("booth_scrap", distinct=True),
+            review_count=Count("booth_review_user", distinct=True),
         ).order_by("name")
 
         shows = user.permission_show.annotate(
-            scrap_count=Count("show_scrap"),
-            review_count=Count("show_review_user"),
+            scrap_count=Count("show_scrap", distinct=True),
+            review_count=Count("show_review_user", distinct=True),
         ).order_by("name")
 
         serializer = MyDataSerializer(
