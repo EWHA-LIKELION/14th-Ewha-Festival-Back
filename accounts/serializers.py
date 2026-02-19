@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import User
-from booths.models import Booth
+from booths.models import Booth, BoothScrap
 from shows.models import Show, ShowScrap
 from utils.abstract_serializers import BaseManagedProgramSerializer
 from booths.serializers import BoothScrapSerializer
@@ -15,7 +15,7 @@ class ManagedShowSerializer(BaseManagedProgramSerializer):
         model = Show
 
 class MyDataSerializer(serializers.ModelSerializer):
-    scrap_count = serializers.SerializerMethodField()
+    scrap_count = serializers.IntegerField(source='calculated_scrap_count')
     recent_scraps = serializers.SerializerMethodField()
     managed_booths = serializers.SerializerMethodField()
     managed_shows = serializers.SerializerMethodField()
@@ -41,21 +41,24 @@ class MyDataSerializer(serializers.ModelSerializer):
             reverse=True
         )[:4]
 
+        serializer_map = {
+            ShowScrap: ShowScrapSerializer,
+            BoothScrap: BoothScrapSerializer,
+        }
+
         return [
-            ShowScrapSerializer(scrap).data
-            if isinstance(scrap, ShowScrap)
-            else BoothScrapSerializer(scrap).data
+            serializer_map[type(scrap)](scrap, context=self.context).data
             for scrap in combined
         ]
     
     def get_managed_booths(self, obj):
-        booths = self.context["managed_booths"]
+        booths = self.context.get("managed_booths", [])
         return ManagedBoothSerializer(
             booths, many=True, context=self.context
         ).data
 
     def get_managed_shows(self, obj):
-        shows = self.context["managed_shows"]
+        shows = self.context.get("managed_shows", [])
         return ManagedShowSerializer(
             shows, many=True, context=self.context
         ).data
