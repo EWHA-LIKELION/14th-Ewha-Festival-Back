@@ -28,9 +28,6 @@ class MyDataSerializer(serializers.ModelSerializer):
             'managed_booths', 'managed_shows',
         )
     
-    def get_scrap_count(self, obj):
-        return obj.showscrap.count() + obj.boothscrap.count()
-    
     def get_recent_scraps(self, obj):
         shows = obj.showscrap.select_related('show').order_by('-created_at')[:4]
         booths = obj.boothscrap.select_related('booth').order_by('-created_at')[:4]
