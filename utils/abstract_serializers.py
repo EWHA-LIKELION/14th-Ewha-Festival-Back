@@ -81,3 +81,17 @@ class BaseProgramDetailSerializer(serializers.ModelSerializer):
     def get_notice_serializer(self): raise NotImplementedError
     def get_review_serializer(self): raise NotImplementedError
     def get_review_model(self): raise NotImplementedError
+
+class BaseProgramListSerializer(BaseProgramDetailSerializer):
+    class Meta(BaseProgramDetailSerializer.Meta):
+        fields = (
+            "id",
+            "name",
+            "is_ongoing",
+            "category",
+            "schedule",
+            "location",
+            "scraps_count",
+            "description",
+            "thumbnail",
+        )
