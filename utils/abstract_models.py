@@ -67,6 +67,11 @@ class BaseProgram(models.Model):
         alphabetically=ascii_uppercase+digits,
         size=10,
     )
+    updated_at = models.DateTimeField(
+        help_text="수정일시",
+        auto_now=True,
+    )
+    
 
     class Meta:
         abstract = True
