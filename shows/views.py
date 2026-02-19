@@ -5,13 +5,11 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import Show
-from .serializers import ShowDetailSerializer
-
-# Create your views here.
+from .serializers import ShowDetailSerializer, ShowPatchSerializer
 
 class ShowDetailView(APIView):
     def get_permissions(self):
-        if self.request.method == "GET":
+        if self.request.method in ["GET", "PATCH"]:
             return [AllowAny()]
         return [IsAuthenticated()]
     
@@ -32,3 +30,23 @@ class ShowDetailView(APIView):
             context={"request": request},
         )
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    def patch(self, request, pk, format=None):
+        show = self.get_object(pk)
+
+        patch_serializer = ShowPatchSerializer(
+            show,
+            data=request.data,
+            partial=True,
+            context={"request": request},
+        )
+        patch_serializer.is_valid(raise_exception=True)
+        patch_serializer.save()
+
+        show = self.get_object(pk)
+
+        read_serializer = ShowDetailSerializer(
+            show,
+            context={"request": request},
+        )
+        return Response(read_serializer.data, status=status.HTTP_200_OK)
