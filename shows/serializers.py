@@ -1,6 +1,6 @@
 from rest_framework import serializers
-from .models import Show, Setlist, ShowReview, ShowNotice
-from utils.abstract_serializers import BaseProgramDetailSerializer, BaseNoticeSerializer, BaseReviewSerializer
+from .models import Show, Setlist, ShowReview, ShowNotice, ShowScrap
+from utils.abstract_serializers import BaseProgramDetailSerializer, BaseNoticeSerializer, BaseReviewSerializer, BaseScrapSerializer
 
 class ShowSetlistSerializer(serializers.ModelSerializer):
     class Meta:
@@ -16,6 +16,12 @@ class ShowNoticeSerializer(BaseNoticeSerializer):
 class ShowReviewSerializer(BaseReviewSerializer):
     class Meta(BaseReviewSerializer.Meta):
         model = ShowReview
+
+class ShowScrapSerializer(BaseScrapSerializer):
+    scrap_field = "show"
+
+    class Meta(BaseScrapSerializer.Meta):
+        model = ShowScrap
 
 class ShowDetailSerializer(BaseProgramDetailSerializer):
     setlist = ShowSetlistSerializer(many=True)

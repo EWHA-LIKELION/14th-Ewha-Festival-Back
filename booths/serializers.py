@@ -1,6 +1,6 @@
 from rest_framework import serializers
-from .models import Booth, Product, BoothReview, BoothNotice
-from utils.abstract_serializers import BaseProgramDetailSerializer, BaseNoticeSerializer, BaseReviewSerializer
+from .models import Booth, Product, BoothReview, BoothNotice, BoothScrap
+from utils.abstract_serializers import BaseProgramDetailSerializer, BaseNoticeSerializer, BaseReviewSerializer, BaseScrapSerializer
 
 class BoothProductSerializer(serializers.ModelSerializer):
     class Meta:
@@ -16,6 +16,12 @@ class BoothNoticeSerializer(BaseNoticeSerializer):
 class BoothReviewSerializer(BaseReviewSerializer):
     class Meta(BaseReviewSerializer.Meta):
         model = BoothReview
+
+class BoothScrapSerializer(BaseScrapSerializer):
+    scrap_field = "booth"
+
+    class Meta(BaseScrapSerializer.Meta):
+        model = BoothScrap
 
 class BoothDetailSerializer(BaseProgramDetailSerializer):
     product = serializers.SerializerMethodField()

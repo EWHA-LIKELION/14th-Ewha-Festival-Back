@@ -34,6 +34,35 @@ class BaseReviewSerializer(serializers.ModelSerializer):
     def get_time_ago(self, obj):
         return time_ago(obj.created_at)
 
+class BaseScrapSerializer(serializers.ModelSerializer):
+    name = serializers.SerializerMethodField()
+    thumbnail = serializers.SerializerMethodField()
+    scrap_field = ""
+
+    class Meta:
+        abstract = True
+        fields = (
+            'id', 'name', 'thumbnail',
+        )
+
+    def get_target(self, obj):
+        return getattr(obj, self.scrap_field)
+    
+    def get_name(self, obj):
+        return self.get_target(obj).name
+
+    def get_thumbnail(self, obj):
+        target = self.get_target(obj)
+        thumbnail = target.thumbnail
+
+        if thumbnail:
+            request = self.context.get("request")
+            if request:
+                return request.build_absolute_uri(thumbnail.url)
+            return thumbnail.url
+
+        return None
+
 class BaseProgramDetailSerializer(serializers.ModelSerializer):
     location = LocationSerializer(read_only=True)
     schedule = serializers.SerializerMethodField()
@@ -81,3 +110,13 @@ class BaseProgramDetailSerializer(serializers.ModelSerializer):
     def get_notice_serializer(self): raise NotImplementedError
     def get_review_serializer(self): raise NotImplementedError
     def get_review_model(self): raise NotImplementedError
+
+class BaseManagedProgramSerializer(serializers.ModelSerializer):
+    scrap_count = serializers.IntegerField()
+    review_count = serializers.IntegerField()
+
+    class Meta:
+        fields = (
+            "id", "name",
+            "scrap_count", "review_count",
+        )
