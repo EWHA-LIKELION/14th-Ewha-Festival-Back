@@ -56,8 +56,8 @@ class BaseProgramDetailSerializer(serializers.ModelSerializer):
         tz = timezone.get_current_timezone()
 
         for r in obj.schedule:
-            start = timezone.localtime(r.lower, tz)
-            end = timezone.localtime(r.upper, tz)
+            start = timezone.localtime(r.lower)
+            end = timezone.localtime(r.upper)
 
             result.append({
                 "date": start.strftime("%m.%d"),
