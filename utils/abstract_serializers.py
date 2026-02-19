@@ -2,6 +2,13 @@ from rest_framework import serializers
 from utils.helpers import time_ago
 from searchs.serializers import LocationSerializer
 from django.utils import timezone
+from dataclasses import dataclass
+from typing import Optional, Type, List, Dict, Any
+from django.db import transaction
+from django.utils import timezone
+from django.utils.dateparse import parse_datetime
+from rest_framework.exceptions import ValidationError
+from utils.exceptions import Conflict
 
 
 class BaseNoticeSerializer(serializers.ModelSerializer):
@@ -97,16 +104,9 @@ class ProgramPatchMixin:
         'location_description', 'roadview', 'sns', 'schedule',
     )
 
-    def update_program_fields(self, instance, validated_data):
-        changed = False
-        for field in self.program_fields:
-            if field in validated_data:
-                setattr(instance, field, validated_data[field])
-                changed = True
+    def get_root_update_fields(self, validated_data):
+        return {k: v for k, v in validated_data.items() if k in self.program_fields}
 
-        if changed:
-            instance.save()
-        return instance
     
     
 class NestedCollectionPatchMixin:
@@ -177,4 +177,102 @@ class NestedCollectionPatchMixin:
 
         return touched
     
+@dataclass(frozen=True)
+class CollectionPatchSpec:
+    items_field_name: str          # payload 키: "product" / "notice" / "playlist"
+    deleted_field_name: Optional[str]  # payload 키: "deleted_product_ids" ...
+    manager_name: str              # instance의 related manager attr: "product" / "booth_notice"
+    model_cls: Type[Any]
+    parent_fk_name: str            # FK 필드명: "booth" / "program"
+    serializer_class: Type[serializers.Serializer]
 
+    
+class BasePatchSerializer(serializers.ModelSerializer):
+    version_header_name = "X-Resource-Version"
+    
+    def get_collection_specs(self) -> List[CollectionPatchSpec]:
+        return []
+    
+    def get_version_field_name(self) -> str:
+        return "updated_at"
+    
+    def get_root_update_fields(self, validated_data: Dict[str, Any]) -> Dict[str,Any]:
+        return dict(validated_data)
+    
+    def should_bump_updated_at(self) -> bool:
+        return True
+    
+    def _get_client_version(self):
+        request = self.context.get("request")
+        if request is None:
+            raise RuntimeError("Serializer context에 request가 없습니다. view에서 context={'request': request} 전달 필요.")
+
+        version = request.headers.get(self.version_header_name)
+        if not version:
+            raise ValidationError({self.version_header_name: "동시성 제어를 위해 X-Resource-Version 헤더가 필요합니다."})
+
+        dt = parse_datetime(version)
+        if dt is None:
+            raise ValidationError({self.version_header_name: "올바른 datetime 형식이 아닙니다. (ISO-8601)"} )
+
+        if timezone.is_naive(dt):
+            dt = timezone.make_aware(dt, timezone.get_current_timezone())
+
+        return dt
+
+    def _get_latest_version(self, pk):
+        vf = self.get_version_field_name()
+        return self.Meta.model.objects.filter(pk=pk).values_list(vf, flat=True).first()  # type: ignore
+
+    def update(self, instance, validated_data):
+        specs = self.get_collection_specs()
+
+        nested_map = {}
+        deleted_map = {}
+
+        for spec in specs:
+            nested_map[spec.items_field_name] = validated_data.pop(spec.items_field_name, None)
+            if spec.deleted_field_name:
+                deleted_map[spec.deleted_field_name] = validated_data.pop(spec.deleted_field_name, None)
+
+        client_version = self._get_client_version()
+        now = timezone.now()
+        version_field = self.get_version_field_name()
+
+        with transaction.atomic():
+            root_fields = self.get_root_update_fields(validated_data)
+            root_fields[version_field] = now
+
+            updated_rows = self.Meta.model.objects.filter(  # type: ignore
+                pk=instance.pk,
+                **{version_field: client_version},
+            ).update(**root_fields)
+
+            if updated_rows == 0:
+                latest = self._get_latest_version(instance.pk)
+                raise Conflict(server_updated_at=latest)
+
+            instance = self.Meta.model.objects.get(pk=instance.pk)  
+
+            touched = False
+            for spec in specs:
+                items_data = nested_map.get(spec.items_field_name)
+                deleted_ids = deleted_map.get(spec.deleted_field_name) if spec.deleted_field_name else None
+
+                touched |= self.patch_collection(
+                    instance=instance,
+                    items_data=items_data,
+                    deleted_ids=deleted_ids,
+                    manager_name=spec.manager_name,
+                    model_cls=spec.model_cls,
+                    parent_fk_name=spec.parent_fk_name,
+                    serializer_class=spec.serializer_class,
+                    items_field_name=spec.items_field_name,
+                    deleted_field_name=spec.deleted_field_name or "",
+                )
+
+            if touched and self.should_bump_updated_at():
+                self.Meta.model.objects.filter(pk=instance.pk).update(**{version_field: timezone.now()})
+                instance.refresh_from_db(fields=[version_field])
+
+        return instance
