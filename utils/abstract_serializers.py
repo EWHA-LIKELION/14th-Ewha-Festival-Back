@@ -112,7 +112,6 @@ class BaseProgramDetailSerializer(serializers.ModelSerializer):
     def get_review_model(self): raise NotImplementedError
 
 class BaseManagedProgramSerializer(serializers.ModelSerializer):
-    thumbnail = serializers.SerializerMethodField()
     scrap_count = serializers.IntegerField()
     review_count = serializers.IntegerField()
 
