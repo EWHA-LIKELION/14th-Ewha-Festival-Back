@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from utils.helpers import time_ago
-from searchs.serializers import LocationSerializer
+from .location_serializers import LocationSerializer
 
 class BaseNoticeSerializer(serializers.ModelSerializer):
     time_ago = serializers.SerializerMethodField()
