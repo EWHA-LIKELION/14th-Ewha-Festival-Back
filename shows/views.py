@@ -5,9 +5,27 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import Show
-from .serializers import ShowDetailSerializer
+from .serializers import ShowListSerializer, ShowDetailSerializer
 
 # Create your views here.
+class ShowListView(APIView):
+    def get_permissions(self):
+        if self.request.method == "GET":
+            return [AllowAny()]
+        return [IsAuthenticated()]
+    
+    def get(self, request, format=None):
+        shows = (
+            Show.objects.select_related("location")
+            .annotate(scraps_count=Count("show_scrap", distinct=True))
+            .all()
+        )
+        serializer = ShowListSerializer(
+            shows,
+            many=True,
+            context={"request":request},
+        )
+        return Response(serializer.data)
 
 class ShowDetailView(APIView):
     def get_permissions(self):
