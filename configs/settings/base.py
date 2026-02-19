@@ -14,6 +14,9 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.env', 'base'))
 SECRET_KEY = env('SECRET_KEY')
 DEBUG = env('DEBUG')
 
+KAKAO_REST_API_KEY = env("KAKAO_REST_API_KEY")
+KAKAO_CLIENT_SECRET = env("KAKAO_CLIENT_SECRET", default="")
+KAKAO_REDIRECT_URI = env("KAKAO_REDIRECT_URI")
 
 # Application definition
 
