@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import Booth, Product, BoothReview, BoothNotice
-from utils.abstract_serializers import BaseProgramDetailSerializer, BaseNoticeSerializer, BaseReviewSerializer, ProgramPatchMixin, NestedCollectionPatchMixin
+from utils.abstract_serializers import BaseProgramDetailSerializer, BaseNoticeSerializer, BaseReviewSerializer, ProgramPatchMixin, NestedCollectionPatchMixin, BaseNoticeWriteSerializer
 from utils.serializer_fields import ScheduleWriteField
 from django.db import transaction
 
@@ -23,13 +23,9 @@ class BoothNoticeSerializer(BaseNoticeSerializer):
     class Meta(BaseNoticeSerializer.Meta):
         model = BoothNotice
 
-class BoothNoticeWriteSerializer(serializers.ModelSerializer):
-    id = serializers.IntegerField(required = False)
-    
-    class Meta:
+class BoothNoticeWriteSerializer(BaseNoticeWriteSerializer):
+    class Meta(BaseNoticeWriteSerializer.Meta):
         model = BoothNotice
-        fields = ('id', 'title', 'content', 'image')
-        
         
 class BoothReviewSerializer(BaseReviewSerializer):
     class Meta(BaseReviewSerializer.Meta):

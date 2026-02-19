@@ -85,6 +85,11 @@ class BaseProgramDetailSerializer(serializers.ModelSerializer):
     def get_review_serializer(self): raise NotImplementedError
     def get_review_model(self): raise NotImplementedError
     
+class BaseNoticeWriteSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(required = False)
+    
+    class Meta:
+        fields = ('id', 'title', 'content', 'image')
 
 class ProgramPatchMixin:
     program_fields = (
