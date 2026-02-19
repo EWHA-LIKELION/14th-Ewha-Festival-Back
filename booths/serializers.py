@@ -36,7 +36,7 @@ class BoothDetailSerializer(BaseProgramDetailSerializer):
 
     class Meta(BaseProgramDetailSerializer.Meta):
         model = Booth
-        fields = BaseProgramDetailSerializer.Meta.fields + ('host', 'product','updated_at')
+        fields = BaseProgramDetailSerializer.Meta.fields + ('host', 'product')
 
     def get_product(self, obj):
         products = obj.product.filter(is_selling=True)

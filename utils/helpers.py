@@ -25,3 +25,4 @@ def time_ago(dt):
     if seconds < 86400:
         return f"{seconds // 3600}시간 전"
     return f"{seconds // 86400}일 전"
+
