@@ -5,9 +5,27 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import Booth
-from .serializers import BoothDetailSerializer
+from .serializers import BoothListSerializer, BoothDetailSerializer
 
 # Create your views here.
+class BoothListView(APIView):
+    def get_permissions(self):
+        if self.request.method == "GET":
+            return [AllowAny()]
+        return [IsAuthenticated()]
+    
+    def get(self, request, format=None):
+        booths = (
+            Booth.objects.select_related("location")
+            .annotate(scraps_count=Count("booth_scrap", distinct=True))
+            .all()
+        )
+        serializer = BoothListSerializer(
+            booths,
+            many=True,
+            context={"request":request},
+        )
+        return Response(serializer.data)
 
 class BoothDetailView(APIView):
     def get_permissions(self):
