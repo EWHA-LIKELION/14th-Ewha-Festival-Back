@@ -1,10 +1,11 @@
-from rest_framework import serializers
-from .models import Location
+from utils.abstract_serializers import BaseProgramListSerializer
+from booths.models import Booth
+from shows.models import Show
 
-class LocationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Location
-        fields = (
-            'building',
-            'number',
-        )
+class BoothSearchSerializer(BaseProgramListSerializer):
+    class Meta(BaseProgramListSerializer.Meta):
+        model = Booth
+    
+class ShowSearchSerializer(BaseProgramListSerializer):
+    class Meta(BaseProgramListSerializer.Meta):
+        model = Show
