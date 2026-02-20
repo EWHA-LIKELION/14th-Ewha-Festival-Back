@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from utils.helpers import time_ago
-from searchs.serializers import LocationSerializer
+from .location_serializers import LocationSerializer
 
 class BaseNoticeSerializer(serializers.ModelSerializer):
     time_ago = serializers.SerializerMethodField()
@@ -81,3 +81,17 @@ class BaseProgramDetailSerializer(serializers.ModelSerializer):
     def get_notice_serializer(self): raise NotImplementedError
     def get_review_serializer(self): raise NotImplementedError
     def get_review_model(self): raise NotImplementedError
+
+class BaseProgramListSerializer(BaseProgramDetailSerializer):
+    class Meta(BaseProgramDetailSerializer.Meta):
+        fields = (
+            "id",
+            "name",
+            "is_ongoing",
+            "category",
+            "schedule",
+            "location",
+            "scraps_count",
+            "description",
+            "thumbnail",
+        )
