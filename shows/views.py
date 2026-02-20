@@ -34,7 +34,6 @@ class ShowListView(APIView):
         {
             "counts":len(serializer),
             "search_result": serializer,
-            "message":"검색 결과가 없습니다." if len(serializer) == 0 else "",
         },
         status=status.HTTP_200_OK,
         )
