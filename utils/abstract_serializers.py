@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from utils.helpers import time_ago
+from django.utils import timezone
 from .location_serializers import LocationSerializer
 
 class BaseNoticeSerializer(serializers.ModelSerializer):
@@ -83,6 +84,9 @@ class BaseProgramDetailSerializer(serializers.ModelSerializer):
     def get_review_model(self): raise NotImplementedError
 
 class BaseProgramListSerializer(BaseProgramDetailSerializer):
+    product_images = serializers.SerializerMethodField()
+    is_ongoing = serializers.SerializerMethodField()
+
     class Meta(BaseProgramDetailSerializer.Meta):
         fields = (
             "id",
@@ -94,4 +98,45 @@ class BaseProgramListSerializer(BaseProgramDetailSerializer):
             "scraps_count",
             "description",
             "thumbnail",
+            "product_images",
         )
+
+    def get_product_images(self, obj):
+
+        if not hasattr(obj, "product"):
+            return []
+        
+        products = obj.product.all().order_by("id")[:3]
+
+        product_images = []
+        for p in products:
+            product_images.append(p.image.url if p.image else None)
+        return product_images
+    
+    def get_is_ongoing(self, obj):
+        if obj.__class__.__name__ == "Booth":
+            return obj.is_ongoing
+        
+        now = timezone.now()
+        before_ongoing = False
+        after_ongoing = False
+
+        schedules = getattr(obj, "schedule", None) or []
+
+        for s in schedules:
+            start = s.lower
+            end = s.upper
+
+            if start <= now < end:
+                return True
+            if now < start:
+                before_ongoing = True
+            if end <= now:
+                after_ongoing = True
+
+        if before_ongoing:
+            return None
+        if after_ongoing:
+            return False
+        
+        return None
