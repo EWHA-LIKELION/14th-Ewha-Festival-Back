@@ -1,6 +1,10 @@
 from rest_framework import serializers
 from .models import Booth, Product, BoothReview, BoothNotice
-from utils.abstract_serializers import BaseProgramDetailSerializer, BaseNoticeSerializer, BaseReviewSerializer
+from utils.abstract_serializers import BaseProgramListSerializer, BaseProgramDetailSerializer, BaseNoticeSerializer, BaseReviewSerializer
+
+class BoothListSerializer(BaseProgramListSerializer):
+    class Meta(BaseProgramListSerializer.Meta):
+        model = Booth
 
 class BoothProductSerializer(serializers.ModelSerializer):
     class Meta:
