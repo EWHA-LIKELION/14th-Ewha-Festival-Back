@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import Booth
 from .serializers import BoothListSerializer, BoothDetailSerializer
+# from utils.filters_sorts import filter_and_sort
 
 # Create your views here.
 class BoothListView(APIView):
@@ -20,12 +21,22 @@ class BoothListView(APIView):
             .annotate(scraps_count=Count("booth_scrap", distinct=True))
             .all()
         )
+
+        # booths = filter_and_sort(booths, request.query_params, program="booth")
+
         serializer = BoothListSerializer(
             booths,
             many=True,
             context={"request":request},
+        ).data
+
+        return Response(
+        {
+            "counts":len(serializer),
+            "search_result": serializer,
+        },
+        status=status.HTTP_200_OK,
         )
-        return Response(serializer.data)
 
 class BoothDetailView(APIView):
     def get_permissions(self):
