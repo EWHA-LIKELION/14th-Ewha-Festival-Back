@@ -1,6 +1,10 @@
 from rest_framework import serializers
 from .models import Show, Setlist, ShowReview, ShowNotice
-from utils.abstract_serializers import BaseProgramDetailSerializer, BaseNoticeSerializer, BaseReviewSerializer
+from utils.abstract_serializers import BaseProgramListSerializer, BaseProgramDetailSerializer, BaseNoticeSerializer, BaseReviewSerializer
+    
+class ShowListSerializer(BaseProgramListSerializer):
+    class Meta(BaseProgramListSerializer.Meta):
+        model = Show
 
 class ShowSetlistSerializer(serializers.ModelSerializer):
     class Meta:
