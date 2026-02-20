@@ -1,9 +1,9 @@
-from django.db.models import Q
+from django.db.models import Q, Case, When, Value, IntegerField
 from django.db.models.expressions import RawSQL
 from datetime import datetime, timedelta
+from django.utils import timezone
 from django.utils.dateparse import parse_date
-from searchs.models import Location
-from utils.choices import LocationChoices
+from .choices import LocationChoices
 
 # 필터링
 def base_filter(qs, params, *, program: str):
@@ -11,7 +11,22 @@ def base_filter(qs, params, *, program: str):
 
     # 종료 제외 (default=ON)
     if params.get("is_ongoing", "true").lower() == "true":
-        q &= Q(is_ongoing=True)
+        if program == "booth":
+            q &= Q(is_ongoing=True)
+        elif program == "show":
+            now = timezone.now()
+            qs = qs.annotate(
+                has_not_ended=RawSQL(
+                    """
+                    EXISTS(
+                        SELECT 1
+                        FROM unnest(schedule) AS r
+                        WHERE upper(r) > %s
+                    )
+                    """,
+                    [now],
+                )
+            ).filter(has_not_ended=True)
 
     # 카테고리
     category = params.getlist("category")
@@ -69,40 +84,41 @@ BOOTH_BUILDING_PRIORITY = [
     LocationChoices.SPORT_TRACK,
 ]
 
-def base_sort(qs, ordering: str | None, *, program: str):
-    ordering = (ordering or "").lower().strip()
+def base_sort(qs, sorting: str | None, *, program: str):
+    sorting = (sorting or "").lower().strip()
     
     # 스크랩순
-    if ordering == "scrap":
+    if sorting == "scrap":
         return qs.order_by("-scraps_count", "id")
     
     # 이름순
-    if ordering == "name":
+    if sorting == "name":
         return qs.order_by("name", "id")
     
     # 부스 default - 번호순
-    if program == "booth":
-        if ordering in ("number", ""):
-            sql_priority = f"""
-                building_priority_index(
-                    ARRAY{BOOTH_BUILDING_PRIORITY}::varchar[],
-                    location.building
-                )
-            """
-            sql_unnest = "(SELECT MIN(lower(r)) FROM unnest(schedule) AS r)"
+    if program == "booth" and sorting in ("number", ""):
+        whens = [
+            When(location__building=building, then=Value(i))
+            for i, building in enumerate(BOOTH_BUILDING_PRIORITY)
+        ]
 
-            return qs.annotate(
-                building_priority_index=RawSQL(sql_priority, []),
-                unnest_time = RawSQL(sql_unnest, []),
-            ).order_by("building_priority_index", "location__number", "unnest_time", "id")
-        
+        sql_unnest = "(SELECT MIN(lower(r)) FROM unnest(schedule) AS r)"
+
+        return qs.annotate(
+            building_priority_index=Case(
+                *whens,
+                default=Value(999),
+                output_field=IntegerField(),
+            ),
+            unnest_time=RawSQL(sql_unnest, []),
+        ).order_by("building_priority_index", "location__number", "unnest_time", "id")
+
     # 공연 default - 시간순
-    if program == "show":
-        if ordering in ("time", ""):
-            sql_unnest = "(SELECT MIN(lower(r)) FROM unnest(schedule) AS r)"
-            return qs.annotate(
-                unnest_time = RawSQL(sql_unnest, [])
-            ).order_by("unnest_time", "id")
+    if program == "show" and sorting in ("time", ""):
+        sql_unnest = "(SELECT MIN(lower(r)) FROM unnest(schedule) AS r)"
+        return qs.annotate(
+            unnest_time=RawSQL(sql_unnest, [])
+        ).order_by("unnest_time", "id")
         
     return qs
 
