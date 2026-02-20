@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import Show
 from .serializers import ShowListSerializer, ShowDetailSerializer
+# from utils.filters_sorts import filter_and_sort
 
 # Create your views here.
 class ShowListView(APIView):
@@ -20,12 +21,23 @@ class ShowListView(APIView):
             .annotate(scraps_count=Count("show_scrap", distinct=True))
             .all()
         )
+
+        # shows = filter_and_sort(shows, request.query_params, program="show")
+
         serializer = ShowListSerializer(
             shows,
             many=True,
             context={"request":request},
+        ).data
+
+        return Response(
+        {
+            "counts":len(serializer),
+            "search_result": serializer,
+            "message":"검색 결과가 없습니다." if len(serializer) == 0 else "",
+        },
+        status=status.HTTP_200_OK,
         )
-        return Response(serializer.data)
 
 class ShowDetailView(APIView):
     def get_permissions(self):
