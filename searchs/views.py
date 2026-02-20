@@ -7,7 +7,7 @@ from rest_framework.views import APIView
 from booths.models import Booth, BoothScrap
 from shows.models import Show, ShowScrap
 from .serializers import BoothSearchSerializer, ShowSearchSerializer
-# from utils.filters_sorts import filter_and_sort
+from utils.filters_sorts import filter_and_sort
 
 def search(*, request, booths_qs, shows_qs):
     q = (request.query_params.get("q") or "").strip()
@@ -31,14 +31,14 @@ def search(*, request, booths_qs, shows_qs):
         .distinct()
     )
 
-    # booths = filter_and_sort(booths, request.query_params, program="booth")
+    booths = filter_and_sort(booths, request.query_params, program="booth")
     booths_serializer = BoothSearchSerializer(
             booths,
             many=True,
             context={"request": request}
         ).data
 
-    # shows = filter_and_sort(shows, request.query_params, program="show")
+    shows = filter_and_sort(shows, request.query_params, program="show")
     shows_serializer = ShowSearchSerializer(
             shows,
             many=True,

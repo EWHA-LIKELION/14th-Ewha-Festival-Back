@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import Booth
 from .serializers import BoothListSerializer, BoothDetailSerializer
-# from utils.filters_sorts import filter_and_sort
+from utils.filters_sorts import filter_and_sort
 
 # Create your views here.
 class BoothListView(APIView):
@@ -22,7 +22,7 @@ class BoothListView(APIView):
             .all()
         )
 
-        # booths = filter_and_sort(booths, request.query_params, program="booth")
+        booths = filter_and_sort(booths, request.query_params, program="booth")
 
         serializer = BoothListSerializer(
             booths,
@@ -70,7 +70,7 @@ class ScrapbookBoothListView(APIView):
             booth_scrap__user=request.user
         ).distinct()
 
-        # booths = filter_and_sort(booths, request.query_params, program="booth")
+        booths = filter_and_sort(booths, request.query_params, program="booth")
 
         serializer = BoothListSerializer(
             booths,

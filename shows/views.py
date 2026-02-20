@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import Show
 from .serializers import ShowListSerializer, ShowDetailSerializer
-# from utils.filters_sorts import filter_and_sort
+from utils.filters_sorts import filter_and_sort
 
 # Create your views here.
 class ShowListView(APIView):
@@ -22,7 +22,7 @@ class ShowListView(APIView):
             .all()
         )
 
-        # shows = filter_and_sort(shows, request.query_params, program="show")
+        shows = filter_and_sort(shows, request.query_params, program="show")
 
         serializer = ShowListSerializer(
             shows,
