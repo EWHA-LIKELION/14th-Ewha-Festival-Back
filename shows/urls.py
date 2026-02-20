@@ -5,4 +5,5 @@ app_name = 'shows'
 
 urlpatterns = [
     path('<str:pk>/', ShowDetailView.as_view()),
+    path('scrapbook/', ScrapbookShowListView.as_view()),
 ]
