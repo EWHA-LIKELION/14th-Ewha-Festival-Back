@@ -61,3 +61,27 @@ class ShowDetailView(APIView):
             context={"request": request},
         )
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+class ScrapbookShowListView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        shows = Show.objects.filter(
+            show_scrap__user=request.user
+        ).distinct()
+
+        shows = filter_and_sort(shows, request.query_params, program="show")
+
+        serializer = ShowListSerializer(
+            shows,
+            many=True,
+            context={"request":request},
+        ).data
+
+        return Response(
+        {
+            "counts":len(serializer),
+            "search_result": serializer,
+        },
+        status=status.HTTP_200_OK,
+        )

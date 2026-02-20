@@ -61,3 +61,27 @@ class BoothDetailView(APIView):
             context={"request": request},
         )
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+class ScrapbookBoothListView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        booths = Booth.objects.filter(
+            booth_scrap__user=request.user
+        ).distinct()
+
+        # booths = filter_and_sort(booths, request.query_params, program="booth")
+
+        serializer = BoothListSerializer(
+            booths,
+            many=True,
+            context={"request":request},
+        ).data
+
+        return Response(
+        {
+            "counts":len(serializer),
+            "search_result": serializer,
+        },
+        status=status.HTTP_200_OK,
+        )
