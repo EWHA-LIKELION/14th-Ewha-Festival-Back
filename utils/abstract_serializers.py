@@ -1,7 +1,6 @@
 from rest_framework import serializers
 from utils.helpers import time_ago
 from searchs.serializers import LocationSerializer
-from django.utils import timezone
 from dataclasses import dataclass
 from typing import Optional, Type, List, Dict, Any
 from django.db import transaction
@@ -9,7 +8,6 @@ from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from rest_framework.exceptions import ValidationError
 from utils.exceptions import Conflict
-
 
 class BaseNoticeSerializer(serializers.ModelSerializer):
     time_ago = serializers.SerializerMethodField()
@@ -106,7 +104,6 @@ class ProgramPatchMixin:
 
     def get_root_update_fields(self, validated_data):
         return {k: v for k, v in validated_data.items() if k in self.program_fields}
-
     
     
 class NestedCollectionPatchMixin:
