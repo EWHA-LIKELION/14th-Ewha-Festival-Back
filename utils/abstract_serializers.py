@@ -53,7 +53,6 @@ class BaseProgramDetailSerializer(serializers.ModelSerializer):
 
     def get_schedule(self, obj):
         result = []
-        tz = timezone.get_current_timezone()
 
         for r in obj.schedule:
             start = timezone.localtime(r.lower)
