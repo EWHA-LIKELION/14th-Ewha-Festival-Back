@@ -6,12 +6,11 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import Booth
 from .serializers import BoothDetailSerializer
-
-# Create your views here.
+from .serializers import BoothDetailSerializer, BoothPatchSerializer
 
 class BoothDetailView(APIView):
     def get_permissions(self):
-        if self.request.method == "GET":
+        if self.request.method in ["GET", "PATCH"]:
             return [AllowAny()]
         return [IsAuthenticated()]
     
@@ -32,3 +31,19 @@ class BoothDetailView(APIView):
             context={"request": request},
         )
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    def patch(self, request, pk, format=None):
+        booth = self.get_object(pk)
+
+        patch_serializer = BoothPatchSerializer(
+            booth,
+            data=request.data,
+            partial=True,
+            context={"request": request},
+        )
+        patch_serializer.is_valid(raise_exception=True)
+        patch_serializer.save()
+
+        booth = self.get_object(pk)  
+        read_serializer = BoothDetailSerializer(booth, context={"request": request})
+        return Response(read_serializer.data, status=status.HTTP_200_OK)
