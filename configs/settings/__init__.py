@@ -1,8 +1,7 @@
-import os
+from .base import DEBUG
 
-env = os.environ.get("DJANGO_ENV", "dev")
-
-if env == "prod":
-    from .prod import *
-else:
+if DEBUG:
     from .dev import *
+else:
+    from .prod import *
+    
