@@ -4,7 +4,7 @@ from .models import User
 class CustomBaseUserCreationForm(BaseUserCreationForm):
     class Meta:
         model = User
-        fields = ("email",)
+        fields = ("kakao_id", "nickname",)
 
 class CustomUserChangeForm(UserChangeForm):
     class Meta:
