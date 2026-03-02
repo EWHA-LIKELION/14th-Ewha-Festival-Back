@@ -11,13 +11,9 @@ class User(AbstractUser):
     kakao_id = models.CharField(
         max_length=50,
         unique=True,
-        null=False,
-        blank=False,
     ) 
     nickname = models.CharField(
         max_length=30,
-        null=False,
-        blank=False,
     )
     permission_booth = models.ManyToManyField(
         'booths.Booth',
