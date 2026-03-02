@@ -70,6 +70,7 @@ class BaseProgram(models.Model):
     updated_at = models.DateTimeField(
         help_text="수정일시",
         auto_now=True,
+        null=True
     )
     
 
