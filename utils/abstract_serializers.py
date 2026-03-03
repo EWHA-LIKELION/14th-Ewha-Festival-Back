@@ -71,6 +71,7 @@ class BaseScrapSerializer(serializers.ModelSerializer):
         return None
 
 class BaseProgramDetailSerializer(serializers.ModelSerializer):
+    is_ongoing = serializers.SerializerMethodField()
     location = LocationSerializer(read_only=True)
     schedule = serializers.SerializerMethodField()
     scraps_count = serializers.IntegerField()
@@ -84,6 +85,34 @@ class BaseProgramDetailSerializer(serializers.ModelSerializer):
             'description', 'location', 'location_description', 'roadview',
             'schedule', 'sns', 'latest_notice', 'reviews', 'updated_at',
         )
+
+    def get_is_ongoing(self, obj):
+        if obj.__class__.__name__ == "Booth":
+            return obj.is_ongoing
+        
+        now = timezone.now()
+        before_ongoing = False
+        after_ongoing = False
+
+        schedules = getattr(obj, "schedule", None) or []
+
+        for s in schedules:
+            start = s.lower
+            end = s.upper
+
+            if start <= now < end:
+                return True
+            if now < start:
+                before_ongoing = True
+            if end <= now:
+                after_ongoing = True
+
+        if before_ongoing:
+            return None
+        if after_ongoing:
+            return False
+        
+        return None
 
     def get_schedule(self, obj):
         result = []
