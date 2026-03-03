@@ -23,7 +23,7 @@ class MyDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = (
-            # 'nickname', # 카카오톡 닉네임은 아직 user 모델에 없으므로 추후 추가 예정
+            'nickname',
             'scrap_count', 'recent_scraps',
             'managed_booths', 'managed_shows',
         )
