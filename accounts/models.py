@@ -7,9 +7,13 @@ class User(AbstractUser):
     username = None
     first_name = None
     last_name = None
-    email = models.EmailField(
+
+    kakao_id = models.CharField(
+        max_length=50,
         unique=True,
-        error_messages={'unique': '이미 존재하는 이메일입니다.'},
+    ) 
+    nickname = models.CharField(
+        max_length=30,
     )
     permission_booth = models.ManyToManyField(
         'booths.Booth',
@@ -22,5 +26,5 @@ class User(AbstractUser):
         related_name="user",
     )
     objects = UserManager()
-    USERNAME_FIELD = 'email'
+    USERNAME_FIELD = 'kakao_id'
     REQUIRED_FIELDS = []
