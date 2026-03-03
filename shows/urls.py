@@ -4,4 +4,5 @@ from .views import *
 app_name = 'shows'
 
 urlpatterns = [
+    path('<str:pk>/', ShowDetailView.as_view()),
 ]
