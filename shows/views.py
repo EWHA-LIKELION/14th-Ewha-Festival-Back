@@ -1,11 +1,12 @@
 from django.http import HttpRequest, Http404
+from django.shortcuts import get_object_or_404
 from django.db.models import Count
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .models import Show
-from .serializers import ShowDetailSerializer, ShowPatchSerializer
+from .models import Show, ShowNotice
+from .serializers import ShowDetailSerializer, ShowNoticeSerializer, ShowPatchSerializer
 
 class ShowDetailView(APIView):
     def get_permissions(self):
@@ -50,3 +51,22 @@ class ShowDetailView(APIView):
             context={"request": request},
         )
         return Response(read_serializer.data, status=status.HTTP_200_OK)
+
+class ShowNoticeView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request: HttpRequest, pk, format=None):
+        get_object_or_404(Show, pk=pk)
+    
+        notices = (
+            ShowNotice.objects
+            .filter(show_id=pk)
+            .order_by('-created_at')
+        )
+
+        serializer = ShowNoticeSerializer(
+            notices,
+            many=True,
+            context={"request": request},
+        )
+        return Response(serializer.data, status=status.HTTP_200_OK)
