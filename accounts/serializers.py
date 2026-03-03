@@ -29,14 +29,14 @@ class MyDataSerializer(serializers.ModelSerializer):
         )
     
     def get_recent_scraps(self, obj):
-        shows = obj.showscrap.select_related('show').order_by('-created_at')[:4]
-        booths = obj.boothscrap.select_related('booth').order_by('-created_at')[:4]
+        shows = obj.showscrap.select_related('show').order_by('-created_at')[:10]
+        booths = obj.boothscrap.select_related('booth').order_by('-created_at')[:10]
 
         combined = sorted(
             list(shows) + list(booths),
             key=lambda x: x.created_at,
             reverse=True
-        )[:4]
+        )[:10]
 
         serializer_map = {
             ShowScrap: ShowScrapSerializer,
