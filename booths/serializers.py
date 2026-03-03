@@ -1,6 +1,6 @@
 from rest_framework import serializers
-from .models import Booth, Product, BoothReview, BoothNotice
-from utils.abstract_serializers import BaseProgramDetailSerializer, BaseNoticeSerializer, BaseReviewSerializer, ProgramPatchMixin, NestedCollectionPatchMixin, BaseNoticeWriteSerializer, BasePatchSerializer, CollectionPatchSpec
+from .models import Booth, Product, BoothReview, BoothNotice, BoothScrap
+from utils.abstract_serializers import BaseProgramDetailSerializer, BaseNoticeSerializer, BaseReviewSerializer, BaseScrapSerializer, ProgramPatchMixin, NestedCollectionPatchMixin, BaseNoticeWriteSerializer, BasePatchSerializer, CollectionPatchSpec
 from utils.serializer_fields import ScheduleWriteField
 
 class BoothProductSerializer(serializers.ModelSerializer):
@@ -17,7 +17,6 @@ class BoothProductWriteSerializer(serializers.ModelSerializer):
         model = Product
         fields = ('id', 'name', 'description', 'price', 'image', 'is_selling')
 
-
 class BoothNoticeSerializer(BaseNoticeSerializer):
     class Meta(BaseNoticeSerializer.Meta):
         model = BoothNotice
@@ -29,6 +28,12 @@ class BoothNoticeWriteSerializer(BaseNoticeWriteSerializer):
 class BoothReviewSerializer(BaseReviewSerializer):
     class Meta(BaseReviewSerializer.Meta):
         model = BoothReview
+
+class BoothScrapSerializer(BaseScrapSerializer):
+    scrap_field = "booth"
+
+    class Meta(BaseScrapSerializer.Meta):
+        model = BoothScrap
 
 class BoothDetailSerializer(BaseProgramDetailSerializer):
     product = serializers.SerializerMethodField()

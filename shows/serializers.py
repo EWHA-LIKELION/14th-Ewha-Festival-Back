@@ -1,6 +1,6 @@
 from rest_framework import serializers
-from .models import Show, Setlist, ShowNotice, ShowReview
-from utils.abstract_serializers import ProgramPatchMixin, NestedCollectionPatchMixin, BaseNoticeWriteSerializer, BasePatchSerializer, CollectionPatchSpec, BaseProgramDetailSerializer, BaseNoticeSerializer, BaseReviewSerializer
+from .models import Show, Setlist, ShowNotice, ShowReview, ShowScrap
+from utils.abstract_serializers import ProgramPatchMixin, NestedCollectionPatchMixin, BaseNoticeWriteSerializer, BasePatchSerializer, CollectionPatchSpec, BaseProgramDetailSerializer, BaseNoticeSerializer, BaseReviewSerializer, BaseScrapSerializer
 from utils.serializer_fields import ScheduleWriteField
 
 class SetlistWriteSerializer(serializers.ModelSerializer):
@@ -75,6 +75,12 @@ class ShowNoticeSerializer(BaseNoticeSerializer):
 class ShowReviewSerializer(BaseReviewSerializer):
     class Meta(BaseReviewSerializer.Meta):
         model = ShowReview
+
+class ShowScrapSerializer(BaseScrapSerializer):
+    scrap_field = "show"
+
+    class Meta(BaseScrapSerializer.Meta):
+        model = ShowScrap
 
 class ShowDetailSerializer(BaseProgramDetailSerializer):
     setlist = ShowSetlistSerializer(many=True)
