@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from utils.helpers import time_ago
-from searchs.serializers import LocationSerializer
+from .location_serializers import LocationSerializer
 from dataclasses import dataclass
 from typing import Optional, Type, List, Dict, Any
 from django.db import transaction
