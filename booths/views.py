@@ -10,7 +10,7 @@ from .serializers import BoothDetailSerializer, BoothNoticeSerializer, BoothPatc
 
 class BoothDetailView(APIView):
     def get_permissions(self):
-        if self.request.method in ["GET", "PATCH"]:
+        if self.request.method == "GET":
             return [AllowAny()]
         return [IsAuthenticated()]
     
