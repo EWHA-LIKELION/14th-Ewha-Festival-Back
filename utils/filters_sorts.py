@@ -46,3 +46,26 @@ def base_filter(qs, params, *, program: str):
         host = params.getlist("host")
         if host:
             q &= Q(host__in=host)
+
+    # 요일
+    qs = qs.filter(q)
+
+    d = parse_date(params.get("date") or "")
+    if d:
+        start = datetime.combine(d, datetime.min.time())
+        end = start + timedelta(days=1)
+
+        qs = qs.annotate(
+            has_overlap_date=RawSQL(
+                """
+                EXISTS(
+                    SELECT 1
+                    FROM unnest(schedule) AS r
+                    WHERE r && tstzrange(%s, %s, '[)')
+                )
+                """,
+                [start, end],
+            )
+        ).filter(has_overlap_date=True)
+    
+    return qs
