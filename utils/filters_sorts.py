@@ -35,3 +35,8 @@ def base_filter(qs, params, *, program: str):
             q &= Q(category__overlap=category)
         else:
             q &= Q(category__in=category)
+
+    # 위치
+    location = params.getlist("building")
+    if location:
+        q &= Q(location__building__in=location)
