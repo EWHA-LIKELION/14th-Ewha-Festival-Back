@@ -27,3 +27,11 @@ def base_filter(qs, params, *, program: str):
                     [now],
                 )
             ).filter(has_not_ended=True)
+
+    # 카테고리
+    category = params.getlist("category")
+    if category:
+        if program == "booth":
+            q &= Q(category__overlap=category)
+        else:
+            q &= Q(category__in=category)
