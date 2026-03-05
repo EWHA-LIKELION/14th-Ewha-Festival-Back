@@ -40,3 +40,9 @@ def base_filter(qs, params, *, program: str):
     location = params.getlist("building")
     if location:
         q &= Q(location__building__in=location)
+    
+    # 주관 (booth만)
+    if program == "booth":
+        host = params.getlist("host")
+        if host:
+            q &= Q(host__in=host)
