@@ -13,6 +13,10 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from urllib.parse import urlencode
 from .serializers import MyDataSerializer
 
+from booths.models import Booth, BoothScrap
+from shows.models import Show, ShowScrap
+from searchs.views import search
+
 # Create your views here.
 
 User = get_user_model()
@@ -104,3 +108,26 @@ class MyDataView(APIView):
         )
 
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+class MyScrapView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, format=None):
+        booths_qs = (
+            Booth.objects.select_related("location")
+            .prefetch_related("product")
+            .filter(id__in=BoothScrap.objects.filter(user=request.user).values("booth_id"))
+        )
+        shows_qs = (
+            Show.objects.select_related("location")
+            .filter(id__in=ShowScrap.objects.filter(user=request.user).values("show_id"))
+        )
+        result = search(
+            request=request,
+            booths_qs=booths_qs,
+            shows_qs=shows_qs,
+        )
+        return Response(
+            result,
+            status=status.HTTP_200_OK,
+        )
