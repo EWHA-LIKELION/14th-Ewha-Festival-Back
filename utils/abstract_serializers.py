@@ -148,6 +148,35 @@ class BaseProgramDetailSerializer(serializers.ModelSerializer):
     def get_review_serializer(self): raise NotImplementedError
     def get_review_model(self): raise NotImplementedError
     
+class BaseProgramListSerializer(BaseProgramDetailSerializer):
+    product_images = serializers.SerializerMethodField()
+
+    class Meta(BaseProgramDetailSerializer.Meta):
+        fields = (
+            "id",
+            "name",
+            "is_ongoing",
+            "category",
+            "schedule",
+            "location",
+            "scraps_count",
+            "description",
+            "thumbnail",
+            "product_images",
+        )
+
+    def get_product_images(self, obj):
+
+        if not hasattr(obj, "product"):
+            return []
+
+        products = obj.product.all().order_by("id")[:3]
+
+        product_images = []
+        for p in products:
+            product_images.append(p.image.url if p.image else None)
+        return product_images
+
 class BaseNoticeWriteSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(required = False)
     
