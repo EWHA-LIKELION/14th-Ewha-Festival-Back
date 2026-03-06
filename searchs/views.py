@@ -1,8 +1,15 @@
 from django.db.models import Q, Count
+from rest_framework import status
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from booths.models import Booth
+from shows.models import Show
 from .serializers import BoothSearchSerializer, ShowSearchSerializer
 from utils.filters_sorts import filter_and_sort
 
-def search(*, request, booths_qs, shows_qs):    
+def search(*, request, booths_qs, shows_qs):
     q = (request.query_params.get("q") or "").strip()
 
     booth_q = Q(name__icontains=q) | Q(product__name__icontains=q)
@@ -48,3 +55,27 @@ def search(*, request, booths_qs, shows_qs):
                 "search_result": shows_serializer,
         },
     }
+
+class SearchView(APIView):
+    def get_permissions(self):
+        if self.request.method == "GET":
+            return [AllowAny()]
+        return [IsAuthenticated()]
+
+    def get(self, request, format=None):
+        booths_qs = (
+            Booth.objects.select_related("location")
+            .prefetch_related("product")
+        )
+        shows_qs = (
+            Show.objects.select_related("location")
+        )
+        result = search(
+            request=request,
+            booths_qs=booths_qs,
+            shows_qs=shows_qs,
+        )
+        return Response(
+            result,
+            status=status.HTTP_200_OK,
+        )
