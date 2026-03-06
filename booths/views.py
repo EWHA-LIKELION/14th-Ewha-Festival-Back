@@ -6,7 +6,37 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import Booth, BoothNotice
-from .serializers import BoothDetailSerializer, BoothNoticeSerializer, BoothPatchSerializer
+from .serializers import BoothListSerializer, BoothDetailSerializer, BoothNoticeSerializer, BoothPatchSerializer
+from utils.filters_sorts import filter_and_sort
+
+class BoothListView(APIView):
+    def get_permissions(self):
+        if self.request.method == "GET":
+            return [AllowAny()]
+        return [IsAuthenticated()]
+
+    def get(self, request, format=None):
+        booths = (
+            Booth.objects.select_related("location")
+            .annotate(scraps_count=Count("booth_scrap", distinct=True))
+            .all()
+        )
+
+        booths = filter_and_sort(booths, request.query_params, program="booth")
+
+        serializer = BoothListSerializer(
+            booths,
+            many=True,
+            context={"request":request},
+        ).data
+
+        return Response(
+        {
+            "counts":len(serializer),
+            "search_result": serializer,
+        },
+        status=status.HTTP_200_OK,
+        )
 
 class BoothDetailView(APIView):
     def get_permissions(self):
