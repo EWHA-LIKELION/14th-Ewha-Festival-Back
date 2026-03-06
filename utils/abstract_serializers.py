@@ -150,7 +150,6 @@ class BaseProgramDetailSerializer(serializers.ModelSerializer):
     
 class BaseProgramListSerializer(BaseProgramDetailSerializer):
     product_images = serializers.SerializerMethodField()
-    is_ongoing = serializers.SerializerMethodField()
 
     class Meta(BaseProgramDetailSerializer.Meta):
         fields = (
@@ -177,34 +176,6 @@ class BaseProgramListSerializer(BaseProgramDetailSerializer):
         for p in products:
             product_images.append(p.image.url if p.image else None)
         return product_images
-
-    def get_is_ongoing(self, obj):
-        if obj.__class__.__name__ == "Booth":
-            return obj.is_ongoing
-
-        now = timezone.now()
-        before_ongoing = False
-        after_ongoing = False
-
-        schedules = getattr(obj, "schedule", None) or []
-
-        for s in schedules:
-            start = s.lower
-            end = s.upper
-
-            if start <= now < end:
-                return True
-            if now < start:
-                before_ongoing = True
-            if end <= now:
-                after_ongoing = True
-
-        if before_ongoing:
-            return None
-        if after_ongoing:
-            return False
-
-        return None
 
 class BaseNoticeWriteSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(required = False)
