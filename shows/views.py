@@ -6,7 +6,37 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import Show, ShowNotice
-from .serializers import ShowDetailSerializer, ShowNoticeSerializer, ShowPatchSerializer
+from .serializers import ShowListSerializer, ShowDetailSerializer, ShowNoticeSerializer, ShowPatchSerializer
+from utils.filters_sorts import filter_and_sort
+
+class ShowListView(APIView):
+    def get_permissions(self):
+        if self.request.method == "GET":
+            return [AllowAny()]
+        return [IsAuthenticated()]
+
+    def get(self, request, format=None):
+        shows = (
+            Show.objects.select_related("location")
+            .annotate(scraps_count=Count("show_scrap", distinct=True))
+            .all()
+        )
+
+        shows = filter_and_sort(shows, request.query_params, program="show")
+
+        serializer = ShowListSerializer(
+            shows,
+            many=True,
+            context={"request":request},
+        ).data
+
+        return Response(
+        {
+            "counts":len(serializer),
+            "search_result": serializer,
+        },
+        status=status.HTTP_200_OK,
+        )
 
 class ShowDetailView(APIView):
     def get_permissions(self):
