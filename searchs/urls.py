@@ -4,4 +4,5 @@ from .views import *
 app_name = 'searchs'
 
 urlpatterns = [
+    path('', SearchView.as_view()),
 ]
