@@ -88,12 +88,12 @@ def search(*, request, booths_qs, shows_qs):
     return {
         "booths":{
             "counts": booth_paginator.count,
-            "has_next": booth_paginator.get_next_link() is not None,
+            "next": booth_paginator.get_next_link() is not None,
             "search_result": booths_serializer,
         },
         "shows":{
             "counts": show_paginator.count,
-            "has_next": show_paginator.get_next_link() is not None,
+            "next": show_paginator.get_next_link() is not None,
             "search_result": shows_serializer,
         },
     }
