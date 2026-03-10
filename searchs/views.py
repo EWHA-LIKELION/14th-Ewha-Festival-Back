@@ -10,6 +10,7 @@ from shows.models import Show
 from .serializers import BoothSearchSerializer, ShowSearchSerializer
 from utils.filters_sorts import filter_and_sort
 from utils.choices import LocationChoices
+from utils.helpers import BasePagination
 
 def search(*, request, booths_qs, shows_qs):
     q = (request.query_params.get("q") or "").strip()
@@ -64,27 +65,36 @@ def search(*, request, booths_qs, shows_qs):
     )
 
     booths = filter_and_sort(booths, request.query_params, program="booth")
+    shows = filter_and_sort(shows, request.query_params, program="show")
+
+    booth_paginator = BasePagination()
+    paginated_booths = booth_paginator.paginate_queryset(booths, request)
+    
     booths_serializer = BoothSearchSerializer(
-            booths,
+            paginated_booths,
             many=True,
             context={"request": request}
         ).data
+    
+    show_paginator = BasePagination()
+    paginated_shows = show_paginator.paginate_queryset(shows, request)
 
-    shows = filter_and_sort(shows, request.query_params, program="show")
     shows_serializer = ShowSearchSerializer(
-            shows,
+            paginated_shows,
             many=True,
             context={"request":request}
         ).data
 
     return {
         "booths":{
-            "counts":len(booths_serializer),
+            "counts": booth_paginator.count,
+            "has_next": booth_paginator.get_next_link() is not None,
             "search_result": booths_serializer,
         },
         "shows":{
-                "counts":len(shows_serializer),
-                "search_result": shows_serializer,
+            "counts": show_paginator.count,
+            "has_next": show_paginator.get_next_link() is not None,
+            "search_result": shows_serializer,
         },
     }
 
