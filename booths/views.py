@@ -8,8 +8,12 @@ from rest_framework.views import APIView
 from .models import Booth, BoothNotice
 from .serializers import BoothListSerializer, BoothDetailSerializer, BoothNoticeSerializer, BoothPatchSerializer
 from utils.filters_sorts import filter_and_sort
+from utils.helpers import BasePagination
 
 class BoothListView(APIView):
+    # 페이지네이션 클래스 호출
+    booth_pagination = BasePagination
+
     def get_permissions(self):
         if self.request.method == "GET":
             return [AllowAny()]
@@ -24,19 +28,16 @@ class BoothListView(APIView):
 
         booths = filter_and_sort(booths, request.query_params, program="booth")
 
+        paginator = self.booth_pagination()
+        paginated_booths = paginator.paginate_queryset(booths, request, view=self)
+
         serializer = BoothListSerializer(
-            booths,
+            paginated_booths,
             many=True,
             context={"request":request},
         ).data
 
-        return Response(
-        {
-            "counts":len(serializer),
-            "search_result": serializer,
-        },
-        status=status.HTTP_200_OK,
-        )
+        return paginator.get_paginated_response(serializer)
 
 class BoothDetailView(APIView):
     def get_permissions(self):
