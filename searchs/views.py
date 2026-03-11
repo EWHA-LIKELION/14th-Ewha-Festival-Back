@@ -95,6 +95,7 @@ def search(*, request, booths_qs, shows_qs):
         "shows":{
             "counts": show_paginator.count,
             "next": show_paginator.get_next_link() is not None,
+            "previous": show_paginator.get_previous_link() is not None,
             "search_result": shows_serializer,
         },
     }
