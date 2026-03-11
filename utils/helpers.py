@@ -40,6 +40,7 @@ class BasePagination(LimitOffsetPagination):
         return Response({
             "count": self.count,
             "next": self.get_next_link() is not None,
+            "previous": self.get_previous_link() is not None,
             "result": data,
         },
         status=status.HTTP_200_OK,
