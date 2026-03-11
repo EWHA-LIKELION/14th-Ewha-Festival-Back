@@ -1,5 +1,8 @@
 from django.utils.deconstruct import deconstructible
 from django.utils import timezone
+from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.response import Response
+from rest_framework import status
 
 @deconstructible
 class FilePathBuilder:
@@ -25,3 +28,20 @@ def time_ago(dt):
     if seconds < 86400:
         return f"{seconds // 3600}시간 전"
     return f"{seconds // 86400}일 전"
+
+# 페이지네이션
+class BasePagination(LimitOffsetPagination):
+    default_limit = 10
+    max_limit = 100
+    limit_query_param = "limit"
+    offset_query_param = "offset"
+
+    def get_paginated_response(self, data):
+        return Response({
+            "count": self.count,
+            "next": self.get_next_link() is not None,
+            "previous": self.get_previous_link() is not None,
+            "result": data,
+        },
+        status=status.HTTP_200_OK,
+        )

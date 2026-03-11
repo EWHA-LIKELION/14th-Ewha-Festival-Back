@@ -8,8 +8,12 @@ from rest_framework.views import APIView
 from .models import Show, ShowNotice
 from .serializers import ShowListSerializer, ShowDetailSerializer, ShowNoticeSerializer, ShowPatchSerializer
 from utils.filters_sorts import filter_and_sort
+from utils.helpers import BasePagination
 
 class ShowListView(APIView):
+    # 페이지네이션 클래스 호출
+    show_pagination = BasePagination
+
     def get_permissions(self):
         if self.request.method == "GET":
             return [AllowAny()]
@@ -24,19 +28,16 @@ class ShowListView(APIView):
 
         shows = filter_and_sort(shows, request.query_params, program="show")
 
+        paginator = self.show_pagination()
+        paginated_shows = paginator.paginate_queryset(shows, request, view=self)
+
         serializer = ShowListSerializer(
-            shows,
+            paginated_shows,
             many=True,
             context={"request":request},
         ).data
 
-        return Response(
-        {
-            "counts":len(serializer),
-            "search_result": serializer,
-        },
-        status=status.HTTP_200_OK,
-        )
+        return paginator.get_paginated_response(serializer)
 
 class ShowDetailView(APIView):
     def get_permissions(self):
