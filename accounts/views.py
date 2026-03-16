@@ -1,10 +1,13 @@
 from django.http import HttpRequest
 from django.db.models import Count, F
+from django.db import IntegrityError
 from .models import User
 from rest_framework import status
+from rest_framework.status import *
 from rest_framework.response import Response
 from rest_framework.views import APIView
 import requests
+import logging
 from django.conf import settings
 from django.shortcuts import redirect
 from django.contrib.auth import get_user_model
@@ -20,6 +23,7 @@ from searchs.views import search
 # Create your views here.
 
 User = get_user_model()
+logger = logging.getLogger(__name__)
 
 class KakaoLoginView(APIView):
     permission_classes = [AllowAny]
@@ -35,9 +39,17 @@ class KakaoLoginView(APIView):
         return redirect(kakao_auth_url)
     
 class KakaoCallbackView(APIView):
+    permission_classes = [AllowAny]
+
     def get(self, request):
         code = request.GET.get("code")
-
+        #인가코드 없는 경우 
+        if not code:
+            return Response(
+                {"message": "인가 코드가 없습니다."},
+                status=HTTP_400_BAD_REQUEST
+            )
+        
         #access_token 요청
         token_response = requests.post(
             "https://kauth.kakao.com/oauth/token",
@@ -52,10 +64,25 @@ class KakaoCallbackView(APIView):
                 "client_secret": settings.KAKAO_CLIENT_SECRET, 
             },
         )
+        if token_response.status_code != 200:
+            return Response(
+                {
+                    "message": "Access token 발급 실패",
+                    "error": token_response.json(),
+                },
+                status=HTTP_401_UNAUTHORIZED
+            )
 
         token_json = token_response.json()
         access_token = token_json.get("access_token")
 
+        #access_token 없는 경우
+        if not access_token:
+            return Response(
+                {"message": "Access token이 응답에 존재하지 않습니다."},
+                status=HTTP_401_UNAUTHORIZED
+            )
+        
         #사용자 정보 요청
         profile_response = requests.get(
             "https://kapi.kakao.com/v2/user/me",
@@ -64,23 +91,49 @@ class KakaoCallbackView(APIView):
             },
         )
 
+        #사용자 정보 요청 실패 
+        if profile_response.status_code != 200:
+            return Response(
+                {"message": "사용자 정보 요청 실패"},
+                status=HTTP_401_UNAUTHORIZED
+            )
+
         profile_json = profile_response.json()
 
-        kakao_id = profile_json["id"]
-        user, created = User.objects.get_or_create(
-            kakao_id=str(kakao_id),
-            defaults={
-                "nickname": profile_json.get("properties", {}).get("nickname")
-            }
-        )
+        kakao_id = profile_json.get("id")
+        #kakao_id 없는 경우
+        if not kakao_id:
+            return Response(
+                {"message": "카카오 사용자 ID가 존재하지 않습니다."},
+                status=HTTP_401_UNAUTHORIZED
+            )
+        try:
+            user, _ = User.objects.get_or_create(
+                kakao_id=str(kakao_id),
+                defaults={
+                    "nickname": profile_json.get("properties", {}).get("nickname")
+                }
+            )
 
-        #JWT 발급 
-        refresh = RefreshToken.for_user(user)
+            #JWT 발급 
+            refresh = RefreshToken.for_user(user)
 
-        return Response({
-            "refresh": str(refresh),
-            "access": str(refresh.access_token),
-        })
+            return Response({
+                "refresh": str(refresh),
+                "access": str(refresh.access_token),
+            })
+        
+        except IntegrityError:
+            return Response(
+                {"message": "사용자 생성 중 DB 오류 발생"}, 
+                status=HTTP_500_INTERNAL_SERVER_ERROR
+                )
+        except Exception as e:
+            logger.error(f"카카오 로그인 오류: {e}") 
+            return Response(
+                {"message": "서버 내부 오류 발생"},
+                status=HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 class MyDataView(APIView):
     permission_classes = [IsAuthenticated]
