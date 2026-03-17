@@ -131,7 +131,7 @@ class KakaoCallbackView(APIView):
             logger.error(f"카카오 로그인 오류: {e}") 
             return Response(
                 {"message": "서버 내부 오류 발생"},
-                status=HTTP_500_INTERNAL_SERVER_ERROR
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
 class MyDataView(APIView):
