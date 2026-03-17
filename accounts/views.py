@@ -69,7 +69,7 @@ class KakaoCallbackView(APIView):
                     "message": "Access token 발급 실패",
                     "error": token_response.json(),
                 },
-                status=HTTP_401_UNAUTHORIZED
+                status=status.HTTP_401_UNAUTHORIZED
             )
 
         token_json = token_response.json()
