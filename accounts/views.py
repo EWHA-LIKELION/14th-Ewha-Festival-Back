@@ -3,7 +3,6 @@ from django.db.models import Count, F
 from django.db import IntegrityError
 from .models import User
 from rest_framework import status
-from rest_framework.status import *
 from rest_framework.response import Response
 from rest_framework.views import APIView
 import requests
