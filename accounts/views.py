@@ -46,7 +46,7 @@ class KakaoCallbackView(APIView):
         if not code:
             return Response(
                 {"message": "인가 코드가 없습니다."},
-                status=HTTP_400_BAD_REQUEST
+                status=status.HTTP_400_BAD_REQUEST
             )
         
         #access_token 요청
