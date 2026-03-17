@@ -125,7 +125,7 @@ class KakaoCallbackView(APIView):
         except IntegrityError:
             return Response(
                 {"message": "사용자 생성 중 DB 오류 발생"}, 
-                status=HTTP_500_INTERNAL_SERVER_ERROR
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
                 )
         except Exception as e:
             logger.error(f"카카오 로그인 오류: {e}") 
