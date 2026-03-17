@@ -94,7 +94,7 @@ class KakaoCallbackView(APIView):
         if profile_response.status_code != 200:
             return Response(
                 {"message": "사용자 정보 요청 실패"},
-                status=HTTP_401_UNAUTHORIZED
+                status=status.HTTP_401_UNAUTHORIZED
             )
 
         profile_json = profile_response.json()
