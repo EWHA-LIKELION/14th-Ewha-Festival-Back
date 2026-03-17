@@ -47,7 +47,7 @@ class KakaoCallbackView(APIView):
         if not code:
             return Response(
                 {"message": "인가 코드가 없습니다."},
-                status=HTTP_400_BAD_REQUEST
+                status=status.HTTP_400_BAD_REQUEST
             )
         
         #access_token 요청
@@ -70,7 +70,7 @@ class KakaoCallbackView(APIView):
                     "message": "Access token 발급 실패",
                     "error": token_response.json(),
                 },
-                status=HTTP_401_UNAUTHORIZED
+                status=status.HTTP_401_UNAUTHORIZED
             )
 
         token_json = token_response.json()
@@ -80,7 +80,7 @@ class KakaoCallbackView(APIView):
         if not access_token:
             return Response(
                 {"message": "Access token이 응답에 존재하지 않습니다."},
-                status=HTTP_401_UNAUTHORIZED
+                status=status.HTTP_401_UNAUTHORIZED
             )
         
         #사용자 정보 요청
@@ -95,7 +95,7 @@ class KakaoCallbackView(APIView):
         if profile_response.status_code != 200:
             return Response(
                 {"message": "사용자 정보 요청 실패"},
-                status=HTTP_401_UNAUTHORIZED
+                status=status.HTTP_401_UNAUTHORIZED
             )
 
         profile_json = profile_response.json()
@@ -105,7 +105,7 @@ class KakaoCallbackView(APIView):
         if not kakao_id:
             return Response(
                 {"message": "카카오 사용자 ID가 존재하지 않습니다."},
-                status=HTTP_401_UNAUTHORIZED
+                status=status.HTTP_401_UNAUTHORIZED
             )
         try:
             user, _ = User.objects.get_or_create(
@@ -126,13 +126,13 @@ class KakaoCallbackView(APIView):
         except IntegrityError:
             return Response(
                 {"message": "사용자 생성 중 DB 오류 발생"}, 
-                status=HTTP_500_INTERNAL_SERVER_ERROR
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
                 )
         except Exception as e:
             logger.error(f"카카오 로그인 오류: {e}") 
             return Response(
                 {"message": "서버 내부 오류 발생"},
-                status=HTTP_500_INTERNAL_SERVER_ERROR
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
 class MyDataView(APIView):
