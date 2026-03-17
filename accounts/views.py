@@ -104,7 +104,7 @@ class KakaoCallbackView(APIView):
         if not kakao_id:
             return Response(
                 {"message": "카카오 사용자 ID가 존재하지 않습니다."},
-                status=HTTP_401_UNAUTHORIZED
+                status=status.HTTP_401_UNAUTHORIZED
             )
         try:
             user, _ = User.objects.get_or_create(
