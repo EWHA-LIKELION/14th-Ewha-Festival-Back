@@ -79,7 +79,7 @@ class KakaoCallbackView(APIView):
         if not access_token:
             return Response(
                 {"message": "Access token이 응답에 존재하지 않습니다."},
-                status=HTTP_401_UNAUTHORIZED
+                status=status.HTTP_401_UNAUTHORIZED
             )
         
         #사용자 정보 요청
