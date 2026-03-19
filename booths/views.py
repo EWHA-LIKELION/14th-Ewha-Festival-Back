@@ -5,8 +5,8 @@ from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .models import Booth, BoothNotice
-from .serializers import BoothListSerializer, BoothDetailSerializer, BoothNoticeSerializer, BoothPatchSerializer
+from .models import Booth, BoothNotice, BoothScrap
+from .serializers import BoothListSerializer, BoothDetailSerializer, BoothNoticeSerializer, BoothPatchSerializer, BoothScrapSerializer
 from utils.filters_sorts import filter_and_sort
 from utils.helpers import BasePagination
 
@@ -97,3 +97,29 @@ class BoothNoticeView(APIView):
             context={"request": request},
         )
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+class BoothScrapView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request: HttpRequest, pk, format=None):
+        booth = get_object_or_404(Booth, pk=pk)
+        scrap, created = BoothScrap.objects.get_or_create(
+            user=request.user, booth=booth
+        )
+        
+        if not created:
+            scrap.delete()
+            return Response(
+                {"scrapped": False},
+                status=status.HTTP_200_OK
+            )
+        
+        serializer = BoothScrapSerializer(scrap, context={"request": request})
+        return Response(
+            {"scrapped": True,
+             "data": serializer.data},
+             status=status.HTTP_201_CREATED
+        )
+
+
+    
