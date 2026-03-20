@@ -5,8 +5,8 @@ from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .models import Show, ShowNotice
-from .serializers import ShowListSerializer, ShowDetailSerializer, ShowNoticeSerializer, ShowPatchSerializer
+from .models import Show, ShowNotice, ShowScrap
+from .serializers import ShowListSerializer, ShowDetailSerializer, ShowNoticeSerializer, ShowPatchSerializer, ShowScrapSerializer
 from utils.filters_sorts import filter_and_sort
 from utils.helpers import BasePagination
 
@@ -101,3 +101,27 @@ class ShowNoticeView(APIView):
             context={"request": request},
         )
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+class ShowScrapView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request: HttpRequest, pk, format=None):
+        show = get_object_or_404(Show, pk=pk)
+        scrap, created = ShowScrap.objects.get_or_create(
+            user=request.user, show=show
+        )
+
+        if not created:
+            scrap.delete()
+            return Response(
+                {"scrapped": False},
+                status=status.HTTP_200_OK
+            )
+        
+        serializer = ShowScrapSerializer(scrap, context={"request": request})
+
+        return Response(
+            {"scrapped": True,
+             "data": serializer.data},
+             status=status.HTTP_201_CREATED
+        )
