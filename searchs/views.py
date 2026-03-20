@@ -11,6 +11,7 @@ from .serializers import BoothSearchSerializer, ShowSearchSerializer
 from utils.filters_sorts import filter_and_sort
 from utils.choices import LocationChoices
 from utils.helpers import BasePagination
+from searchs.services import record_search, get_popular_searches
 
 def search(*, request, booths_qs, shows_qs):
     q = (request.query_params.get("q") or "").strip()
@@ -119,7 +120,19 @@ class SearchView(APIView):
             booths_qs=booths_qs,
             shows_qs=shows_qs,
         )
+        q = (request.query_params.get("q") or "").strip()
+        if q and (result["booths"]["counts"] > 0 or result["shows"]["counts"] > 0):
+            record_search(q)
         return Response(
             result,
             status=status.HTTP_200_OK,
+        )
+
+class PopularSearchView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request, format=None):
+        return Response(
+            get_popular_searches(),
+            status=status.HTTP_200_OK
         )
