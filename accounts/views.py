@@ -8,7 +8,7 @@ from rest_framework.views import APIView
 import requests
 import logging
 from django.conf import settings
-from django.shortcuts import redirect
+from django.shortcuts import redirect 
 from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -117,10 +117,23 @@ class KakaoCallbackView(APIView):
             #JWT 발급 
             refresh = RefreshToken.for_user(user)
 
-            return Response({
-                "refresh": str(refresh),
-                "access": str(refresh.access_token),
-            })
+            response = redirect(f"{settings.KAKAO_FRONT_REDIRECT_URL}")
+            response.set_cookie(
+                "access",
+                str(refresh.access_token),
+                httponly=True,
+                samesite="None",
+                secure=True,
+            )
+            response.set_cookie(
+                "refresh",
+                str(refresh),
+                httponly=True,
+                samesite="None",
+                secure=True,
+            )
+            return response
+
         
         except IntegrityError:
             return Response(
