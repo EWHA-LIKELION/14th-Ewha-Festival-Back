@@ -40,8 +40,18 @@ class KakaoLoginView(APIView):
 class KakaoCallbackView(APIView):
     permission_classes = [AllowAny]
 
+    
     def get(self, request):
-        code = request.GET.get("code")
+        #프론트 테스트용 분기(삭제 예정) 
+        FRONT_URLS = settings.KAKAO_FRONT_REDIRECT_URL
+        redirect_url = request.query_params.get("redirect_url")
+
+        if redirect_url and "localhost" in redirect_url:
+            front_url = FRONT_URLS[0]
+        else:
+            front_url = FRONT_URLS[1]
+    
+        code = request.query_params.get("code")
         #인가코드 없는 경우 
         if not code:
             return Response(
@@ -117,20 +127,22 @@ class KakaoCallbackView(APIView):
             #JWT 발급 
             refresh = RefreshToken.for_user(user)
 
-            response = redirect(f"{settings.KAKAO_FRONT_REDIRECT_URL}")
+            response = redirect(front_url)
+            #response = redirect(f"{settings.KAKAO_FRONT_REDIRECT_URL}")
+
             response.set_cookie(
                 "access",
                 str(refresh.access_token),
                 httponly=True,
-                samesite="None",
-                secure=True,
+                samesite="Lax",
+                secure=False,
             )
             response.set_cookie(
                 "refresh",
                 str(refresh),
                 httponly=True,
-                samesite="None",
-                secure=True,
+                samesite="Lax",
+                secure=False,
             )
             return response
 
@@ -146,6 +158,27 @@ class KakaoCallbackView(APIView):
                 {"message": "서버 내부 오류 발생"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+        
+class KakaoLogoutView(APIView):
+    def post(self, request):
+        refresh_token = request.COOKIES.get("refresh")
+
+        if refresh_token:
+            try:
+                token = RefreshToken(refresh_token)
+                token.blacklist()
+            except Exception:
+                pass
+
+        response = Response(
+            {"message": "로그아웃 성공"},
+            status=status.HTTP_200_OK
+        )
+        
+        response.delete_cookie("access", samesie="Lax")
+        response.delete_cookie("refresh", samesite="Lax")
+
+        return response
 
 class MyDataView(APIView):
     permission_classes = [IsAuthenticated]

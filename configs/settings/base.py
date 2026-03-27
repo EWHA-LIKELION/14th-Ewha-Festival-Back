@@ -17,7 +17,7 @@ DEBUG = env('DEBUG')
 KAKAO_REST_API_KEY = env("KAKAO_REST_API_KEY")
 KAKAO_CLIENT_SECRET = env("KAKAO_CLIENT_SECRET", default="")
 KAKAO_REDIRECT_URI = env("KAKAO_REDIRECT_URI")
-KAKAO_FRONT_REDIRECT_URL = env("KAKAO_FRONT_REDIRECT_URL")
+KAKAO_FRONT_REDIRECT_URL = env.list("KAKAO_FRONT_REDIRECT_URL")
 
 # Application definition
 
@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
     'accounts.apps.AccountsConfig',
     'searchs',
     'booths',
