@@ -122,15 +122,15 @@ class KakaoCallbackView(APIView):
                 "access",
                 str(refresh.access_token),
                 httponly=True,
-                samesite="None",
-                secure=True,
+                samesite="Lax",
+                secure=False,
             )
             response.set_cookie(
                 "refresh",
                 str(refresh),
                 httponly=True,
-                samesite="None",
-                secure=True,
+                samesite="Lax",
+                secure=False,
             )
             return response
 
@@ -146,6 +146,27 @@ class KakaoCallbackView(APIView):
                 {"message": "서버 내부 오류 발생"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+        
+class KakaoLogoutView(APIView):
+    def post(self, request):
+        refresh_token = request.COOKIES.get("refresh")
+
+        if refresh_token:
+            try:
+                token = RefreshToken(refresh_token)
+                token.blacklist()
+            except Exception:
+                pass
+
+        response = Response(
+            {"message": "로그아웃 성공"},
+            status=status.HTTP_200_OK
+        )
+        
+        response.delete_cookie("access", samesie="Lax")
+        response.delete_cookie("refresh", samesite="Lax")
+
+        return response
 
 class MyDataView(APIView):
     permission_classes = [IsAuthenticated]
