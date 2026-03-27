@@ -40,13 +40,12 @@ class KakaoLoginView(APIView):
 class KakaoCallbackView(APIView):
     permission_classes = [AllowAny]
 
-    
     def get(self, request):
         #프론트 테스트용 분기(삭제 예정) 
         FRONT_URLS = settings.KAKAO_FRONT_REDIRECT_URL
-        redirect_url = request.query_params.get("redirect_url")
+        state = request.query_params.get("state")
 
-        if redirect_url and "localhost" in redirect_url:
+        if state == "local":
             front_url = FRONT_URLS[0]
         else:
             front_url = FRONT_URLS[1]
@@ -175,7 +174,7 @@ class KakaoLogoutView(APIView):
             status=status.HTTP_200_OK
         )
         
-        response.delete_cookie("access", samesie="Lax")
+        response.delete_cookie("access", samesite="Lax")
         response.delete_cookie("refresh", samesite="Lax")
 
         return response
