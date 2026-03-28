@@ -28,10 +28,13 @@ class KakaoLoginView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request):
+        state = request.query_params.get("state", "prod")
+
         params = {
             "client_id": settings.KAKAO_REST_API_KEY,
             "redirect_uri": settings.KAKAO_REDIRECT_URI,
             "response_type": "code",
+            "state": state, 
         }
 
         kakao_auth_url = "https://kauth.kakao.com/oauth/authorize?" + urlencode(params)
