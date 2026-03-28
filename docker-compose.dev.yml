@@ -1,0 +1,33 @@
+version: "3"
+services:
+  db:
+    container_name: db
+    image: postgres:15
+    expose:
+      - 5432
+    ports:
+      - "5432:5432"
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+    restart: always
+    env_file:
+      - ./.env/dev
+  web:
+    container_name: web
+    depends_on:
+      - db
+    build: .
+    command: sh -c "while ! nc -z db 5432; do echo 'Waiting for DB...'; sleep 1; done; python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    restart: always
+    env_file:
+      - ./.env/dev
+    environment:
+      DATABASE_HOST: db
+      DATABASE_PORT: 5432
+volumes:
+  app:
+  dbdata:
