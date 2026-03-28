@@ -26,6 +26,7 @@ logger = logging.getLogger(__name__)
 
 class KakaoLoginView(APIView):
     permission_classes = [AllowAny]
+    authentication_classes = []
 
     def get(self, request):
         state = request.query_params.get("state", "prod")
@@ -42,6 +43,7 @@ class KakaoLoginView(APIView):
     
 class KakaoCallbackView(APIView):
     permission_classes = [AllowAny]
+    authentication_classes = []
 
     def get(self, request):
         #프론트 테스트용 분기(삭제 예정) 
