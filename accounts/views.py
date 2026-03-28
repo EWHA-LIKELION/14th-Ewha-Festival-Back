@@ -177,8 +177,8 @@ class KakaoLogoutView(APIView):
             status=status.HTTP_200_OK
         )
         
-        response.delete_cookie("access", samesite="Lax")
-        response.delete_cookie("refresh", samesite="Lax")
+        response.delete_cookie("access", samesite="None", secure=True)
+        response.delete_cookie("refresh", samesite="None", secure=True)
 
         return response
 
