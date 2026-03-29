@@ -24,6 +24,7 @@ services:
       - .:/app
     restart: always
     env_file:
+      - ./.env/base
       - ./.env/dev
     environment:
       DATABASE_HOST: db
