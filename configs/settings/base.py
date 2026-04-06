@@ -136,6 +136,7 @@ CORS_ALLOW_HEADERS = (
     'user-agent',
     'x-csrftoken',
     'x-requested-with',
+    'X-Resource-Version',
 )
 
 CORS_ALLOW_CREDENTIALS = True
