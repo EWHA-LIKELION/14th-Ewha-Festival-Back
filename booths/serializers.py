@@ -55,6 +55,9 @@ class BoothDetailSerializer(BaseProgramDetailSerializer):
     def get_review_model(self): 
         from .models import BoothReview
         return BoothReview
+    def get_scrap_model(self):
+        from .models import BoothScrap
+        return BoothScrap
 
 class BoothPatchSerializer(
     BasePatchSerializer,

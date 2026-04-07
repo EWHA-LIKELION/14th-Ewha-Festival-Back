@@ -98,3 +98,6 @@ class ShowDetailSerializer(BaseProgramDetailSerializer):
     def get_review_model(self): 
         from .models import ShowReview
         return ShowReview
+    def get_scrap_model(self):
+        from .models import ShowScrap
+        return ShowScrap

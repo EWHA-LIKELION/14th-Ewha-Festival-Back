@@ -75,13 +75,14 @@ class BaseProgramDetailSerializer(serializers.ModelSerializer):
     location = LocationSerializer(read_only=True)
     schedule = serializers.SerializerMethodField()
     scraps_count = serializers.IntegerField()
+    is_scraped = serializers.SerializerMethodField()
     latest_notice = serializers.SerializerMethodField()
     reviews = serializers.SerializerMethodField()
 
     class Meta:
         abstract = True
         fields = (
-            'id', 'thumbnail', 'name', 'category', 'is_ongoing', 'scraps_count',
+            'id', 'thumbnail', 'name', 'category', 'is_ongoing', 'scraps_count', 'is_scraped',
             'description', 'location', 'location_description', 'roadview',
             'schedule', 'sns', 'latest_notice', 'reviews', 'updated_at',
         )
@@ -113,6 +114,18 @@ class BaseProgramDetailSerializer(serializers.ModelSerializer):
             return False
         
         return None
+
+    def get_is_scraped(self, obj):
+        request = self.context.get("request")
+        if not request or not request.user.is_authenticated:
+            return False
+        
+        scrap_model = self.get_scrap_model()
+        model_name = obj._meta.model_name
+        return scrap_model.objects.filter(
+            user=request.user,
+            **{model_name: obj}
+        ).exists()
 
     def get_schedule(self, obj):
         result = []
@@ -147,6 +160,7 @@ class BaseProgramDetailSerializer(serializers.ModelSerializer):
     def get_notice_serializer(self): raise NotImplementedError
     def get_review_serializer(self): raise NotImplementedError
     def get_review_model(self): raise NotImplementedError
+    def get_scrap_model(self): raise NotImplementedError
     
 class BaseProgramListSerializer(BaseProgramDetailSerializer):
     product_images = serializers.SerializerMethodField()
@@ -160,6 +174,7 @@ class BaseProgramListSerializer(BaseProgramDetailSerializer):
             "schedule",
             "location",
             "scraps_count",
+            "is_scraped",
             "description",
             "thumbnail",
             "product_images",
