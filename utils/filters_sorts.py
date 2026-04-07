@@ -76,7 +76,7 @@ BOOTH_BUILDING_PRIORITY = [
     LocationChoices.STUDENT_UNION,
     LocationChoices.HAK_GWAN,
     LocationChoices.EWHA_POSCO_BUILDING,
-    LocationChoices.MAIN_GATE,
+    LocationChoices.SENTENNIAL_MUSEUM,
     LocationChoices.WELCH_RYANG_AUDITORIUM,
     LocationChoices.HYUUT_GIL,
     LocationChoices.EDUCATION_BUILDING,
