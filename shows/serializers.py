@@ -96,5 +96,10 @@ class ShowDetailSerializer(BaseProgramDetailSerializer):
         model = Show
         fields = BaseProgramDetailSerializer.Meta.fields + ('setlist',)
 
+    def get_notice_serializer(self): return ShowNoticeSerializer
+    def get_review_serializer(self): return ShowReviewSerializer
+    def get_review_model(self): 
+        from .models import ShowReview
+        return ShowReview
     def get_scrap_model(self):
         return ShowScrap

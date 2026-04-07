@@ -53,6 +53,11 @@ class BoothDetailSerializer(BaseProgramDetailSerializer):
         products = obj.product.filter(is_selling=True)
         return BoothProductSerializer(products, many=True).data
 
+    def get_notice_serializer(self): return BoothNoticeSerializer
+    def get_review_serializer(self): return BoothReviewSerializer
+    def get_review_model(self): 
+        from .models import BoothReview
+        return BoothReview
     def get_scrap_model(self):
         return BoothScrap
 
