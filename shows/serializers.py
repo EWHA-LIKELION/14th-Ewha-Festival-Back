@@ -86,6 +86,9 @@ class ShowListSerializer(BaseProgramListSerializer):
     class Meta(BaseProgramListSerializer.Meta):
         model = Show
 
+    def get_scrap_model(self):
+        return ShowScrap
+
 class ShowDetailSerializer(BaseProgramDetailSerializer):
     setlist = ShowSetlistSerializer(many=True)
 
@@ -98,3 +101,5 @@ class ShowDetailSerializer(BaseProgramDetailSerializer):
     def get_review_model(self): 
         from .models import ShowReview
         return ShowReview
+    def get_scrap_model(self):
+        return ShowScrap
