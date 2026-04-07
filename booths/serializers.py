@@ -7,6 +7,15 @@ class BoothListSerializer(BaseProgramListSerializer):
     class Meta(BaseProgramListSerializer.Meta):
         model = Booth
 
+    def get_notice_serializer(self): return BoothNoticeSerializer
+    def get_review_serializer(self): return BoothReviewSerializer
+    def get_review_model(self): 
+        from .models import BoothReview
+        return BoothReview
+    def get_scrap_model(self):
+        from .models import BoothScrap
+        return BoothScrap
+
 class BoothProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
