@@ -233,3 +233,6 @@ class MyScrapView(APIView):
             result,
             status=status.HTTP_200_OK,
         )
+
+class Permission(APIView):
+    pass
