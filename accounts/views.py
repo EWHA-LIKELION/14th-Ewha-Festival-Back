@@ -13,7 +13,8 @@ from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from urllib.parse import urlencode
-from .serializers import MyDataSerializer
+from .serializers import MyDataSerializer, PermissionSerializer
+from .services import PermissionService
 
 from booths.models import Booth, BoothScrap
 from shows.models import Show, ShowScrap
@@ -235,4 +236,28 @@ class MyScrapView(APIView):
         )
 
 class Permission(APIView):
-    pass
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request:HttpRequest, format=None):
+        # 요청 수신, 요청값 검증
+        permission_serializer = PermissionSerializer(data=request.data)
+        permission_serializer.is_valid(raise_exception=True)
+        name = permission_serializer.validated_data['name']
+        password = permission_serializer.validated_data['password']
+
+        # 요청값 분석
+        name_list = name.split('-')
+        day = name_list[1].split('_')
+
+        # 비즈니스 로직
+        permission_service = PermissionService()
+        if(name_list[0]=='BOOTH'):
+            permission_service.booth(password=password, day=day, *name_list[2:])
+        elif(name_list[0]=='SHOW'):
+            permission_service.show(password=password, day=day, *name_list[2:])
+
+        # 응답 송신
+        return Response(
+            status=status.HTTP_200_OK,
+            data={"detail":"인증되었어요."},
+        )

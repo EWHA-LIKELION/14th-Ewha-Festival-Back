@@ -59,3 +59,6 @@ class MyDataSerializer(serializers.ModelSerializer):
         return ManagedShowSerializer(
             shows, many=True, context=self.context
         ).data
+
+class PermissionSerializer(serializers.Serializer):
+    pass
