@@ -1,8 +1,7 @@
 from django.db import models
 from django.conf import settings
+from django.contrib.auth.hashers import make_password, check_password
 from django.contrib.postgres.fields import ArrayField, DateTimeRangeField
-from django_nanoid.models import NANOIDField
-from string import ascii_uppercase, digits
 from .helpers import FilePathBuilder
 
 class BaseProgram(models.Model):
@@ -61,24 +60,28 @@ class BaseProgram(models.Model):
         blank=True,
         default=list,
     )
-    admin_code = NANOIDField(
+    admincode = models.CharField(
         help_text="관리자 인증 코드",
         editable=False,
-        alphabetically=ascii_uppercase+digits,
-        size=10,
+        max_length=128,
     )
     updated_at = models.DateTimeField(
         help_text="수정일시",
         auto_now=True,
         null=True
     )
-    
 
     class Meta:
         abstract = True
 
     def __str__(self):
         return self.name
+
+    def set_admincode(self, raw_admincode:str)->None:
+        self.admin_code = make_password(raw_admincode)
+
+    def check_admincode(self, raw_admincode:str)->bool:
+        return check_password(raw_admincode, self.admin_code)
 
 class BaseNotice(models.Model):
     title = models.CharField(

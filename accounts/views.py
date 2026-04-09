@@ -247,14 +247,13 @@ class Permission(APIView):
 
         # 요청값 분석
         name_list = name.split('-')
-        day_list = name_list[1].split('_')
 
         # 비즈니스 로직
         permission_service = PermissionService(request=request, pk=name)
         if(name_list[0]=='BOOTH'):
-            permission_service.booth(password=password, day_list=day_list, *name_list[2:])
+            permission_service.booth(password=password)
         elif(name_list[0]=='SHOW'):
-            permission_service.show(password=password, day_list=day_list, *name_list[2:])
+            permission_service.show(password=password)
 
         # 응답 송신
         return Response(
