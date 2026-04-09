@@ -242,19 +242,19 @@ class Permission(APIView):
         # 요청 수신, 요청값 검증
         permission_serializer = PermissionSerializer(data=request.data)
         permission_serializer.is_valid(raise_exception=True)
-        name = permission_serializer.validated_data['name']
-        password = permission_serializer.validated_data['password']
+        name:str = permission_serializer.validated_data['name']
+        password:str = permission_serializer.validated_data['password']
 
         # 요청값 분석
         name_list = name.split('-')
-        day = name_list[1].split('_')
+        day_list = name_list[1].split('_')
 
         # 비즈니스 로직
-        permission_service = PermissionService()
+        permission_service = PermissionService(request=request, pk=name)
         if(name_list[0]=='BOOTH'):
-            permission_service.booth(password=password, day=day, *name_list[2:])
+            permission_service.booth(password=password, day_list=day_list, *name_list[2:])
         elif(name_list[0]=='SHOW'):
-            permission_service.show(password=password, day=day, *name_list[2:])
+            permission_service.show(password=password, day_list=day_list, *name_list[2:])
 
         # 응답 송신
         return Response(
