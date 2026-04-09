@@ -77,6 +77,7 @@ class PermissionSerializer(serializers.Serializer):
         allow_null=False,
         allow_blank=False,
         max_length=10,
+        write_only=True,
     )
 
     def validate_name(self, value):
