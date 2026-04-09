@@ -3,6 +3,7 @@ from django.db.models import Count, F
 from django.db import IntegrityError
 from .models import User
 from rest_framework import status
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework.views import APIView
 import requests
@@ -246,12 +247,14 @@ class Permission(APIView):
         password:str = permission_serializer.validated_data['password']
 
         # 요청값 분석, 비즈니스 로직
-        prefix = name.partition("-")[0]
+        prefix = name.partition("-")[0].lower()
         permission_service = PermissionService(request=request, pk=name)
-        if(prefix == "BOOTH"):
-            permission_service.booth(password=password)
-        elif(prefix == "SHOW"):
-            permission_service.show(password=password)
+        is_valid, obj = permission_service.validate(kind=prefix, password=password)
+
+        if not is_valid:
+            raise PermissionDenied(detail="관리자 코드가 올바르지 않아요.")
+
+        permission_service.add_permission(kind=prefix, obj=obj)
 
         # 응답 송신
         return Response(
