@@ -245,14 +245,12 @@ class Permission(APIView):
         name:str = permission_serializer.validated_data['name']
         password:str = permission_serializer.validated_data['password']
 
-        # 요청값 분석
-        name_list = name.split('-')
-
-        # 비즈니스 로직
+        # 요청값 분석, 비즈니스 로직
+        prefix = name.partition("-")[0]
         permission_service = PermissionService(request=request, pk=name)
-        if(name_list[0]=='BOOTH'):
+        if(prefix == "BOOTH"):
             permission_service.booth(password=password)
-        elif(name_list[0]=='SHOW'):
+        elif(prefix == "SHOW"):
             permission_service.show(password=password)
 
         # 응답 송신
