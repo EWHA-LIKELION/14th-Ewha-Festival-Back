@@ -44,16 +44,20 @@ class BaseReviewSerializer(serializers.ModelSerializer):
 class BaseScrapSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField()
     thumbnail = serializers.SerializerMethodField()
+    target_id = serializers.SerializerMethodField()
     scrap_field = ""
 
     class Meta:
         abstract = True
         fields = (
-            'id', 'name', 'thumbnail',
+            'id', 'target_id', 'name', 'thumbnail',
         )
 
     def get_target(self, obj):
         return getattr(obj, self.scrap_field)
+
+    def get_target_id(self, obj):
+        return getattr(obj, f"{self.scrap_field}_id")
     
     def get_name(self, obj):
         return self.get_target(obj).name
