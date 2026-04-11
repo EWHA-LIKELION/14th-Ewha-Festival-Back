@@ -7,9 +7,8 @@ from .helpers import FilePathBuilder
 
 class BaseProgram(models.Model):
     id = models.CharField(
-        help_text="예시:BOOTH_RELEASE",
         primary_key=True,
-        max_length=20,
+        max_length=100,
     )
     thumbnail = models.ImageField(
         help_text="썸네일",
