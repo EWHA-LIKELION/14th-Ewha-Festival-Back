@@ -10,6 +10,7 @@ class Show(BaseProgram):
         help_text="카테고리",
         max_length=10,
         choices=ShowCategoryChoices.choices,
+        null=True,
     )
 
 class ShowNotice(BaseNotice):
