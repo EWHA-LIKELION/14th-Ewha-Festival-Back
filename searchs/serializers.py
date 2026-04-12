@@ -8,7 +8,7 @@ class BoothSearchSerializer(BaseProgramListSerializer):
 
     class Meta(BaseProgramListSerializer.Meta):
         model = Booth
-    
+
     def get_scrap_model(self):
         return BoothScrap
 
