@@ -3,6 +3,7 @@ from django.contrib.postgres.fields import ArrayField, DateTimeRangeField
 from utils.abstract_models import BaseProgram, BaseNotice, BaseReviewUser, BaseReview, BaseScrap
 from utils.choices import BoothCategoryChoices, BoothHostChoices
 from utils.helpers import FilePathBuilder
+from .managers import BoothManager
 
 class Booth(BaseProgram):
     schedule = ArrayField(
@@ -29,6 +30,8 @@ class Booth(BaseProgram):
         max_length = 20,
         choices = BoothHostChoices.choices,
     )
+
+    objects = BoothManager()
 
 class BoothNotice(BaseNotice):
     booth = models.ForeignKey(
