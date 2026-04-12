@@ -1,6 +1,6 @@
 from django.db import models
 from django.conf import settings
-from django.contrib.postgres.fields import ArrayField, DateTimeRangeField
+from django.contrib.postgres.fields import ArrayField
 from django_nanoid.models import NANOIDField
 from string import ascii_uppercase, digits
 from .helpers import FilePathBuilder
@@ -20,21 +20,11 @@ class BaseProgram(models.Model):
         help_text="이름",
         max_length=20
     )
-    is_ongoing = models.BooleanField(
-        help_text="운영중 여부",
-        null=True,
-        blank=True,
-    )
     description = models.CharField(
         help_text="소개글",
         max_length=200,
         null=True,
         blank=True,
-    )
-    schedule = ArrayField(
-        help_text="시간",
-        base_field=DateTimeRangeField(),
-        default=list,
     )
     location = models.ForeignKey(
         "searchs.Location",
