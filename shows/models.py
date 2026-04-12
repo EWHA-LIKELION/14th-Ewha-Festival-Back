@@ -1,5 +1,4 @@
 from django.db import models
-from django.conf import settings
 from utils.abstract_models import BaseProgram, BaseNotice, BaseReviewUser, BaseReview, BaseScrap
 from utils.choices import ShowCategoryChoices
 
