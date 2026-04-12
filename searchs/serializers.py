@@ -4,6 +4,8 @@ from booths.models import Booth, BoothScrap
 from shows.models import Show, ShowScrap
 
 class BoothSearchSerializer(BaseProgramListSerializer):
+    is_ongoing = serializers.BooleanField(read_only=True)
+
     class Meta(BaseProgramListSerializer.Meta):
         model = Booth
     
@@ -11,6 +13,8 @@ class BoothSearchSerializer(BaseProgramListSerializer):
         return BoothScrap
 
 class ShowSearchSerializer(BaseProgramListSerializer):
+    is_ongoing = serializers.CharField(read_only=True)
+
     class Meta(BaseProgramListSerializer.Meta):
         model = Show
 

@@ -83,6 +83,8 @@ class ShowScrapSerializer(BaseScrapSerializer):
         model = ShowScrap
 
 class ShowListSerializer(BaseProgramListSerializer):
+    is_ongoing = serializers.CharField(read_only=True)
+
     class Meta(BaseProgramListSerializer.Meta):
         model = Show
 
