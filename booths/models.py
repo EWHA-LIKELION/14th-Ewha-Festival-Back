@@ -1,10 +1,15 @@
 from django.db import models
-from django.contrib.postgres.fields import ArrayField
+from django.contrib.postgres.fields import ArrayField, DateTimeRangeField
 from utils.abstract_models import BaseProgram, BaseNotice, BaseReviewUser, BaseReview, BaseScrap
 from utils.choices import BoothCategoryChoices, BoothHostChoices
 from utils.helpers import FilePathBuilder
 
 class Booth(BaseProgram):
+    ongoing = models.BooleanField(
+        help_text="관리자가 설정한 운영 상태",
+        null=True,
+        blank=True,
+    )
     category = ArrayField(
         help_text="카테고리",
         base_field=models.CharField(
