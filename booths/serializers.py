@@ -67,6 +67,7 @@ class BoothPatchSerializer(
     NestedCollectionPatchMixin,
     serializers.ModelSerializer,
 ):
+    is_ongoing = serializers.BooleanField(source='ongoing')
     product = BoothProductWriteSerializer(many=True, required=False)
     notice = BoothNoticeWriteSerializer(many=True, required=False)
     schedule = ScheduleWriteField(required=False)
