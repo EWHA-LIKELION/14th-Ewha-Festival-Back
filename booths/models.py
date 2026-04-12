@@ -4,8 +4,6 @@ from utils.abstract_models import BaseProgram, BaseNotice, BaseReviewUser, BaseR
 from utils.choices import BoothCategoryChoices, BoothHostChoices
 from utils.helpers import FilePathBuilder
 
-# Create your models here.
-
 class Booth(BaseProgram):
     category = ArrayField(
         help_text="카테고리",

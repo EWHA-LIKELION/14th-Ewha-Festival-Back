@@ -2,8 +2,6 @@ from django.db import models
 from utils.abstract_models import BaseProgram, BaseNotice, BaseReviewUser, BaseReview, BaseScrap
 from utils.choices import ShowCategoryChoices
 
-# Create your models here.
-
 class Show(BaseProgram):
     category = models.CharField(
         help_text="카테고리",
