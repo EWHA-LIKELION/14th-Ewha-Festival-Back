@@ -1,7 +1,6 @@
 from django.db.models import Q, Case, When, Value, IntegerField
 from django.db.models.expressions import RawSQL
 from datetime import datetime, timedelta
-from django.utils import timezone
 from django.utils.dateparse import parse_date
 from .choices import LocationChoices
 
@@ -14,19 +13,7 @@ def base_filter(qs, params, *, program: str):
         if program == "booth":
             q &= Q(is_ongoing=True)
         elif program == "show":
-            now = timezone.now()
-            qs = qs.annotate(
-                has_not_ended=RawSQL(
-                    """
-                    EXISTS(
-                        SELECT 1
-                        FROM unnest(schedule) AS r
-                        WHERE upper(r) > %s
-                    )
-                    """,
-                    [now],
-                )
-            ).filter(has_not_ended=True)
+            q &= ~Q(is_ongoing="AFTER")
 
     # 카테고리
     category = params.getlist("category")
