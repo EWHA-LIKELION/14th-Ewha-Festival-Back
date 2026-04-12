@@ -32,7 +32,7 @@ class ShowPatchSerializer(
     class Meta:
         model = Show 
         fields = (
-            "thumbnail", "name", "category", "is_ongoing", "description", "schedule",
+            "thumbnail", "name", "category", "description", "schedule",
             "location_description", "roadview", "sns",
             # nested
             "setlist",
