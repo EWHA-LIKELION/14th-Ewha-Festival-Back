@@ -90,6 +90,7 @@ class ShowListSerializer(BaseProgramListSerializer):
         return ShowScrap
 
 class ShowDetailSerializer(BaseProgramDetailSerializer):
+    is_ongoing = serializers.CharField(read_only=True)
     setlist = ShowSetlistSerializer(many=True)
 
     class Meta(BaseProgramDetailSerializer.Meta):
