@@ -3,6 +3,7 @@ from django.db.models import Count, F
 from django.db import IntegrityError
 from .models import User
 from rest_framework import status
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework.views import APIView
 import requests
@@ -13,7 +14,8 @@ from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from urllib.parse import urlencode
-from .serializers import MyDataSerializer
+from .serializers import MyDataSerializer, PermissionSerializer
+from .services import PermissionService
 
 from booths.models import Booth, BoothScrap
 from shows.models import Show, ShowScrap
@@ -232,4 +234,30 @@ class MyScrapView(APIView):
         return Response(
             result,
             status=status.HTTP_200_OK,
+        )
+
+class Permission(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request:HttpRequest, format=None):
+        # 요청 수신, 요청값 검증
+        permission_serializer = PermissionSerializer(data=request.data)
+        permission_serializer.is_valid(raise_exception=True)
+        name:str = permission_serializer.validated_data['name']
+        password:str = permission_serializer.validated_data['password']
+
+        # 요청값 분석, 비즈니스 로직
+        prefix = name.partition("-")[0].lower()
+        permission_service = PermissionService(request=request, pk=name)
+        is_valid, obj = permission_service.validate(kind=prefix, password=password)
+
+        if not is_valid:
+            raise PermissionDenied(detail="관리자 코드가 올바르지 않아요.")
+
+        permission_service.add_permission(kind=prefix, obj=obj)
+
+        # 응답 송신
+        return Response(
+            status=status.HTTP_200_OK,
+            data={"detail":"인증되었어요."},
         )

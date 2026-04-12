@@ -1,8 +1,10 @@
+import re
 from rest_framework import serializers
 from .models import User
 from booths.models import Booth, BoothScrap
 from shows.models import Show, ShowScrap
 from utils.abstract_serializers import BaseManagedProgramSerializer
+from utils.choices import LocationChoices
 from booths.serializers import BoothScrapSerializer
 from shows.serializers import ShowScrapSerializer
 
@@ -59,3 +61,36 @@ class MyDataSerializer(serializers.ModelSerializer):
         return ManagedShowSerializer(
             shows, many=True, context=self.context
         ).data
+
+DAY_PART = r"(WED|THU|FRI|WED_THU|WED_FRI|THU_FRI|WED_THU_FRI)"
+BOOTH_PATTERN = re.compile(rf"^BOOTH-{DAY_PART}-({'|'.join(LocationChoices.values)})-\d{{1,2}}$")
+SHOW_PATTERN = re.compile(rf"^SHOW-{DAY_PART}-\d{{4}}-STUDENT_UNION$")
+
+class PermissionSerializer(serializers.Serializer):
+    name = serializers.CharField(
+        required=True,
+        allow_null=False,
+        allow_blank=False,
+    )
+    password = serializers.CharField(
+        required=True,
+        allow_null=False,
+        allow_blank=False,
+        max_length=10,
+        write_only=True,
+    )
+
+    def validate_name(self, value):
+        prefix = value.partition("-")[0]
+
+        if prefix == "BOOTH":
+            pattern = BOOTH_PATTERN
+        elif prefix == "SHOW":
+            pattern = SHOW_PATTERN
+        else:
+            raise serializers.ValidationError('접두사가 올바르지 않아요. 부스 번호는 "BOOTH"로, 공연 번호는 "SHOW"로 시작해요.')
+
+        if not pattern.match(value):
+            raise serializers.ValidationError("부스/공연 번호 형식이 올바르지 않아요.")
+
+        return value
