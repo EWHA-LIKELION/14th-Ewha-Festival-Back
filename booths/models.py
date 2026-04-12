@@ -15,6 +15,7 @@ class Booth(BaseProgram):
             choices=BoothCategoryChoices.choices,
         ),
         default=list,
+        blank=True,
     )
     host = models.CharField(
         help_text = "주관",
