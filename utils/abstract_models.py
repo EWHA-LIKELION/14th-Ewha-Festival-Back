@@ -22,6 +22,8 @@ class BaseProgram(models.Model):
     )
     is_ongoing = models.BooleanField(
         help_text="운영중 여부",
+        null=True,
+        blank=True,
     )
     description = models.CharField(
         help_text="소개글",
