@@ -5,7 +5,7 @@ from utils.choices import ShowCategoryChoices
 from .managers import ShowManager
 
 class Show(BaseProgram):
-    schedule = DateTimeRangeField(),
+    schedule = DateTimeRangeField()
     category = models.CharField(
         help_text="카테고리",
         max_length=10,
