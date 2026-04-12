@@ -1,14 +1,19 @@
 from django.db import models
+from django.contrib.postgres.fields import DateTimeRangeField
 from utils.abstract_models import BaseProgram, BaseNotice, BaseReviewUser, BaseReview, BaseScrap
 from utils.choices import ShowCategoryChoices
+from .managers import ShowManager
 
 class Show(BaseProgram):
+    schedule = DateTimeRangeField(),
     category = models.CharField(
         help_text="카테고리",
         max_length=10,
         choices=ShowCategoryChoices.choices,
         null=True,
     )
+
+    objects = ShowManager()
 
 class ShowNotice(BaseNotice):
     show = models.ForeignKey(
