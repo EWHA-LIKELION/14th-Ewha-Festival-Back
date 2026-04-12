@@ -5,6 +5,11 @@ from utils.choices import BoothCategoryChoices, BoothHostChoices
 from utils.helpers import FilePathBuilder
 
 class Booth(BaseProgram):
+    schedule = ArrayField(
+        help_text="시간",
+        base_field=DateTimeRangeField(),
+        default=list,
+    )
     ongoing = models.BooleanField(
         help_text="관리자가 설정한 운영 상태",
         null=True,
