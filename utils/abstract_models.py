@@ -70,7 +70,6 @@ class BaseProgram(models.Model):
         help_text="수정일시",
         auto_now=True,
     )
-    
 
     class Meta:
         abstract = True
