@@ -11,7 +11,7 @@ def base_filter(qs, params, *, program: str):
     # 종료 제외 (default=ON)
     if params.get("is_ongoing", "true").lower() == "true":
         if program == "booth":
-            q &= Q(is_ongoing=True)
+            q &= ~Q(is_ongoing=False)
         elif program == "show":
             q &= ~Q(is_ongoing="AFTER")
 
