@@ -280,7 +280,7 @@ class CollectionPatchSpec:
     serializer_class: Type[serializers.Serializer]
 
     
-class BasePatchSerializer(serializers.ModelSerializer):
+class BasePatchSerializer(JsonParsingMixin, serializers.ModelSerializer):
     version_header_name = "X-Resource-Version"
     
     def get_collection_specs(self) -> List[CollectionPatchSpec]:
