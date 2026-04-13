@@ -33,11 +33,13 @@ class ShowPatchSerializer(
         model = Show 
         fields = (
             "thumbnail", "name", "category", "description", "schedule",
-            "location_description", "roadview", "sns",
+            "location_description", "roadview", "sns","setlist", "notice", "schedule",
             "deleted_setlist_ids",
             "deleted_notice_ids",
         )
-        json_fields = ("setlist", "notice", "schedule")
+        json_fields = ("setlist", "notice", "schedule",
+            "deleted_setlist_ids",
+            "deleted_notice_ids",)
 
     def get_collection_specs(self):
         return [
