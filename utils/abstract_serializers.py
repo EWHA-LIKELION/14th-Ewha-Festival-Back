@@ -8,7 +8,26 @@ from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from rest_framework.exceptions import ValidationError
 from utils.exceptions import Conflict
+import json
 
+class JsonParsingMixin:
+    def to_internal_value(self, data):
+        if hasattr(data, 'copy'):
+            data = data.copy()
+            
+        json_fields = getattr(self.Meta, 'json_fields', [])
+
+        for field in json_fields:
+            if field in data:
+                value = data.get(field)
+                if value and isinstance(value, str):
+                    try:
+                        data[field] = json.loads(value)
+                    except (json.JSONDecodeError, TypeError):
+                        pass
+
+        return super().to_internal_value(data)
+    
 class BaseNoticeSerializer(serializers.ModelSerializer):
     time_ago = serializers.SerializerMethodField()
     is_updated = serializers.SerializerMethodField()

@@ -1,4 +1,5 @@
 from rest_framework import serializers
+import json
 from .models import Booth, Product, BoothReview, BoothNotice, BoothScrap
 from utils.abstract_serializers import BaseProgramListSerializer, BaseProgramDetailSerializer, BaseNoticeSerializer, BaseReviewSerializer, BaseScrapSerializer, ProgramPatchMixin, NestedCollectionPatchMixin, BaseNoticeWriteSerializer, BasePatchSerializer, CollectionPatchSpec
 from utils.serializer_fields import ScheduleWriteField
