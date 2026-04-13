@@ -5,7 +5,7 @@ from django.db.models.functions import Coalesce
 
 class BoothManager(models.Manager):
     def get_queryset(self):
-        check_schedule = RawSQL("Now() @> ANY(schedule)")
+        check_schedule = RawSQL("Now() @> ANY(schedule)", ())
 
         return super().get_queryset().annotate(
             is_ongoing=Coalesce(
