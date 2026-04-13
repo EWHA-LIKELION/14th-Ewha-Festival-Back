@@ -1,4 +1,4 @@
-from django.db.models import Q, Case, When, Value, IntegerField
+from django.db.models import Q, Case, When, Value, IntegerField, DateTimeField
 from django.db.models.expressions import RawSQL
 from datetime import datetime, timedelta
 from django.utils.dateparse import parse_date
@@ -102,11 +102,10 @@ def base_sort(qs, sorting: str | None, *, program: str):
 
     # 공연 default - 시간순
     if program == "show" and sorting in ("time", ""):
-        sql_unnest = "(SELECT MIN(lower(r)) FROM unnest(schedule) AS r)"
         return qs.annotate(
-            unnest_time=RawSQL(sql_unnest, [])
+            unnest_time=RawSQL("lower(schedule)", (), output_field=DateTimeField())
         ).order_by("unnest_time", "id")
-        
+
     return qs
 
 def filter_and_sort(qs, params, *, program: str):
