@@ -32,7 +32,7 @@ class ShowPatchSerializer(
     class Meta:
         model = Show 
         fields = (
-            "thumbnail", "name", "category", "is_ongoing", "description", "schedule",
+            "thumbnail", "name", "category", "description", "schedule",
             "location_description", "roadview", "sns",
             # nested
             "setlist",
@@ -83,6 +83,8 @@ class ShowScrapSerializer(BaseScrapSerializer):
         model = ShowScrap
 
 class ShowListSerializer(BaseProgramListSerializer):
+    is_ongoing = serializers.CharField(read_only=True)
+
     class Meta(BaseProgramListSerializer.Meta):
         model = Show
 
@@ -90,6 +92,7 @@ class ShowListSerializer(BaseProgramListSerializer):
         return ShowScrap
 
 class ShowDetailSerializer(BaseProgramDetailSerializer):
+    is_ongoing = serializers.CharField(read_only=True)
     setlist = ShowSetlistSerializer(many=True)
 
     class Meta(BaseProgramDetailSerializer.Meta):

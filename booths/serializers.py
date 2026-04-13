@@ -4,6 +4,8 @@ from utils.abstract_serializers import BaseProgramListSerializer, BaseProgramDet
 from utils.serializer_fields import ScheduleWriteField
 
 class BoothListSerializer(BaseProgramListSerializer):
+    is_ongoing = serializers.BooleanField(read_only=True)
+
     class Meta(BaseProgramListSerializer.Meta):
         model = Booth
 
@@ -43,6 +45,7 @@ class BoothScrapSerializer(BaseScrapSerializer):
         model = BoothScrap
 
 class BoothDetailSerializer(BaseProgramDetailSerializer):
+    is_ongoing = serializers.BooleanField(read_only=True)
     product = serializers.SerializerMethodField()
 
     class Meta(BaseProgramDetailSerializer.Meta):
@@ -67,6 +70,7 @@ class BoothPatchSerializer(
     NestedCollectionPatchMixin,
     serializers.ModelSerializer,
 ):
+    is_ongoing = serializers.BooleanField(source='ongoing')
     product = BoothProductWriteSerializer(many=True, required=False)
     notice = BoothNoticeWriteSerializer(many=True, required=False)
     schedule = ScheduleWriteField(required=False)
