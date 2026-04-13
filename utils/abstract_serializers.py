@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from utils.helpers import time_ago
 from .location_serializers import LocationSerializer
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Optional, Type, List, Dict, Any
 from django.db import transaction
 from django.utils import timezone
@@ -23,8 +23,10 @@ class JsonParsingMixin:
                 if value and isinstance(value, str):
                     try:
                         data[field] = json.loads(value)
-                    except (json.JSONDecodeError, TypeError):
-                        pass
+                    except (json.JSONDecodeError, TypeError) as e:
+                         raise serializers.ValidationError({
+                            field: f"올바른 JSON 형식이 아닙니다. (에러: {str(e)})"
+                            })
 
         return super().to_internal_value(data)
     
