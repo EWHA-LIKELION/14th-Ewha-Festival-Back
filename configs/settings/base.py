@@ -19,10 +19,6 @@ KAKAO_CLIENT_SECRET = env("KAKAO_CLIENT_SECRET", default="")
 KAKAO_REDIRECT_URI = env("KAKAO_REDIRECT_URI")
 KAKAO_FRONT_REDIRECT_URL = env.list("KAKAO_FRONT_REDIRECT_URL")
 
-REDIS_HOST = env("REDIS_HOST")
-REDIS_PORT = int(env("REDIS_PORT", default="6379"))
-REDIS_DB = int(env("REDIS_DB", default="0"))
-
 # Application definition
 
 INSTALLED_APPS = [
