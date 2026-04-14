@@ -188,11 +188,12 @@ class BaseProgramListSerializer(BaseProgramDetailSerializer):
             product_images.append(p.image.url if p.image else None)
         return product_images
 
-class BaseNoticeWriteSerializer(serializers.ModelSerializer):
+class BaseNoticeWriteSerializer(JsonParsingMixin, serializers.ModelSerializer):
     id = serializers.IntegerField(required = False)
     
     class Meta:
         fields = ('id', 'title', 'content', 'image')
+    json_fields =  ('id', 'title', 'content', 'image')
 
 class ProgramPatchMixin:
     program_fields = (
