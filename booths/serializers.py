@@ -1,4 +1,5 @@
 from rest_framework import serializers
+import json
 from .models import Booth, Product, BoothReview, BoothNotice, BoothScrap
 from utils.abstract_serializers import BaseProgramListSerializer, BaseProgramDetailSerializer, BaseNoticeSerializer, BaseReviewSerializer, BaseScrapSerializer, ProgramPatchMixin, NestedCollectionPatchMixin, BaseNoticeWriteSerializer, BasePatchSerializer, CollectionPatchSpec
 from utils.serializer_fields import ScheduleWriteField
@@ -81,11 +82,14 @@ class BoothPatchSerializer(
     class Meta:
         model = Booth
         fields = (
-            'thumbnail', 'name', 'category', 'is_ongoing',
-            'description', 'location_description', 'roadview', 'sns',
-            'host',
-            'product', 'notice', 'schedule',
-            'deleted_product_ids', 'deleted_notice_ids',
+            "thumbnail", "name", "category", "is_ongoing",
+            "description", "location_description", "roadview", "sns",
+            "host", "product", "notice", "schedule",
+            "deleted_product_ids", "deleted_notice_ids",
+        )
+        json_fields = (
+            "product", "notice", "schedule",
+            "deleted_product_ids", "deleted_notice_ids",
         )
 
     def get_collection_specs(self):
