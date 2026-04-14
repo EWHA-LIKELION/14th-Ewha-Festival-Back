@@ -1,6 +1,7 @@
 import logging
 from utils.redis_client import get_redis_client
 from datetime import datetime, timezone
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +25,7 @@ def update_snapshot() -> None:
     except Exception:
         logger.warning("update_snapshot failed", exc_info=True)
 
-def get_popular_searches(top_n: int = 10) -> list[dict]:
+def get_popular_searches(top_n: int = 10) -> dict[str, Any]:
     try:
         r = get_redis_client()
         key = (
