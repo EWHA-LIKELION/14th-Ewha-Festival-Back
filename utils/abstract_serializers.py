@@ -1,14 +1,35 @@
 from rest_framework import serializers
 from utils.helpers import time_ago
 from .location_serializers import LocationSerializer
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Optional, Type, List, Dict, Any
 from django.db import transaction
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from rest_framework.exceptions import ValidationError
 from utils.exceptions import Conflict
+import json
 
+class JsonParsingMixin:
+    def to_internal_value(self, data):
+        if hasattr(data, 'copy'):
+            data = data.copy()
+            
+        json_fields = getattr(self.Meta, 'json_fields', [])
+
+        for field in json_fields:
+            if field in data:
+                value = data.get(field)
+                if value and isinstance(value, str):
+                    try:
+                        data[field] = json.loads(value)
+                    except (json.JSONDecodeError, TypeError) as e:
+                         raise serializers.ValidationError({
+                            field: f"올바른 JSON 형식이 아닙니다. (에러: {str(e)})"
+                            })
+
+        return super().to_internal_value(data)
+    
 class BaseNoticeSerializer(serializers.ModelSerializer):
     time_ago = serializers.SerializerMethodField()
     is_updated = serializers.SerializerMethodField()
@@ -261,7 +282,7 @@ class CollectionPatchSpec:
     serializer_class: Type[serializers.Serializer]
 
     
-class BasePatchSerializer(serializers.ModelSerializer):
+class BasePatchSerializer(JsonParsingMixin, serializers.ModelSerializer):
     version_header_name = "X-Resource-Version"
     
     def get_collection_specs(self) -> List[CollectionPatchSpec]:
