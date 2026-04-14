@@ -228,10 +228,27 @@ class NestedCollectionPatchMixin:
         manager = getattr(instance, manager_name, None)
         if manager is None:
             raise NotImplementedError(f"Invalid manager_name: {manager_name}")
+        # [추가] items_data 자체가 문자열로 넘어오는 경우 (FormData 대응)
+        if isinstance(items_data, str):
+            try:
+                items_data = json.loads(items_data)
+            except json.JSONDecodeError:
+                raise serializers.ValidationError({items_field_name: "올바른 JSON 배열 형식이 아닙니다."})
 
-        # upsert
+        # [추가] deleted_ids 자체가 문자열로 넘어오는 경우
+        if isinstance(deleted_ids, str):
+            try:
+                deleted_ids = json.loads(deleted_ids)
+            except json.JSONDecodeError:
+                raise serializers.ValidationError({deleted_field_name: "올바른 JSON 배열 형식이 아닙니다."})
+
+        # upsert 로직 시작
         if items_data is not None:
             for item in items_data:
+                # 여기서 item이 또 문자열일 경우를 대비 (2중 방어)
+                if isinstance(item, str):
+                    item = json.loads(item)
+                
                 item_id = item.get("id")
 
                 if item_id is None:
