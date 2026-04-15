@@ -67,7 +67,7 @@ BOOTH_PATTERN = re.compile(rf"^BOOTH-{DAY_PART}-({'|'.join(LocationChoices.value
 SHOW_PATTERN = re.compile(rf"^SHOW-{DAY_PART}-\d{{4}}-STUDENT_UNION$")
 
 class PermissionSerializer(serializers.Serializer):
-    name = serializers.CharField(
+    programname = serializers.CharField(
         required=True,
         allow_null=False,
         allow_blank=False,
@@ -80,7 +80,7 @@ class PermissionSerializer(serializers.Serializer):
         write_only=True,
     )
 
-    def validate_name(self, value):
+    def validate_programname(self, value):
         prefix = value.partition("-")[0]
 
         if prefix == "BOOTH":

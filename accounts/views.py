@@ -243,12 +243,12 @@ class Permission(APIView):
         # 요청 수신, 요청값 검증
         permission_serializer = PermissionSerializer(data=request.data)
         permission_serializer.is_valid(raise_exception=True)
-        name:str = permission_serializer.validated_data['name']
+        programname:str = permission_serializer.validated_data['programname']
         password:str = permission_serializer.validated_data['password']
 
         # 요청값 분석, 비즈니스 로직
-        prefix = name.partition("-")[0].lower()
-        permission_service = PermissionService(request=request, pk=name)
+        prefix = programname.partition("-")[0].lower()
+        permission_service = PermissionService(request=request, pk=programname)
         is_valid, obj = permission_service.validate(kind=prefix, password=password)
 
         if not is_valid:
