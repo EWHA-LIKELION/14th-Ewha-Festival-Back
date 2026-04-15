@@ -1,3 +1,5 @@
+import argparse
+import os
 from django.utils.deconstruct import deconstructible
 from django.utils import timezone
 from rest_framework.pagination import LimitOffsetPagination
@@ -45,3 +47,10 @@ class BasePagination(LimitOffsetPagination):
         },
         status=status.HTTP_200_OK,
         )
+
+def tsv_file(value:str):
+    if not value.endswith('.tsv'):
+        raise argparse.ArgumentTypeError(f"'{value}'은 .tsv 파일이 아닙니다.")
+    if not os.path.exists(value):
+        raise argparse.ArgumentTypeError(f"{value} 파일을 찾을 수 없습니다.")
+    return value
