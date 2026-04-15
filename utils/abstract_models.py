@@ -78,10 +78,10 @@ class BaseProgram(models.Model):
         return self.name
 
     def set_admincode(self, raw_admincode:str)->None:
-        self.admin_code = make_password(raw_admincode)
+        self.admincode = make_password(raw_admincode)
 
     def check_admincode(self, raw_admincode:str)->bool:
-        return check_password(raw_admincode, self.admin_code)
+        return check_password(raw_admincode, self.admincode)
 
 class BaseNotice(models.Model):
     title = models.CharField(
