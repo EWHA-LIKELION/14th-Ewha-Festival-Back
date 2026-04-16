@@ -12,9 +12,14 @@ class Command(BaseCommand):
 python manage.py insertshow < show.tsv"""
 
     def handle(self, *args, **options):
-        file = io.TextIOWrapper(sys.stdin.buffer, encoding='utf-8')
-        reader = csv.DictReader(file, delimiter='\t')
-        data_list = list(reader)
+        try:
+            file = io.TextIOWrapper(sys.stdin.buffer, encoding='utf-8')
+            reader = csv.DictReader(file, delimiter='\t')
+            data_list = list(reader)
+        except UnicodeDecodeError as e:
+            raise CommandError(f"파일 인코딩 오류입니다. UTF-8 형식인지 확인해 주세요: {e}")
+        except Exception as e:
+            raise CommandError(f"파일을 읽는 중 오류가 발생했습니다: {e}")
 
         show_list = list()
         for data in data_list:
