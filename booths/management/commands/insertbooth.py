@@ -21,7 +21,7 @@ python manage.py insertbooth < booth.tsv"""
             raise CommandError(f"파일을 읽는 중 오류가 발생했습니다: {e}")
 
         booth_list = list()
-        for data in data_list:
+        for i, data in enumerate(data_list, start=1):
             try:
                 location = Location.objects.get(
                     building=data['location_building'],
@@ -29,7 +29,7 @@ python manage.py insertbooth < booth.tsv"""
                 )
             except Location.DoesNotExist:
                 raise CommandError(
-                    f"Location 데이터가 올바르지 않습니다. "
+                    f"[{i}번째 행] Location 데이터가 올바르지 않습니다: "
                     f"(building={data['location_building']}, number={data['location_number']})"
                 )
 
