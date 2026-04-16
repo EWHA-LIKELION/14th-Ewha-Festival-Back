@@ -1,7 +1,6 @@
-from django.db.models import Q, Case, When, Value, IntegerField
+from django.db.models import Q, Case, When, Value, IntegerField, DateTimeField
 from django.db.models.expressions import RawSQL
 from datetime import datetime, timedelta
-from django.utils import timezone
 from django.utils.dateparse import parse_date
 from .choices import LocationChoices
 
@@ -12,21 +11,9 @@ def base_filter(qs, params, *, program: str):
     # 종료 제외 (default=ON)
     if params.get("is_ongoing", "true").lower() == "true":
         if program == "booth":
-            q &= Q(is_ongoing=True)
+            q &= ~Q(is_ongoing=False)
         elif program == "show":
-            now = timezone.now()
-            qs = qs.annotate(
-                has_not_ended=RawSQL(
-                    """
-                    EXISTS(
-                        SELECT 1
-                        FROM unnest(schedule) AS r
-                        WHERE upper(r) > %s
-                    )
-                    """,
-                    [now],
-                )
-            ).filter(has_not_ended=True)
+            q &= ~Q(is_ongoing="AFTER")
 
     # 카테고리
     category = params.getlist("category")
@@ -115,11 +102,10 @@ def base_sort(qs, sorting: str | None, *, program: str):
 
     # 공연 default - 시간순
     if program == "show" and sorting in ("time", ""):
-        sql_unnest = "(SELECT MIN(lower(r)) FROM unnest(schedule) AS r)"
         return qs.annotate(
-            unnest_time=RawSQL(sql_unnest, [])
+            unnest_time=RawSQL("lower(schedule)", (), output_field=DateTimeField())
         ).order_by("unnest_time", "id")
-        
+
     return qs
 
 def filter_and_sort(qs, params, *, program: str):

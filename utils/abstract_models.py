@@ -1,14 +1,13 @@
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.hashers import make_password, check_password
-from django.contrib.postgres.fields import ArrayField, DateTimeRangeField
+from django.contrib.postgres.fields import ArrayField
 from .helpers import FilePathBuilder
 
 class BaseProgram(models.Model):
     id = models.CharField(
-        help_text="예시:BOOTH_RELEASE",
         primary_key=True,
-        max_length=20,
+        max_length=100,
     )
     thumbnail = models.ImageField(
         help_text="썸네일",
@@ -20,19 +19,11 @@ class BaseProgram(models.Model):
         help_text="이름",
         max_length=20
     )
-    is_ongoing = models.BooleanField(
-        help_text="운영중 여부",
-    )
     description = models.CharField(
         help_text="소개글",
         max_length=200,
         null=True,
         blank=True,
-    )
-    schedule = ArrayField(
-        help_text="시간",
-        base_field=DateTimeRangeField(),
-        default=list,
     )
     location = models.ForeignKey(
         "searchs.Location",
@@ -68,7 +59,6 @@ class BaseProgram(models.Model):
     updated_at = models.DateTimeField(
         help_text="수정일시",
         auto_now=True,
-        null=True
     )
 
     class Meta:
