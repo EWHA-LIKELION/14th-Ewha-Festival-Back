@@ -1,5 +1,6 @@
-import argparse
 import csv
+import sys
+import io
 from django.core.management.base import BaseCommand, CommandError
 from utils.choices import LocationChoices
 from shows.models import Show
@@ -7,18 +8,11 @@ from searchs.models import Location
 
 class Command(BaseCommand):
     help = """Show 모델에 여러 개의 레코드를 삽입합니다.
-로컬에 파일을 준비한 뒤, 파일이 존재하는 곳에서 명령어를 실행해 주세요."""
-
-    def add_arguments(self, parser):
-        parser.add_argument(
-            '--file',
-            type=argparse.FileType('r'),
-            required=True,
-            help="tsv 파일 경로를 입력해 주세요.",
-        )
+사용법: 로컬에 파일을 준비한 뒤, 파일이 위치한 곳에서 명령어를 실행해 주세요.
+python manage.py insertshow < show.tsv"""
 
     def handle(self, *args, **options):
-        file = options['file']
+        file = io.TextIOWrapper(sys.stdin.buffer, encoding='utf-8')
         reader = csv.DictReader(file, delimiter='\t')
         data_list = list(reader)
 
