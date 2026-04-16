@@ -31,7 +31,7 @@ class Command(BaseCommand):
             except Location.DoesNotExist:
                 raise CommandError(
                     f"Location 데이터가 올바르지 않습니다. "
-                    f"(building={data['location.building']}, number={data['location.number']})"
+                    f"(building={data['location_building']}, number={data['location_number']})"
                 )
 
             booth = Booth(
