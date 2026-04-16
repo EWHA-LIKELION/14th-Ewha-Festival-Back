@@ -21,19 +21,16 @@ python manage.py insertshow < show.tsv"""
         except Exception as e:
             raise CommandError(f"파일을 읽는 중 오류가 발생했습니다: {e}")
 
+        try:
+            location = Location.objects.get(
+                building=LocationChoices.STUDENT_UNION,
+                number__isnull=True,
+            )
+        except Location.DoesNotExist:
+            raise CommandError("Location 데이터가 올바르지 않습니다.")
+
         show_list = list()
         for data in data_list:
-            try:
-                location = Location.objects.get(
-                    building=LocationChoices.STUDENT_UNION,
-                    number__isnull=True,
-                )
-            except Location.DoesNotExist:
-                raise CommandError(
-                    f"Location 데이터가 올바르지 않습니다. "
-                    f"(building={LocationChoices.STUDENT_UNION}, number=Null)"
-                )
-
             show = Show(
                 id=data['id'],
                 name=data['name'],
