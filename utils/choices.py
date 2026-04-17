@@ -31,6 +31,7 @@ class BoothHostChoices(TextChoices):
     COMMITTEE = "COMMITTEE", "축준위"
     SPONSOR = "SPONSOR", "협찬"
     FLEA_MARKET = "FLEA_MARKET", "플리마켓"
+    ETC = "ETC", "기타"
 
 class ShowCategoryChoices(TextChoices):
     BAND = "BAND", "밴드"
