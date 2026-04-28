@@ -12,9 +12,15 @@ import json
 
 class JsonParsingMixin:
     def to_internal_value(self, data):
-        if hasattr(data, 'copy'):
+        if hasattr(data, 'getlist'):
+            plain = {}
+            for key in data.keys():
+                vals = data.getlist(key)
+                plain[key] = vals[0] if len(vals) == 1 else vals
+            data = plain
+        elif hasattr(data, 'copy'):
             data = data.copy()
-            
+
         json_fields = getattr(self.Meta, 'json_fields', [])
 
         for field in json_fields:
