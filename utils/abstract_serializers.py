@@ -130,10 +130,20 @@ class BaseProgramDetailSerializer(serializers.ModelSerializer):
         ).exists()
 
     def get_schedule(self, obj):
-        result = []
-        tz = timezone.get_current_timezone()
+        if not obj or not obj.schedule:
+            return []
 
-        for r in obj.schedule:
+        if isinstance(obj.schedule, list):
+            raw_schedules = obj.schedule
+        else:
+            raw_schedules = [obj.schedule]
+
+        result = []
+        
+        for r in raw_schedules:
+            if r is None:
+                continue
+                
             start = timezone.localtime(r.lower)
             end = timezone.localtime(r.upper)
 
