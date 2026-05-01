@@ -12,9 +12,15 @@ import json
 
 class JsonParsingMixin:
     def to_internal_value(self, data):
-        if hasattr(data, 'copy'):
+        if hasattr(data, 'getlist'):
+            plain = {}
+            for key in data.keys():
+                vals = data.getlist(key)
+                plain[key] = vals[0] if len(vals) == 1 else vals
+            data = plain
+        elif hasattr(data, 'copy'):
             data = data.copy()
-            
+
         json_fields = getattr(self.Meta, 'json_fields', [])
 
         for field in json_fields:
@@ -124,10 +130,20 @@ class BaseProgramDetailSerializer(serializers.ModelSerializer):
         ).exists()
 
     def get_schedule(self, obj):
-        result = []
-        tz = timezone.get_current_timezone()
+        if not obj or not obj.schedule:
+            return []
 
-        for r in obj.schedule:
+        if isinstance(obj.schedule, list):
+            raw_schedules = obj.schedule
+        else:
+            raw_schedules = [obj.schedule]
+
+        result = []
+        
+        for r in raw_schedules:
+            if r is None:
+                continue
+                
             start = timezone.localtime(r.lower)
             end = timezone.localtime(r.upper)
 
