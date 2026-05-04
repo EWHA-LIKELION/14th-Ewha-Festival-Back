@@ -17,7 +17,7 @@ def start():
     scheduler.add_jobstore(DjangoJobStore(), "default")
     scheduler.add_job(
         update_snapshot,
-        trigger=IntervalTrigger(minutes=1),
+        trigger=IntervalTrigger(hours=1),
         id="update_search_snapshot",
         replace_existing=True,
     )
