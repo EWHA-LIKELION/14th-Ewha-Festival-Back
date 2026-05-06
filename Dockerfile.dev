@@ -1,0 +1,27 @@
+# Pull official base image
+FROM python:3.11-alpine
+
+# Set work directory
+RUN mkdir /app
+WORKDIR /app
+
+# Set environment variables
+ENV PYTHONUNBUFFERED 1
+
+# Install dependencies to build
+RUN apk update && apk add --no-cache \
+    postgresql-dev \
+    gcc \
+    python3-dev \
+    musl-dev \
+    libpq
+
+COPY requirements.txt /app/requirements.txt
+
+# Install dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Uninstall dependencies (optimize image)
+RUN apk del postgresql-dev gcc python3-dev musl-dev
+
+COPY . /app/

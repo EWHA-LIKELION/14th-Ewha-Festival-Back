@@ -1,0 +1,33 @@
+version: "3"
+services:
+  web:
+    container_name: web
+    build:
+      context: ./
+      dockerfile: Dockerfile.prod
+    command: gunicorn configs.wsgi:application --bind 0.0.0.0:8000
+    expose:
+      - 8000
+    entrypoint:
+      - sh
+      - configs/docker/entrypoint.prod.sh
+    volumes:
+      - static:/home/app/web/static
+      - media:/home/app/web/media
+    env_file:
+      - .env
+  nginx:
+    container_name: nginx
+    depends_on:
+      - web
+    build: ./configs/nginx
+    ports:
+      - "80:80"
+    volumes:
+      - static:/home/app/web/static
+      - media:/home/app/web/media
+    environment:
+      TZ: "Asia/Seoul"
+volumes:
+  static:
+  media:
