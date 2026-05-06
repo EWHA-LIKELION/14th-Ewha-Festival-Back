@@ -1,0 +1,51 @@
+import csv
+import sys
+import io
+from django.core.management.base import BaseCommand, CommandError
+from booths.models import Booth
+from searchs.models import Location
+
+class Command(BaseCommand):
+    help = """Booth 모델에 여러 개의 레코드를 삽입합니다.
+사용법: 로컬에 파일을 준비한 뒤, 파일이 위치한 곳에서 명령어를 실행해 주세요.
+python manage.py insertbooth < booth.tsv"""
+
+    def handle(self, *args, **options):
+        try:
+            file = io.TextIOWrapper(sys.stdin.buffer, encoding='utf-8')
+            reader = csv.DictReader(file, delimiter='\t')
+            data_list = list(reader)
+        except UnicodeDecodeError as e:
+            raise CommandError(f"파일 인코딩 오류입니다. UTF-8 형식인지 확인해 주세요: {e}")
+        except Exception as e:
+            raise CommandError(f"파일을 읽는 중 오류가 발생했습니다: {e}")
+
+        booth_list = list()
+        for i, data in enumerate(data_list, start=1):
+            try:
+                location = Location.objects.get(
+                    building=data['location_building'],
+                    number=data['location_number'],
+                )
+            except Location.DoesNotExist:
+                raise CommandError(
+                    f"[{i}번째 행] Location 데이터가 올바르지 않습니다: "
+                    f"(building={data['location_building']}, number={data['location_number']})"
+                )
+
+            booth = Booth(
+                id=data['id'],
+                name=data['name'],
+                schedule=data['schedule'],
+                host=data['host'],
+                location=location,
+            )
+            booth.set_admincode(data['admincode'])
+            booth_list.append(booth)
+
+        try:
+            instances = Booth.objects.bulk_create(booth_list)
+        except Exception as e:
+            raise CommandError(f"bulk_create 중 오류가 발생했습니다: {e}")
+
+        self.stdout.write(self.style.SUCCESS(f"Booth 모델에 데이터 {len(instances)}개를 삽입했습니다."))

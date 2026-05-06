@@ -3,6 +3,7 @@ from django.db.models import Count, F
 from django.db import IntegrityError
 from .models import User
 from rest_framework import status
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework.views import APIView
 import requests
@@ -13,7 +14,8 @@ from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from urllib.parse import urlencode
-from .serializers import MyDataSerializer
+from .serializers import MyDataSerializer, PermissionSerializer
+from .services import PermissionService
 
 from booths.models import Booth, BoothScrap
 from shows.models import Show, ShowScrap
@@ -26,12 +28,16 @@ logger = logging.getLogger(__name__)
 
 class KakaoLoginView(APIView):
     permission_classes = [AllowAny]
+    authentication_classes = []
 
     def get(self, request):
+        state = request.query_params.get("state", "prod")
+
         params = {
             "client_id": settings.KAKAO_REST_API_KEY,
             "redirect_uri": settings.KAKAO_REDIRECT_URI,
             "response_type": "code",
+            "state": state, 
         }
 
         kakao_auth_url = "https://kauth.kakao.com/oauth/authorize?" + urlencode(params)
@@ -39,6 +45,7 @@ class KakaoLoginView(APIView):
     
 class KakaoCallbackView(APIView):
     permission_classes = [AllowAny]
+    authentication_classes = []
 
     def get(self, request):
         #프론트 테스트용 분기(삭제 예정) 
@@ -133,15 +140,15 @@ class KakaoCallbackView(APIView):
                 "access",
                 str(refresh.access_token),
                 httponly=True,
-                samesite="Lax",
-                secure=False,
+                samesite="None",
+                secure=True,
             )
             response.set_cookie(
                 "refresh",
                 str(refresh),
                 httponly=True,
-                samesite="Lax",
-                secure=False,
+                samesite="None",
+                secure=True,
             )
             return response
 
@@ -174,8 +181,8 @@ class KakaoLogoutView(APIView):
             status=status.HTTP_200_OK
         )
         
-        response.delete_cookie("access", samesite="Lax")
-        response.delete_cookie("refresh", samesite="Lax")
+        response.delete_cookie("access")
+        response.delete_cookie("refresh")
 
         return response
 
@@ -227,4 +234,30 @@ class MyScrapView(APIView):
         return Response(
             result,
             status=status.HTTP_200_OK,
+        )
+
+class Permission(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request:HttpRequest, format=None):
+        # 요청 수신, 요청값 검증
+        permission_serializer = PermissionSerializer(data=request.data)
+        permission_serializer.is_valid(raise_exception=True)
+        programname:str = permission_serializer.validated_data['programname']
+        password:str = permission_serializer.validated_data['password']
+
+        # 요청값 분석, 비즈니스 로직
+        prefix = programname.partition("-")[0].lower()
+        permission_service = PermissionService(request=request, pk=programname)
+        is_valid, obj = permission_service.validate(kind=prefix, password=password)
+
+        if not is_valid:
+            raise PermissionDenied(detail="관리자 코드가 올바르지 않아요.")
+
+        permission_service.add_permission(kind=prefix, obj=obj)
+
+        # 응답 송신
+        return Response(
+            status=status.HTTP_200_OK,
+            data={"detail":"인증되었어요."},
         )

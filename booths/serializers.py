@@ -1,11 +1,17 @@
 from rest_framework import serializers
+import json
 from .models import Booth, Product, BoothReview, BoothNotice, BoothScrap
 from utils.abstract_serializers import BaseProgramListSerializer, BaseProgramDetailSerializer, BaseNoticeSerializer, BaseReviewSerializer, BaseScrapSerializer, ProgramPatchMixin, NestedCollectionPatchMixin, BaseNoticeWriteSerializer, BasePatchSerializer, CollectionPatchSpec
 from utils.serializer_fields import ScheduleWriteField
 
 class BoothListSerializer(BaseProgramListSerializer):
+    is_ongoing = serializers.BooleanField(read_only=True)
+
     class Meta(BaseProgramListSerializer.Meta):
         model = Booth
+
+    def get_scrap_model(self):
+        return BoothScrap
 
 class BoothProductSerializer(serializers.ModelSerializer):
     class Meta:
@@ -40,6 +46,7 @@ class BoothScrapSerializer(BaseScrapSerializer):
         model = BoothScrap
 
 class BoothDetailSerializer(BaseProgramDetailSerializer):
+    is_ongoing = serializers.BooleanField(read_only=True)
     product = serializers.SerializerMethodField()
 
     class Meta(BaseProgramDetailSerializer.Meta):
@@ -55,6 +62,8 @@ class BoothDetailSerializer(BaseProgramDetailSerializer):
     def get_review_model(self): 
         from .models import BoothReview
         return BoothReview
+    def get_scrap_model(self):
+        return BoothScrap
 
 class BoothPatchSerializer(
     BasePatchSerializer,
@@ -62,6 +71,7 @@ class BoothPatchSerializer(
     NestedCollectionPatchMixin,
     serializers.ModelSerializer,
 ):
+    is_ongoing = serializers.BooleanField(source='ongoing')
     product = BoothProductWriteSerializer(many=True, required=False)
     notice = BoothNoticeWriteSerializer(many=True, required=False)
     schedule = ScheduleWriteField(required=False)
@@ -72,11 +82,13 @@ class BoothPatchSerializer(
     class Meta:
         model = Booth
         fields = (
-            'thumbnail', 'name', 'category', 'is_ongoing',
-            'description', 'location_description', 'roadview', 'sns',
-            'host',
-            'product', 'notice', 'schedule',
-            'deleted_product_ids', 'deleted_notice_ids',
+            "thumbnail", "name", "category", "is_ongoing",
+            "description", "location_description", "roadview", "sns",
+            "host", "product", "notice", "schedule",
+            "deleted_product_ids", "deleted_notice_ids",
+        )
+        json_fields = (
+            "category", "location", "schedule", "sns", "product", "notice", "deleted_product_ids", "deleted_notice_ids",
         )
 
     def get_collection_specs(self):

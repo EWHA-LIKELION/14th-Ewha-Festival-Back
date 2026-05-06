@@ -11,14 +11,15 @@ from .serializers import BoothSearchSerializer, ShowSearchSerializer
 from utils.filters_sorts import filter_and_sort
 from utils.choices import LocationChoices
 from utils.helpers import BasePagination
+from searchs.services import record_search, get_popular_searches
 
 def search(*, request, booths_qs, shows_qs):
     q = (request.query_params.get("q") or "").strip()
 
     booths_qs = booths_qs.annotate(
     building_label=Case(
-        When(location__building=LocationChoices.MAIN_GATE, then=Value("정문")),
         When(location__building=LocationChoices.GRASS_GROUND, then=Value("잔디광장")),
+        When(location__building=LocationChoices.SENTENNIAL_MUSEUM, then=Value("박물관")),
         When(location__building=LocationChoices.SPORT_TRACK, then=Value("스포츠트랙")),
         When(location__building=LocationChoices.HYUUT_GIL, then=Value("휴웃길")),
         When(location__building=LocationChoices.WELCH_RYANG_AUDITORIUM, then=Value("대강당")),
@@ -119,7 +120,19 @@ class SearchView(APIView):
             booths_qs=booths_qs,
             shows_qs=shows_qs,
         )
+        q = (request.query_params.get("q") or "").strip()
+        if q and (result["booths"]["counts"] > 0 or result["shows"]["counts"] > 0):
+            record_search(q)
         return Response(
             result,
             status=status.HTTP_200_OK,
+        )
+
+class PopularSearchView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request, format=None):
+        return Response(
+            get_popular_searches(),
+            status=status.HTTP_200_OK
         )

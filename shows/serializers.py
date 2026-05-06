@@ -32,14 +32,14 @@ class ShowPatchSerializer(
     class Meta:
         model = Show 
         fields = (
-            "thumbnail", "name", "category", "is_ongoing", "description", "schedule",
-            "location_description", "roadview", "sns",
-            # nested
-            "setlist",
-            "notice",
+            "thumbnail", "name", "category", "description", "schedule",
+            "location_description", "roadview", "sns","setlist", "notice", "schedule",
             "deleted_setlist_ids",
             "deleted_notice_ids",
         )
+        json_fields = ("setlist", "location", "schedule", "sns", "notice",
+            "deleted_setlist_ids",
+            "deleted_notice_ids",)
 
     def get_collection_specs(self):
         return [
@@ -83,10 +83,16 @@ class ShowScrapSerializer(BaseScrapSerializer):
         model = ShowScrap
 
 class ShowListSerializer(BaseProgramListSerializer):
+    is_ongoing = serializers.CharField(read_only=True)
+
     class Meta(BaseProgramListSerializer.Meta):
         model = Show
 
+    def get_scrap_model(self):
+        return ShowScrap
+
 class ShowDetailSerializer(BaseProgramDetailSerializer):
+    is_ongoing = serializers.CharField(read_only=True)
     setlist = ShowSetlistSerializer(many=True)
 
     class Meta(BaseProgramDetailSerializer.Meta):
@@ -98,3 +104,5 @@ class ShowDetailSerializer(BaseProgramDetailSerializer):
     def get_review_model(self): 
         from .models import ShowReview
         return ShowReview
+    def get_scrap_model(self):
+        return ShowScrap

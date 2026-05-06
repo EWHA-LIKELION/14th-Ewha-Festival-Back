@@ -1,13 +1,21 @@
 from django.db import models
-from django.conf import settings
-from django.contrib.postgres.fields import ArrayField
+from django.contrib.postgres.fields import ArrayField, DateTimeRangeField
 from utils.abstract_models import BaseProgram, BaseNotice, BaseReviewUser, BaseReview, BaseScrap
 from utils.choices import BoothCategoryChoices, BoothHostChoices
 from utils.helpers import FilePathBuilder
-
-# Create your models here.
+from .managers import BoothManager
 
 class Booth(BaseProgram):
+    schedule = ArrayField(
+        help_text="시간",
+        base_field=DateTimeRangeField(),
+        default=list,
+    )
+    ongoing = models.BooleanField(
+        help_text="관리자가 설정한 운영 상태",
+        null=True,
+        blank=True,
+    )
     category = ArrayField(
         help_text="카테고리",
         base_field=models.CharField(
@@ -15,12 +23,15 @@ class Booth(BaseProgram):
             choices=BoothCategoryChoices.choices,
         ),
         default=list,
+        blank=True,
     )
     host = models.CharField(
         help_text = "주관",
         max_length = 20,
         choices = BoothHostChoices.choices,
     )
+
+    objects = BoothManager()
 
 class BoothNotice(BaseNotice):
     booth = models.ForeignKey(

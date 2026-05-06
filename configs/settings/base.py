@@ -34,9 +34,10 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
     'storages',
     'accounts.apps.AccountsConfig',
-    'searchs',
+    'searchs.apps.SearchsConfig',
     'booths',
     'shows',
+    'django_apscheduler',
 ]
 
 MIDDLEWARE = [
@@ -130,6 +131,7 @@ CORS_ALLOW_HEADERS = (
     'user-agent',
     'x-csrftoken',
     'x-requested-with',
+    'X-Resource-Version',
 )
 
 CORS_ALLOW_CREDENTIALS = True
@@ -139,6 +141,7 @@ CORS_ALLOW_CREDENTIALS = True
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
+        'accounts.authentication.CookieJWTAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
         'rest_framework.authentication.SessionAuthentication',
     ),

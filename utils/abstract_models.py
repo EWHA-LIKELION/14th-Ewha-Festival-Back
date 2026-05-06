@@ -1,15 +1,13 @@
 from django.db import models
 from django.conf import settings
-from django.contrib.postgres.fields import ArrayField, DateTimeRangeField
-from django_nanoid.models import NANOIDField
-from string import ascii_uppercase, digits
+from django.contrib.auth.hashers import make_password, check_password
+from django.contrib.postgres.fields import ArrayField
 from .helpers import FilePathBuilder
 
 class BaseProgram(models.Model):
     id = models.CharField(
-        help_text="예시:BOOTH_RELEASE",
         primary_key=True,
-        max_length=20,
+        max_length=100,
     )
     thumbnail = models.ImageField(
         help_text="썸네일",
@@ -21,19 +19,11 @@ class BaseProgram(models.Model):
         help_text="이름",
         max_length=20
     )
-    is_ongoing = models.BooleanField(
-        help_text="운영중 여부",
-    )
     description = models.CharField(
         help_text="소개글",
         max_length=200,
         null=True,
         blank=True,
-    )
-    schedule = ArrayField(
-        help_text="시간",
-        base_field=DateTimeRangeField(),
-        default=list,
     )
     location = models.ForeignKey(
         "searchs.Location",
@@ -61,24 +51,27 @@ class BaseProgram(models.Model):
         blank=True,
         default=list,
     )
-    admin_code = NANOIDField(
+    admincode = models.CharField(
         help_text="관리자 인증 코드",
         editable=False,
-        alphabetically=ascii_uppercase+digits,
-        size=10,
+        max_length=128,
     )
     updated_at = models.DateTimeField(
         help_text="수정일시",
         auto_now=True,
-        null=True
     )
-    
 
     class Meta:
         abstract = True
 
     def __str__(self):
         return self.name
+
+    def set_admincode(self, raw_admincode:str)->None:
+        self.admincode = make_password(raw_admincode)
+
+    def check_admincode(self, raw_admincode:str)->bool:
+        return check_password(raw_admincode, self.admincode)
 
 class BaseNotice(models.Model):
     title = models.CharField(

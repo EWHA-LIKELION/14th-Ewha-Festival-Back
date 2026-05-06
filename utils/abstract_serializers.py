@@ -1,14 +1,41 @@
 from rest_framework import serializers
 from utils.helpers import time_ago
 from .location_serializers import LocationSerializer
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Optional, Type, List, Dict, Any
 from django.db import transaction
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from rest_framework.exceptions import ValidationError
 from utils.exceptions import Conflict
+import json
 
+class JsonParsingMixin:
+    def to_internal_value(self, data):
+        if hasattr(data, 'getlist'):
+            plain = {}
+            for key in data.keys():
+                vals = data.getlist(key)
+                plain[key] = vals[0] if len(vals) == 1 else vals
+            data = plain
+        elif hasattr(data, 'copy'):
+            data = data.copy()
+
+        json_fields = getattr(self.Meta, 'json_fields', [])
+
+        for field in json_fields:
+            if field in data:
+                value = data.get(field)
+                if value and isinstance(value, str):
+                    try:
+                        data[field] = json.loads(value)
+                    except (json.JSONDecodeError, TypeError) as e:
+                         raise serializers.ValidationError({
+                            field: f"올바른 JSON 형식이 아닙니다. (에러: {str(e)})"
+                            })
+
+        return super().to_internal_value(data)
+    
 class BaseNoticeSerializer(serializers.ModelSerializer):
     time_ago = serializers.SerializerMethodField()
     is_updated = serializers.SerializerMethodField()
@@ -44,16 +71,20 @@ class BaseReviewSerializer(serializers.ModelSerializer):
 class BaseScrapSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField()
     thumbnail = serializers.SerializerMethodField()
+    target_id = serializers.SerializerMethodField()
     scrap_field = ""
 
     class Meta:
         abstract = True
         fields = (
-            'id', 'name', 'thumbnail',
+            'id', 'target_id', 'name', 'thumbnail',
         )
 
     def get_target(self, obj):
         return getattr(obj, self.scrap_field)
+
+    def get_target_id(self, obj):
+        return getattr(obj, f"{self.scrap_field}_id")
     
     def get_name(self, obj):
         return self.get_target(obj).name
@@ -71,54 +102,52 @@ class BaseScrapSerializer(serializers.ModelSerializer):
         return None
 
 class BaseProgramDetailSerializer(serializers.ModelSerializer):
-    is_ongoing = serializers.SerializerMethodField()
     location = LocationSerializer(read_only=True)
     schedule = serializers.SerializerMethodField()
     scraps_count = serializers.IntegerField()
+    is_scraped = serializers.SerializerMethodField()
     latest_notice = serializers.SerializerMethodField()
     reviews = serializers.SerializerMethodField()
+    sns = serializers.ListField(
+        child=serializers.CharField(allow_blank=True, allow_null=True),
+        required=False
+    )
 
     class Meta:
         abstract = True
         fields = (
-            'id', 'thumbnail', 'name', 'category', 'is_ongoing', 'scraps_count',
+            'id', 'thumbnail', 'name', 'category', 'is_ongoing', 'scraps_count', 'is_scraped',
             'description', 'location', 'location_description', 'roadview',
             'schedule', 'sns', 'latest_notice', 'reviews', 'updated_at',
         )
 
-    def get_is_ongoing(self, obj):
-        if obj.__class__.__name__ == "Booth":
-            return obj.is_ongoing
-        
-        now = timezone.now()
-        before_ongoing = False
-        after_ongoing = False
-
-        schedules = getattr(obj, "schedule", None) or []
-
-        for s in schedules:
-            start = s.lower
-            end = s.upper
-
-            if start <= now < end:
-                return True
-            if now < start:
-                before_ongoing = True
-            if end <= now:
-                after_ongoing = True
-
-        if before_ongoing:
-            return None
-        if after_ongoing:
+    def get_is_scraped(self, obj):
+        request = self.context.get("request")
+        if not request or not request.user.is_authenticated:
             return False
         
-        return None
+        scrap_model = self.get_scrap_model()
+        model_name = obj._meta.model_name
+        return scrap_model.objects.filter(
+            user=request.user,
+            **{model_name: obj}
+        ).exists()
 
     def get_schedule(self, obj):
-        result = []
-        tz = timezone.get_current_timezone()
+        if not obj or not obj.schedule:
+            return []
 
-        for r in obj.schedule:
+        if isinstance(obj.schedule, list):
+            raw_schedules = obj.schedule
+        else:
+            raw_schedules = [obj.schedule]
+
+        result = []
+        
+        for r in raw_schedules:
+            if r is None:
+                continue
+                
             start = timezone.localtime(r.lower)
             end = timezone.localtime(r.upper)
 
@@ -147,6 +176,7 @@ class BaseProgramDetailSerializer(serializers.ModelSerializer):
     def get_notice_serializer(self): raise NotImplementedError
     def get_review_serializer(self): raise NotImplementedError
     def get_review_model(self): raise NotImplementedError
+    def get_scrap_model(self): raise NotImplementedError
     
 class BaseProgramListSerializer(BaseProgramDetailSerializer):
     product_images = serializers.SerializerMethodField()
@@ -160,6 +190,7 @@ class BaseProgramListSerializer(BaseProgramDetailSerializer):
             "schedule",
             "location",
             "scraps_count",
+            "is_scraped",
             "description",
             "thumbnail",
             "product_images",
@@ -271,8 +302,14 @@ class CollectionPatchSpec:
     serializer_class: Type[serializers.Serializer]
 
     
-class BasePatchSerializer(serializers.ModelSerializer):
+class BasePatchSerializer(JsonParsingMixin, serializers.ModelSerializer):
+    
     version_header_name = "X-Resource-Version"
+    
+    sns = serializers.ListField(
+        child=serializers.CharField(allow_blank=True, allow_null=True),
+        required=False
+    )
     
     def get_collection_specs(self) -> List[CollectionPatchSpec]:
         return []
