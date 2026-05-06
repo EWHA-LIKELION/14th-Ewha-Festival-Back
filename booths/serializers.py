@@ -88,8 +88,7 @@ class BoothPatchSerializer(
             "deleted_product_ids", "deleted_notice_ids",
         )
         json_fields = (
-            "product", "notice", "schedule",
-            "deleted_product_ids", "deleted_notice_ids",
+            "category", "location", "schedule", "sns", "product", "notice", "deleted_product_ids", "deleted_notice_ids",
         )
 
     def get_collection_specs(self):

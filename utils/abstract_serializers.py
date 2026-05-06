@@ -108,6 +108,10 @@ class BaseProgramDetailSerializer(serializers.ModelSerializer):
     is_scraped = serializers.SerializerMethodField()
     latest_notice = serializers.SerializerMethodField()
     reviews = serializers.SerializerMethodField()
+    sns = serializers.ListField(
+        child=serializers.CharField(allow_blank=True, allow_null=True),
+        required=False
+    )
 
     class Meta:
         abstract = True
@@ -299,7 +303,13 @@ class CollectionPatchSpec:
 
     
 class BasePatchSerializer(JsonParsingMixin, serializers.ModelSerializer):
+    
     version_header_name = "X-Resource-Version"
+    
+    sns = serializers.ListField(
+        child=serializers.CharField(allow_blank=True, allow_null=True),
+        required=False
+    )
     
     def get_collection_specs(self) -> List[CollectionPatchSpec]:
         return []
