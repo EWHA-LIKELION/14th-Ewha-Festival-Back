@@ -37,7 +37,7 @@ class ShowPatchSerializer(
             "deleted_setlist_ids",
             "deleted_notice_ids",
         )
-        json_fields = ("setlist", "notice", "schedule",
+        json_fields = ("setlist", "category", "location", "schedule", "sns", "notice",
             "deleted_setlist_ids",
             "deleted_notice_ids",)
 
