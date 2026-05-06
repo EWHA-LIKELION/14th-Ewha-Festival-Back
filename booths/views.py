@@ -41,7 +41,7 @@ class BoothListView(APIView):
 
 class BoothDetailView(APIView):
     def get_permissions(self):
-        if self.request.method == "GET":
+        if self.request.method in ["GET", "PATCH"]:
             return [AllowAny()]
         return [IsAuthenticated()]
     

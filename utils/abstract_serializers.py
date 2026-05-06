@@ -217,7 +217,7 @@ class BaseNoticeWriteSerializer(serializers.ModelSerializer):
 class ProgramPatchMixin:
     program_fields = (
         'thumbnail', 'name', 'is_ongoing', 'description',
-        'location_description', 'roadview', 'sns', 'schedule',
+        'location_description', 'roadview', 'sns', 'schedule', 'category',
     )
 
     def get_root_update_fields(self, validated_data):
