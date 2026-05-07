@@ -1,12 +1,12 @@
-name: Deploy to EC2
+name: Deploy to AWS Monolithic Architecture
 
 on:
   push:
     branches:
-      - deploy
+      - deploy/aws-ma
   pull_request:
     branches:
-      - deploy
+      - deploy/aws-ma
 
 jobs:
   build:
