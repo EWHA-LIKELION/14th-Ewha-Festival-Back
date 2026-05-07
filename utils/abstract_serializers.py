@@ -311,10 +311,15 @@ class BasePatchSerializer(JsonParsingMixin, serializers.ModelSerializer):
         required=False
     )
     
+    nullable_string_fields = ('thumbnail', 'roadview')
+
     def to_internal_value(self, data):
-        if 'thumbnail' in data and data['thumbnail'] in ['null', 'None', '', 'undefined']:
-            mutable_data = data.copy() if hasattr(data, 'copy') else data
-            mutable_data['thumbnail'] = None
+        null_sentinels = {'null', 'None', '', 'undefined'}
+        if any(data.get(f) in null_sentinels for f in self.nullable_string_fields if f in data):
+            mutable_data = data.copy() if hasattr(data, 'copy') else dict(data)
+            for f in self.nullable_string_fields:
+                if f in mutable_data and mutable_data[f] in null_sentinels:
+                    mutable_data[f] = None
             return super().to_internal_value(mutable_data)
         return super().to_internal_value(data)
     

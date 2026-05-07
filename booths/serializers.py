@@ -98,6 +98,33 @@ class BoothPatchSerializer(
             "category", "location", "schedule", "sns", "product", "notice", "deleted_product_ids", "deleted_notice_ids",
         )
 
+    def to_internal_value(self, data):
+        request = self.context.get('request')
+
+        if request and 'product' in data:
+            if hasattr(data, 'getlist'):
+                data = {k: (lambda v: v[0] if len(v) == 1 else v)(data.getlist(k)) for k in data.keys()}
+            else:
+                data = dict(data)
+
+            product_val = data.get('product')
+            if isinstance(product_val, str):
+                try:
+                    products = json.loads(product_val)
+                except (json.JSONDecodeError, TypeError):
+                    products = []
+            else:
+                products = list(product_val) if product_val else []
+
+            for i, product in enumerate(products):
+                image = request.FILES.get(f'product_image_{i}')
+                if image:
+                    product['image'] = image
+
+            data['product'] = products
+
+        return super().to_internal_value(data)
+
     def get_collection_specs(self):
         return [
             CollectionPatchSpec(
