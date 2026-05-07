@@ -6,6 +6,7 @@ from typing import Optional, Type, List, Dict, Any
 from django.db import transaction
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
+from datetime import timedelta
 from rest_framework.exceptions import ValidationError
 from utils.exceptions import Conflict
 import json
@@ -50,7 +51,9 @@ class BaseNoticeSerializer(serializers.ModelSerializer):
         return time_ago(obj.created_at)
 
     def get_is_updated(self, obj):
-        return obj.updated_at != obj.created_at
+        if obj.created_at is None or obj.updated_at is None:
+            return False
+        return (obj.updated_at - obj.created_at) > timedelta(seconds=1)
 
 class BaseReviewSerializer(serializers.ModelSerializer):
     number = serializers.SerializerMethodField()
