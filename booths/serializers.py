@@ -26,13 +26,6 @@ class BoothProductWriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = ('id', 'name', 'description', 'price', 'image', 'is_selling')
-        
-    def to_internal_value(self, data):
-        if 'image' in data and data['image'] in ['null', 'None', '', 'undefined']:
-            mutable_data = data.copy() if hasattr(data, 'copy') else data
-            mutable_data['image'] = None
-            return super().to_internal_value(mutable_data)
-        return super().to_internal_value(data)
 
 class BoothNoticeSerializer(BaseNoticeSerializer):
     class Meta(BaseNoticeSerializer.Meta):
@@ -116,10 +109,14 @@ class BoothPatchSerializer(
             else:
                 products = list(product_val) if product_val else []
 
+            null_sentinels = {'null', 'None', '', 'undefined'}
             for i, product in enumerate(products):
-                image = request.FILES.get(f'product_image_{i}')
+                key = f'product_image_{i}'
+                image = request.FILES.get(key)
                 if image:
                     product['image'] = image
+                elif data.get(key) in null_sentinels:
+                    product['image'] = None
 
             data['product'] = products
 
