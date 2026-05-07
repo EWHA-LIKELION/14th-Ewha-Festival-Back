@@ -311,6 +311,13 @@ class BasePatchSerializer(JsonParsingMixin, serializers.ModelSerializer):
         required=False
     )
     
+    def to_internal_value(self, data):
+        if 'thumbnail' in data and data['thumbnail'] in ['null', 'None', '', 'undefined']:
+            mutable_data = data.copy() if hasattr(data, 'copy') else data
+            mutable_data['thumbnail'] = None
+            return super().to_internal_value(mutable_data)
+        return super().to_internal_value(data)
+    
     def get_collection_specs(self) -> List[CollectionPatchSpec]:
         return []
     
