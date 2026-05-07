@@ -43,7 +43,7 @@ class BaseNoticeSerializer(serializers.ModelSerializer):
     class Meta:
         abstract = True
         fields = (
-            'id', 'title', 'content', 'image', 'time_ago', 'is_updated',
+            'id', 'title', 'content', 'time_ago', 'is_updated',
         )
 
     def get_time_ago(self, obj):
@@ -212,7 +212,7 @@ class BaseNoticeWriteSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(required = False)
     
     class Meta:
-        fields = ('id', 'title', 'content', 'image')
+        fields = ('id', 'title', 'content')
 
 class ProgramPatchMixin:
     program_fields = (
@@ -235,7 +235,7 @@ class NestedCollectionPatchMixin:
         model_cls,              # Product / BoothNotice / ShowNotice / Setlist
         parent_fk_name: str,    # "booth" / "show"
         serializer_class,
-        items_field_name: str,   # 예: "product" / "notice" / "setlist"
+        items_field_name: str,   # 예: "product" / "setlist"
         deleted_field_name: str  # 예: "deleted_product_ids" / "deleted_notice_ids" ...
     ) -> bool:
         """
