@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'booths',
     'shows',
     'django_apscheduler',
+    'django_cleanup',
 ]
 
 MIDDLEWARE = [

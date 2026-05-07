@@ -82,12 +82,6 @@ class BaseNotice(models.Model):
         help_text="내용",
         max_length=200,
     )
-    image = models.ImageField(
-        help_text="사진",
-        upload_to=FilePathBuilder("image"),
-        null=True,
-        blank=True,
-    )
     created_at = models.DateTimeField(
         help_text="생성일시",
         auto_now_add=True,
