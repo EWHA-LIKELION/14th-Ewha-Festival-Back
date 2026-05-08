@@ -65,14 +65,15 @@ def base_filter(qs, params, *, program: str):
 BOOTH_BUILDING_PRIORITY = [
     LocationChoices.HUMAN_ECOLOGY_BUILDING,
     LocationChoices.STUDENT_UNION,
-    LocationChoices.HAK_GWAN,
     LocationChoices.EWHA_POSCO_BUILDING,
-    LocationChoices.SENTENNIAL_MUSEUM,
+    LocationChoices.HAK_GWAN,
     LocationChoices.WELCH_RYANG_AUDITORIUM,
-    LocationChoices.HYUUT_GIL,
+    LocationChoices.GRASS_GROUND,
     LocationChoices.EDUCATION_BUILDING,
-    LocationChoices.EWHA_SHINSEGAE_BUILDING,
+    LocationChoices.HYUUT_GIL,
+    LocationChoices.SENTENNIAL_MUSEUM,
     LocationChoices.SPORT_TRACK,
+    LocationChoices.EWHA_SHINSEGAE_BUILDING,
 ]
 
 def base_sort(qs, sorting: str | None, *, program: str):
