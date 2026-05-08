@@ -80,6 +80,16 @@ def base_sort(qs, sorting: str | None, *, program: str):
     
     # 이름순
     if sorting == "name":
+        if program == "show":
+            qs = qs.annotate(
+                name_priority = Case(
+                    When(name__regex=r'^[가-힣]', then=Value(0)),
+                    When(name__regex=r'^[A-Za-z]', then=Value(1)),
+                    default=Value(2),
+                    output_field=IntegerField(),
+                )
+            )
+            return qs.order_by("name_priority", "name", "id")
         return qs.order_by("name", "id")
     
     # 부스 default - 번호순
