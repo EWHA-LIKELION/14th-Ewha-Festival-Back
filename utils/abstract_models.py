@@ -76,7 +76,7 @@ class BaseProgram(models.Model):
 class BaseNotice(models.Model):
     title = models.CharField(
         help_text="제목",
-        max_length=20,
+        max_length=40,
     )
     content = models.CharField(
         help_text="내용",
