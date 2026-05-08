@@ -42,18 +42,22 @@ def base_filter(qs, params, *, program: str):
         start = datetime.combine(d, datetime.min.time())
         end = start + timedelta(days=1)
 
-        qs = qs.annotate(
-            has_overlap_date=RawSQL(
-                """
-                EXISTS(
-                    SELECT 1
-                    FROM unnest(schedule) AS r
-                    WHERE r && tstzrange(%s, %s, '[)')
+        if program == "booth":
+            qs = qs.annotate(
+                has_overlap_date=RawSQL(
+                    """
+                    EXISTS(
+                        SELECT 1
+                        FROM unnest(schedule) AS r
+                        WHERE r && tstzrange(%s, %s, '[)')
+                    )
+                    """,
+                    [start, end],
                 )
-                """,
-                [start, end],
-            )
-        ).filter(has_overlap_date=True)
+            ).filter(has_overlap_date=True)
+            
+        elif program == "show":
+            qs = qs.filter(schedule__overlap=(start, end))
     
     return qs
 
