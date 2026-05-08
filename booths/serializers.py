@@ -54,7 +54,7 @@ class BoothDetailSerializer(BaseProgramDetailSerializer):
         fields = BaseProgramDetailSerializer.Meta.fields + ('host', 'product')
 
     def get_product(self, obj):
-        products = obj.product.filter(is_selling=True)
+        products = obj.product.all()
         return BoothProductSerializer(products, many=True).data
 
     def get_notice_serializer(self): return BoothNoticeSerializer
