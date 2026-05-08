@@ -377,18 +377,36 @@ class BasePatchSerializer(JsonParsingMixin, serializers.ModelSerializer):
 
         with transaction.atomic():
             root_fields = self.get_root_update_fields(validated_data)
-            root_fields[version_field] = now
+
+            file_fields = {}
+            db_fields = {}
+            for field_name, value in root_fields.items():
+                try:
+                    model_field = self.Meta.model._meta.get_field(field_name)  # type: ignore
+                    if hasattr(model_field, 'upload_to'):
+                        file_fields[field_name] = value
+                        continue
+                except Exception:
+                    pass
+                db_fields[field_name] = value
+
+            db_fields[version_field] = now
 
             updated_rows = self.Meta.model.objects.filter(  # type: ignore
                 pk=instance.pk,
                 **{version_field: client_version},
-            ).update(**root_fields)
+            ).update(**db_fields)
 
             if updated_rows == 0:
                 latest = self._get_latest_version(instance.pk)
                 raise Conflict(server_updated_at=latest)
 
-            instance = self.Meta.model.objects.get(pk=instance.pk)  
+            instance = self.Meta.model.objects.get(pk=instance.pk)
+
+            if file_fields:
+                for field_name, value in file_fields.items():
+                    setattr(instance, field_name, value)
+                instance.save(update_fields=list(file_fields.keys()))
 
             touched = False
             for spec in specs:
