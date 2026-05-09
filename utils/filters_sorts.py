@@ -1,4 +1,5 @@
 from django.db.models import Q, Case, When, Value, IntegerField, DateTimeField
+from django.db.models.functions import Collate, Lower
 from django.db.models.expressions import RawSQL
 from datetime import datetime, timedelta
 from django.utils.dateparse import parse_date
@@ -42,18 +43,22 @@ def base_filter(qs, params, *, program: str):
         start = datetime.combine(d, datetime.min.time())
         end = start + timedelta(days=1)
 
-        qs = qs.annotate(
-            has_overlap_date=RawSQL(
-                """
-                EXISTS(
-                    SELECT 1
-                    FROM unnest(schedule) AS r
-                    WHERE r && tstzrange(%s, %s, '[)')
+        if program == "booth":
+            qs = qs.annotate(
+                has_overlap_date=RawSQL(
+                    """
+                    EXISTS(
+                        SELECT 1
+                        FROM unnest(schedule) AS r
+                        WHERE r && tstzrange(%s, %s, '[)')
+                    )
+                    """,
+                    [start, end],
                 )
-                """,
-                [start, end],
-            )
-        ).filter(has_overlap_date=True)
+            ).filter(has_overlap_date=True)
+            
+        elif program == "show":
+            qs = qs.filter(schedule__overlap=(start, end))
     
     return qs
 
@@ -61,14 +66,15 @@ def base_filter(qs, params, *, program: str):
 BOOTH_BUILDING_PRIORITY = [
     LocationChoices.HUMAN_ECOLOGY_BUILDING,
     LocationChoices.STUDENT_UNION,
-    LocationChoices.HAK_GWAN,
     LocationChoices.EWHA_POSCO_BUILDING,
-    LocationChoices.SENTENNIAL_MUSEUM,
+    LocationChoices.HAK_GWAN,
     LocationChoices.WELCH_RYANG_AUDITORIUM,
-    LocationChoices.HYUUT_GIL,
+    LocationChoices.GRASS_GROUND,
     LocationChoices.EDUCATION_BUILDING,
-    LocationChoices.EWHA_SHINSEGAE_BUILDING,
+    LocationChoices.HYUUT_GIL,
+    LocationChoices.SENTENNIAL_MUSEUM,
     LocationChoices.SPORT_TRACK,
+    LocationChoices.EWHA_SHINSEGAE_BUILDING,
 ]
 
 def base_sort(qs, sorting: str | None, *, program: str):
@@ -80,7 +86,21 @@ def base_sort(qs, sorting: str | None, *, program: str):
     
     # 이름순
     if sorting == "name":
-        return qs.order_by("name", "id")
+        qs = qs.annotate(
+            name_priority = Case(
+                When(name__regex=r'^[가-힣ㄱ-ㅎㅏ-ㅣ]', then=Value(0)),
+                When(name__regex=r'^[A-Za-z]', then=Value(1)),
+                default=Value(2),
+                output_field=IntegerField(),
+            )
+        )
+        #print(qs.query)
+        return qs.order_by(
+            "name_priority", 
+            Collate(Lower("name"), "ko-KR-x-icu"),
+            "name", 
+            "id"
+        )
     
     # 부스 default - 번호순
     if program == "booth" and sorting in ("number", ""):
