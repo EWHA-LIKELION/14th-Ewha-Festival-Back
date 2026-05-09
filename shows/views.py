@@ -92,7 +92,7 @@ class ShowNoticeView(APIView):
         notices = (
             ShowNotice.objects
             .filter(show_id=pk)
-            .order_by('-created_at')
+            .order_by('-created_at', '-id')
         )
 
         serializer = ShowNoticeSerializer(
