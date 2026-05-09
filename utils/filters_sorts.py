@@ -1,4 +1,5 @@
 from django.db.models import Q, Case, When, Value, IntegerField, DateTimeField
+from django.db.models.functions import Collate, Lower
 from django.db.models.expressions import RawSQL
 from datetime import datetime, timedelta
 from django.utils.dateparse import parse_date
@@ -87,13 +88,19 @@ def base_sort(qs, sorting: str | None, *, program: str):
     if sorting == "name":
         qs = qs.annotate(
             name_priority = Case(
-                When(name__regex=r'^[가-힣]', then=Value(0)),
+                When(name__regex=r'^[가-힣ㄱ-ㅎㅏ-ㅣ]', then=Value(0)),
                 When(name__regex=r'^[A-Za-z]', then=Value(1)),
                 default=Value(2),
                 output_field=IntegerField(),
             )
         )
-        return qs.order_by("name_priority", "name", "id")
+        #print(qs.query)
+        return qs.order_by(
+            "name_priority", 
+            Collate(Lower("name"), "ko-KR-x-icu"),
+            "name", 
+            "id"
+        )
     
     # 부스 default - 번호순
     if program == "booth" and sorting in ("number", ""):
