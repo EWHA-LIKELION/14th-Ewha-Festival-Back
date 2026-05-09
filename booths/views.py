@@ -88,7 +88,7 @@ class BoothNoticeView(APIView):
         notices = (
             BoothNotice.objects
             .filter(booth_id=pk)
-            .order_by('-created_at')
+            .order_by('-created_at', '-id')
         )
 
         serializer = BoothNoticeSerializer(
