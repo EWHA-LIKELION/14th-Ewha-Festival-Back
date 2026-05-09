@@ -15,6 +15,7 @@ from searchs.services import record_search, get_popular_searches
 
 def search(*, request, booths_qs, shows_qs):
     q = (request.query_params.get("q") or "").strip()
+    q_normalize = q.replace(" ", "")
 
     booths_qs = booths_qs.annotate(
     building_label=Case(
@@ -41,14 +42,14 @@ def search(*, request, booths_qs, shows_qs):
     )
 
     booth_q = (
-        Q(name__icontains=q) |
-        Q(product__name__icontains=q) |
-        Q(location__building__icontains=q) |
-        Q(full_location__icontains=q)
+        Q(name__icontains=q_normalize) |
+        Q(product__name__icontains=q_normalize) |
+        Q(location__building__icontains=q_normalize) |
+        Q(full_location__icontains=q_normalize)
     )
 
-    if q.isdigit():
-        booth_q |= Q(location__number=int(q))
+    if q_normalize.isdigit():
+        booth_q |= Q(location__number=int(q_normalize))
 
     booths = (
         booths_qs
@@ -57,7 +58,7 @@ def search(*, request, booths_qs, shows_qs):
         .distinct()
     )
 
-    show_q = Q(name__icontains=q)
+    show_q = Q(name__icontains=q_normalize)
     shows = (
         shows_qs
         .filter(show_q)
