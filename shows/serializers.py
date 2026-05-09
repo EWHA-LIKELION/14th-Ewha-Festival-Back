@@ -93,7 +93,10 @@ class ShowListSerializer(BaseProgramListSerializer):
 
 class ShowDetailSerializer(BaseProgramDetailSerializer):
     is_ongoing = serializers.CharField(read_only=True)
-    setlist = ShowSetlistSerializer(many=True)
+    setlist = serializers.SerializerMethodField()
+
+    def get_setlist(self, obj):
+        return ShowSetlistSerializer(obj.setlist.order_by('id'), many=True).data
 
     class Meta(BaseProgramDetailSerializer.Meta):
         model = Show
