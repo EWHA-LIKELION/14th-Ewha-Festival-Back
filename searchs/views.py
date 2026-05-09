@@ -7,7 +7,8 @@ from rest_framework.views import APIView
 
 from booths.models import Booth
 from shows.models import Show
-from .serializers import BoothSearchSerializer, ShowSearchSerializer
+from booths.serializers import BoothListSerializer
+from shows.serializers import ShowListSerializer
 from utils.filters_sorts import filter_and_sort
 from utils.choices import LocationChoices
 from utils.helpers import BasePagination
@@ -72,7 +73,7 @@ def search(*, request, booths_qs, shows_qs):
     booth_paginator = BasePagination()
     paginated_booths = booth_paginator.paginate_queryset(booths, request)
     
-    booths_serializer = BoothSearchSerializer(
+    booths_serializer = BoothListSerializer(
             paginated_booths,
             many=True,
             context={"request": request}
@@ -81,7 +82,7 @@ def search(*, request, booths_qs, shows_qs):
     show_paginator = BasePagination()
     paginated_shows = show_paginator.paginate_queryset(shows, request)
 
-    shows_serializer = ShowSearchSerializer(
+    shows_serializer = ShowListSerializer(
             paginated_shows,
             many=True,
             context={"request":request}
