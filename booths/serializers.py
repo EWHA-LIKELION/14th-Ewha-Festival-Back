@@ -3,6 +3,7 @@ import json
 from .models import Booth, Product, BoothReview, BoothNotice, BoothScrap
 from utils.abstract_serializers import BaseProgramListSerializer, BaseProgramDetailSerializer, BaseNoticeSerializer, BaseReviewSerializer, BaseScrapSerializer, ProgramPatchMixin, NestedCollectionPatchMixin, BaseNoticeWriteSerializer, BasePatchSerializer, CollectionPatchSpec
 from utils.serializer_fields import ScheduleWriteField
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 class BoothListSerializer(BaseProgramListSerializer):
     is_ongoing = serializers.BooleanField(read_only=True)
@@ -14,6 +15,7 @@ class BoothListSerializer(BaseProgramListSerializer):
         return BoothScrap
 
 class BoothProductSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Product
         fields = (
@@ -22,6 +24,7 @@ class BoothProductSerializer(serializers.ModelSerializer):
         
 class BoothProductWriteSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(required=False)
+    price = serializers.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(99999)])
 
     class Meta:
         model = Product
