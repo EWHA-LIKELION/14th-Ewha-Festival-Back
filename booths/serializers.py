@@ -1,7 +1,7 @@
 from rest_framework import serializers
 import json
 from .models import Booth, Product, BoothReview, BoothNotice, BoothScrap
-from utils.abstract_serializers import BaseProgramListSerializer, BaseProgramDetailSerializer, BaseNoticeSerializer, BaseReviewSerializer, BaseScrapSerializer, ProgramPatchMixin, NestedCollectionPatchMixin, BaseNoticeWriteSerializer, BasePatchSerializer, CollectionPatchSpec
+from utils.abstract_serializers import BaseProgramListSerializer, BaseProgramDetailSerializer, BaseNoticeSerializer, BaseReviewSerializer, BaseScrapSerializer, ProgramPatchMixin, BaseNoticeWriteSerializer, BasePatchSerializer, CollectionPatchSpec
 from utils.serializer_fields import ScheduleWriteField
 
 class BoothListSerializer(BaseProgramListSerializer):
@@ -68,7 +68,6 @@ class BoothDetailSerializer(BaseProgramDetailSerializer):
 class BoothPatchSerializer(
     BasePatchSerializer,
     ProgramPatchMixin,
-    NestedCollectionPatchMixin,
     serializers.ModelSerializer,
 ):
     is_ongoing = serializers.BooleanField(source='ongoing')

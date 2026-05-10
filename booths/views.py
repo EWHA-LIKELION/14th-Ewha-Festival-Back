@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import Booth, BoothNotice, BoothScrap
 from .serializers import BoothListSerializer, BoothDetailSerializer, BoothNoticeSerializer, BoothPatchSerializer, BoothScrapSerializer
+from utils.patch_service import ProgramPatchService
 from utils.filters_sorts import filter_and_sort
 from utils.helpers import BasePagination
 
@@ -73,9 +74,9 @@ class BoothDetailView(APIView):
             context={"request": request},
         )
         patch_serializer.is_valid(raise_exception=True)
-        patch_serializer.save()
+        ProgramPatchService().update(patch_serializer, booth)
 
-        booth = self.get_object(pk)  
+        booth = self.get_object(pk)
         read_serializer = BoothDetailSerializer(booth, context={"request": request})
         return Response(read_serializer.data, status=status.HTTP_200_OK)
 
