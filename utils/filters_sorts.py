@@ -77,12 +77,26 @@ BOOTH_BUILDING_PRIORITY = [
     LocationChoices.EWHA_SHINSEGAE_BUILDING,
 ]
 
+def annotate_building_priority(qs):
+    whens = [
+        When(location__building=building, then=Value(i))
+        for i, building in enumerate(BOOTH_BUILDING_PRIORITY)
+    ]
+    return qs.annotate(
+        building_priority_index=Case(
+            *whens,
+            default=Value(999),
+            output_field=IntegerField(),
+        )
+    )
+
 def base_sort(qs, sorting: str | None, *, program: str):
     sorting = (sorting or "").lower().strip()
     
     # 스크랩순
     if sorting == "scrap":
-        return qs.order_by("-scraps_count", "id")
+        qs = annotate_building_priority(qs)
+        return qs.order_by("-scraps_count", "building_priority_index", "location__number", "id")
     
     # 이름순
     if sorting == "name":
@@ -94,7 +108,6 @@ def base_sort(qs, sorting: str | None, *, program: str):
                 output_field=IntegerField(),
             )
         )
-        #print(qs.query)
         return qs.order_by(
             "name_priority", 
             Collate(Lower("name"), "ko-KR-x-icu"),
@@ -104,19 +117,11 @@ def base_sort(qs, sorting: str | None, *, program: str):
     
     # 부스 default - 번호순
     if program == "booth" and sorting in ("number", ""):
-        whens = [
-            When(location__building=building, then=Value(i))
-            for i, building in enumerate(BOOTH_BUILDING_PRIORITY)
-        ]
-
+        qs = annotate_building_priority(qs)
+        
         sql_unnest = "(SELECT MIN(lower(r)) FROM unnest(schedule) AS r)"
 
         return qs.annotate(
-            building_priority_index=Case(
-                *whens,
-                default=Value(999),
-                output_field=IntegerField(),
-            ),
             unnest_time=RawSQL(sql_unnest, []),
         ).order_by("building_priority_index", "location__number", "unnest_time", "id")
 
