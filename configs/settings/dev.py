@@ -14,3 +14,15 @@ CACHES = {
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=[])
 
 CORS_ORIGIN_ALLOW_ALL = True
+
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

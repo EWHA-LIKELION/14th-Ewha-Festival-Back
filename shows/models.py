@@ -35,7 +35,7 @@ class Setlist(models.Model):
     )
     name = models.CharField(
         help_text="이름",
-        max_length=20,
+        max_length=40,
     )
 
     def __str__(self):
