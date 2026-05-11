@@ -122,9 +122,9 @@ class SearchView(APIView):
             booths_qs=booths_qs,
             shows_qs=shows_qs,
         )
-        q = (request.query_params.get("q") or "").strip()
+        '''q = (request.query_params.get("q") or "").strip()
         if q and (result["booths"]["counts"] > 0 or result["shows"]["counts"] > 0):
-            record_search(q)
+            record_search(q)'''
         return Response(
             result,
             status=status.HTTP_200_OK,
