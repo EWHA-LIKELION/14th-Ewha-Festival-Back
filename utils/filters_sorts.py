@@ -37,28 +37,29 @@ def base_filter(qs, params, *, program: str):
 
     # 요일
     qs = qs.filter(q)
+    dates = [parse_date(d) for d in params.getlist("date") if parse_date(d)]
 
-    d = parse_date(params.get("date") or "")
-    if d:
-        start = datetime.combine(d, datetime.min.time())
-        end = start + timedelta(days=1)
-
+    if dates:
         if program == "booth":
+            range_conditions = " OR ".join(
+                "EXISTS(SELECT 1 FROM unnest(schedule) AS r WHERE r && tstzrange(%s, %s, '[)'))"
+                for _ in dates
+            )
+            sql_params = [p for d in dates for p in (
+                datetime.combine(d, datetime.min.time()),
+                datetime.combine(d, datetime.min.time()) + timedelta(days=1),
+            )]
             qs = qs.annotate(
-                has_overlap_date=RawSQL(
-                    """
-                    EXISTS(
-                        SELECT 1
-                        FROM unnest(schedule) AS r
-                        WHERE r && tstzrange(%s, %s, '[)')
-                    )
-                    """,
-                    [start, end],
-                )
+                has_overlap_date=RawSQL(range_conditions, sql_params)
             ).filter(has_overlap_date=True)
             
         elif program == "show":
-            qs = qs.filter(schedule__overlap=(start, end))
+            date_q = Q()
+            for d in dates:
+                start = datetime.combine(d, datetime.min.time())
+                end = start + timedelta(days=1)
+                date_q |= Q(schedule__overlap=(start, end))
+            qs = qs.filter(date_q)
     
     return qs
 
