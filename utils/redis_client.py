@@ -16,6 +16,7 @@ def get_redis_client() -> redis.Redis:
             decode_responses=True,
             socket_connect_timeout=1,
             socket_timeout=1,
+            ssl=True,
         )
     return _client
 
