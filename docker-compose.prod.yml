@@ -12,6 +12,8 @@ services:
       - --workers=3
       - --keep-alive=75
       - --timeout=120
+      - --worker-class=sync
+      - --access-logfile=-
     expose:
       - 8000
     entrypoint:
