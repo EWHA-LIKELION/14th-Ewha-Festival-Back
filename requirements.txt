@@ -1,8 +1,6 @@
 APScheduler==3.11.2
 asgiref==3.11.0
 async-timeout==5.0.1
-boto3==1.43.4
-botocore==1.43.4
 certifi==2026.1.4
 charset-normalizer==3.4.4
 Django==5.2.9
@@ -12,13 +10,11 @@ django-environ==0.12.0
 django-nanoid==0.0.2
 django-cleanup==9.0.0
 django-redis==6.0.0
-django-storages==1.14.6
 djangorestframework==3.16.1
 djangorestframework_simplejwt==5.5.1
 gunicorn==25.1.0
 idna==3.11
 iniconfig==2.3.0
-jmespath==1.1.0
 nanoid==2.0.0
 packaging==26.0
 pillow==12.0.0
@@ -27,13 +23,8 @@ pluggy==1.6.0
 psycopg2==2.9.11
 Pygments==2.19.2
 PyJWT==2.10.1
-python-dateutil==2.9.0.post0
 redis==7.3.0
 requests==2.32.5
-requests==2.32.5
-s3transfer==0.17.0
-setuptools==65.5.0
-six==1.17.0
 sortedcontainers==2.4.0
 sqlparse==0.5.5
 tzdata==2025.3
