@@ -204,12 +204,13 @@ class BaseProgramListSerializer(BaseProgramDetailSerializer):
         if not hasattr(obj, "product"):
             return []
 
-        products = obj.product.all().order_by("id")[:3]
+        products = obj.product.all().order_by("id")
 
         product_images = []
         for p in products:
-            product_images.append(p.image.url if p.image else None)
-        return product_images
+            if p.image:
+                product_images.append(p.image.url)
+        return product_images[:3]
 
 class BaseNoticeWriteSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(required = False)
