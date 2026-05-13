@@ -1,3 +1,5 @@
+import re
+
 from django.db.models import Q, Count, Value, CharField, Case, When, F
 from django.db.models.functions import Concat, Cast, Replace
 from rest_framework import status
@@ -15,7 +17,6 @@ from utils.helpers import BasePagination
 from searchs.services import record_search, get_popular_searches
 
 def search(*, request, booths_qs, shows_qs):
-    import re
     q = (request.query_params.get("q") or "").strip()
     q_normalize = re.sub(r'\s+', '', q)
     qs_no_space = Replace(F('name'), Value(' '), Value(''))
