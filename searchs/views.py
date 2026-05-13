@@ -1,5 +1,5 @@
-from django.db.models import Q, Count, Value, CharField, Case, When
-from django.db.models.functions import Concat, Cast
+from django.db.models import Q, Count, Value, CharField, Case, When, F
+from django.db.models.functions import Concat, Cast, Replace
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -15,10 +15,13 @@ from utils.helpers import BasePagination
 from searchs.services import record_search, get_popular_searches
 
 def search(*, request, booths_qs, shows_qs):
+    import re
     q = (request.query_params.get("q") or "").strip()
-    q_normalize = q.replace(" ", "")
+    q_normalize = re.sub(r'\s+', '', q)
+    qs_no_space = Replace(F('name'), Value(' '), Value(''))
 
     booths_qs = booths_qs.annotate(
+        name_no_space=qs_no_space,
     building_label=Case(
         When(location__building=LocationChoices.GRASS_GROUND, then=Value("잔디광장")),
         When(location__building=LocationChoices.SENTENNIAL_MUSEUM, then=Value("박물관")),
@@ -43,10 +46,10 @@ def search(*, request, booths_qs, shows_qs):
     )
 
     booth_q = (
-        Q(name__icontains=q_normalize) |
-        Q(product__name__icontains=q_normalize) |
-        Q(location__building__icontains=q_normalize) |
-        Q(full_location__icontains=q_normalize)
+        Q(name__icontains=q) | Q(name__icontains=q_normalize) | Q(name_no_space__icontains=q_normalize) |
+        Q(product__name__icontains=q) | Q(product__name__icontains=q_normalize) |
+        Q(location__building__icontains=q) | Q(location__building__icontains=q_normalize) |
+        Q(full_location__icontains=q) | Q(full_location__icontains=q_normalize)
     )
 
     if q_normalize.isdigit():
@@ -59,9 +62,11 @@ def search(*, request, booths_qs, shows_qs):
         .distinct()
     )
 
-    show_q = Q(name__icontains=q_normalize)
+    show_q = (
+        Q(name__icontains=q) | Q(name__icontains=q_normalize) | Q(name_no_space__icontains=q_normalize)
+    )
     shows = (
-        shows_qs
+        shows_qs.annotate(name_no_space=qs_no_space)
         .filter(show_q)
         .annotate(scraps_count=Count("show_scrap", distinct=True))
         .distinct()
