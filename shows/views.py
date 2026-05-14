@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import Show, ShowNotice, ShowScrap
 from .serializers import ShowListSerializer, ShowDetailSerializer, ShowNoticeSerializer, ShowPatchSerializer, ShowScrapSerializer
+from utils.patch_service import ProgramPatchService
 from utils.filters_sorts import filter_and_sort
 from utils.helpers import BasePagination
 
@@ -73,7 +74,7 @@ class ShowDetailView(APIView):
             context={"request": request},
         )
         patch_serializer.is_valid(raise_exception=True)
-        patch_serializer.save()
+        ProgramPatchService().update(patch_serializer, show)
 
         show = self.get_object(pk)
 

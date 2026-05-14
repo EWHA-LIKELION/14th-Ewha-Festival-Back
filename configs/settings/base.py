@@ -167,7 +167,6 @@ SIMPLE_JWT = {
     'TOKEN_USER_CLASS': AUTH_USER_MODEL,
 }
 
-
 # S3
 AWS_ACCESS_KEY_ID = env('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = env('AWS_SECRET_ACCESS_KEY')
@@ -193,8 +192,6 @@ STORAGES = {
     },
 }
 
-
 # Media files
-
 MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
