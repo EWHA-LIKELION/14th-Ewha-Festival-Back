@@ -11,7 +11,6 @@ from booths.models import Booth
 from shows.models import Show
 from booths.serializers import BoothListSerializer
 from shows.serializers import ShowListSerializer
-from utils.filters_sorts import filter_and_sort
 from utils.choices import LocationChoices
 from utils.helpers import BasePagination
 from searchs.services import record_search, get_popular_searches
@@ -61,7 +60,7 @@ def search(*, request, booths_qs, shows_qs):
         .filter(booth_q)
         .annotate(scraps_count=Count("booth_scrap", distinct=True))
         .distinct()
-    )
+    ).filter_and_sort(request.query_params, program="booth")
 
     show_q = (
         Q(name__icontains=q) | Q(name__icontains=q_normalize) | Q(name_no_space__icontains=q_normalize)
@@ -71,10 +70,7 @@ def search(*, request, booths_qs, shows_qs):
         .filter(show_q)
         .annotate(scraps_count=Count("show_scrap", distinct=True))
         .distinct()
-    )
-
-    booths = filter_and_sort(booths, request.query_params, program="booth")
-    shows = filter_and_sort(shows, request.query_params, program="show")
+    ).filter_and_sort(request.query_params, program="show")
 
     booth_paginator = BasePagination()
     paginated_booths = booth_paginator.paginate_queryset(booths, request)

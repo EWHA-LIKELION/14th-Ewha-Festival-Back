@@ -7,7 +7,6 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import Show, ShowNotice, ShowScrap
 from .serializers import ShowListSerializer, ShowDetailSerializer, ShowNoticeSerializer, ShowPatchSerializer, ShowScrapSerializer
-from utils.filters_sorts import filter_and_sort
 from utils.helpers import BasePagination
 
 class ShowListView(APIView):
@@ -24,9 +23,7 @@ class ShowListView(APIView):
             Show.objects.select_related("location")
             .annotate(scraps_count=Count("show_scrap", distinct=True))
             .all()
-        )
-
-        shows = filter_and_sort(shows, request.query_params, program="show")
+        ).filter_and_sort(request.query_params, program="show")
 
         paginator = self.show_pagination()
         paginated_shows = paginator.paginate_queryset(shows, request, view=self)
