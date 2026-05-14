@@ -1,7 +1,6 @@
 import re
 
-from django.db.models import Q, Count, Value, CharField, Case, When, F
-from django.db.models.functions import Concat, Cast, Replace
+from django.db.models import Q
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -11,40 +10,15 @@ from booths.models import Booth
 from shows.models import Show
 from booths.serializers import BoothListSerializer
 from shows.serializers import ShowListSerializer
-from utils.choices import LocationChoices
 from utils.helpers import BasePagination
 from searchs.services import record_search, get_popular_searches
 
 def search(*, request, booths_qs, shows_qs):
     q = (request.query_params.get("q") or "").strip()
     q_normalize = re.sub(r'\s+', '', q)
-    qs_no_space = Replace(F('name'), Value(' '), Value(''))
 
-    booths_qs = booths_qs.annotate(
-        name_no_space=qs_no_space,
-    building_label=Case(
-        When(location__building=LocationChoices.GRASS_GROUND, then=Value("잔디광장")),
-        When(location__building=LocationChoices.SENTENNIAL_MUSEUM, then=Value("박물관")),
-        When(location__building=LocationChoices.SPORT_TRACK, then=Value("스포츠트랙")),
-        When(location__building=LocationChoices.HYUUT_GIL, then=Value("휴웃길")),
-        When(location__building=LocationChoices.WELCH_RYANG_AUDITORIUM, then=Value("대강당")),
-        When(location__building=LocationChoices.EWHA_POSCO_BUILDING, then=Value("포스코관")),
-        When(location__building=LocationChoices.STUDENT_UNION, then=Value("학생문화관")),
-        When(location__building=LocationChoices.HUMAN_ECOLOGY_BUILDING, then=Value("생활환경관")),
-        When(location__building=LocationChoices.HAK_GWAN, then=Value("학관")),
-        When(location__building=LocationChoices.EDUCATION_BUILDING, then=Value("교육관")),
-        When(location__building=LocationChoices.EWHA_SHINSEGAE_BUILDING, then=Value("신세계관")),
-        default=Value(""),
-        output_field=CharField(),
-        ),
-    ).annotate(
-        full_location=Concat(
-            "building_label",
-            Cast("location__number", CharField()),
-            output_field=CharField(),
-        )
-    )
-
+    booths_qs = booths_qs.with_building_label()
+    
     booth_q = (
         Q(name__icontains=q) | Q(name__icontains=q_normalize) | Q(name_no_space__icontains=q_normalize) |
         Q(product__name__icontains=q) | Q(product__name__icontains=q_normalize) |
@@ -58,19 +32,21 @@ def search(*, request, booths_qs, shows_qs):
     booths = (
         booths_qs
         .filter(booth_q)
-        .annotate(scraps_count=Count("booth_scrap", distinct=True))
+        .with_scraps_count(program="booth")
         .distinct()
-    ).filter_and_sort(request.query_params, program="booth")
+        .filter_and_sort(request.query_params, program="booth")
+    )
 
     show_q = (
         Q(name__icontains=q) | Q(name__icontains=q_normalize) | Q(name_no_space__icontains=q_normalize)
     )
     shows = (
-        shows_qs.annotate(name_no_space=qs_no_space)
+        shows_qs.with_name_no_space()
         .filter(show_q)
-        .annotate(scraps_count=Count("show_scrap", distinct=True))
+        .with_scraps_count(program="show")
         .distinct()
-    ).filter_and_sort(request.query_params, program="show")
+        .filter_and_sort(request.query_params, program="show")
+    )
 
     booth_paginator = BasePagination()
     paginated_booths = booth_paginator.paginate_queryset(booths, request)

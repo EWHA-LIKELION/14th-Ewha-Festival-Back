@@ -1,6 +1,5 @@
 from django.http import HttpRequest, Http404
 from django.shortcuts import get_object_or_404
-from django.db.models import Count
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -20,10 +19,11 @@ class ShowListView(APIView):
 
     def get(self, request, format=None):
         shows = (
-            Show.objects.select_related("location")
-            .annotate(scraps_count=Count("show_scrap", distinct=True))
-            .all()
-        ).filter_and_sort(request.query_params, program="show")
+            Show.objects
+            .with_location()
+            .with_scraps_count(program="show")
+            .filter_and_sort(request.query_params, program="show")
+        )
 
         paginator = self.show_pagination()
         paginated_shows = paginator.paginate_queryset(shows, request, view=self)
@@ -46,7 +46,7 @@ class ShowDetailView(APIView):
         try:
             return (
                 Show.objects
-                .annotate(scraps_count=Count("show_scrap"))
+                .with_scraps_count(program="show")
                 .get(pk=pk)
             )
         except Show.DoesNotExist:
