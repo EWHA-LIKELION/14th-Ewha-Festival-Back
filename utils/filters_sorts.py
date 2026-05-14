@@ -133,7 +133,3 @@ def base_sort(qs, sorting: str | None, *, program: str):
         ).order_by("unnest_time", "id")
 
     return qs
-
-def filter_and_sort(qs, params, *, program: str):
-    qs = base_filter(qs, params, program=program)
-    return base_sort(qs, params.get("sorting"), program=program)
