@@ -17,17 +17,10 @@ class FilterSortQuerySet(models.QuerySet):
     def with_building_label(self):
         return self.with_name_no_space().annotate(
             building_label=Case(
-                When(location__building=LocationChoices.GRASS_GROUND, then=Value("잔디광장")),
-                When(location__building=LocationChoices.SENTENNIAL_MUSEUM, then=Value("박물관")),
-                When(location__building=LocationChoices.SPORT_TRACK, then=Value("스포츠트랙")),
-                When(location__building=LocationChoices.HYUUT_GIL, then=Value("휴웃길")),
-                When(location__building=LocationChoices.WELCH_RYANG_AUDITORIUM, then=Value("대강당")),
-                When(location__building=LocationChoices.EWHA_POSCO_BUILDING, then=Value("포스코관")),
-                When(location__building=LocationChoices.STUDENT_UNION, then=Value("학생문화관")),
-                When(location__building=LocationChoices.HUMAN_ECOLOGY_BUILDING, then=Value("생활환경관")),
-                When(location__building=LocationChoices.HAK_GWAN, then=Value("학관")),
-                When(location__building=LocationChoices.EDUCATION_BUILDING, then=Value("교육관")),
-                When(location__building=LocationChoices.EWHA_SHINSEGAE_BUILDING, then=Value("신세계관")),
+                *[
+                    When(location__building=choice, then=Value(label))
+                    for choice, label in LocationChoices.choices
+                ],
                 default=Value(""),
                 output_field=CharField(),
                 ),
