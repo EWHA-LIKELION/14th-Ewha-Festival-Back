@@ -22,8 +22,8 @@ def search(*, request, booths_qs, shows_qs):
     booth_q = (
         Q(name__icontains=q) | Q(name__icontains=q_normalize) | Q(name_no_space__icontains=q_normalize) |
         Q(product__name__icontains=q) | Q(product__name__icontains=q_normalize) |
-        Q(location__building__icontains=q) | Q(location__building__icontains=q_normalize) |
-        Q(full_location__icontains=q) | Q(full_location__icontains=q_normalize)
+        Q(building_label__icontains=q) | Q(building_label__icontains=q_normalize) |
+        Q(full_location=q) | Q(full_location=q_normalize)
     )
 
     if q_normalize.isdigit():
