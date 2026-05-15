@@ -64,7 +64,7 @@ class MyDataSerializer(serializers.ModelSerializer):
 
 DAY_PART = r"(WED|THU|FRI|WED_THU|WED_FRI|THU_FRI|WED_THU_FRI)"
 BOOTH_PATTERN = re.compile(rf"^BOOTH-{DAY_PART}-({'|'.join(LocationChoices.values)})-\d{{1,2}}$")
-SHOW_PATTERN = re.compile(rf"^SHOW-{DAY_PART}-\d{{4}}-STUDENT_UNION$")
+SHOW_PATTERN = re.compile(rf"^SHOW-{DAY_PART}-\d{{4}}-({'|'.join(LocationChoices.values)})$")
 
 class PermissionSerializer(serializers.Serializer):
     programname = serializers.CharField(
