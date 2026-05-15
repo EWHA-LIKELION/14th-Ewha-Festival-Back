@@ -21,6 +21,7 @@ def update_snapshot() -> None:
         r = get_redis_client()
         r.zunionstore(SEARCH_RANKING_SNAPSHOT_KEY, [SEARCH_RANKING_KEY])
         r.set("ranking:search:updated_at", datetime.now(timezone.utc).isoformat()) # 갱신 시각 저장
+        r.delete(SEARCH_RANKING_KEY)
         logger.info("search snapshot updated")
     except Exception:
         logger.warning("update_snapshot failed", exc_info=True)
