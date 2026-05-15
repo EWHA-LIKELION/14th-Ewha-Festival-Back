@@ -2,7 +2,6 @@ import csv
 import sys
 import io
 from django.core.management.base import BaseCommand, CommandError
-from utils.choices import LocationChoices
 from shows.models import Show
 from searchs.models import Location
 
@@ -21,16 +20,19 @@ python manage.py insertshow < show.tsv"""
         except Exception as e:
             raise CommandError(f"파일을 읽는 중 오류가 발생했습니다: {e}")
 
-        try:
-            location = Location.objects.get(
-                building=LocationChoices.STUDENT_UNION,
-                number__isnull=True,
-            )
-        except Location.DoesNotExist:
-            raise CommandError("Location 데이터가 올바르지 않습니다.")
-
         show_list = list()
-        for data in data_list:
+        for i, data in enumerate(data_list, start=1):
+            try:
+                location = Location.objects.get(
+                    building=data['location_building'],
+                    number__isnull=True,
+                )
+            except Location.DoesNotExist:
+                raise CommandError(
+                    f"[{i}번째 행] Location 데이터가 올바르지 않습니다: "
+                    f"(building={data['location_building']})"
+                )
+
             show = Show(
                 id=data['id'],
                 name=data['name'],
