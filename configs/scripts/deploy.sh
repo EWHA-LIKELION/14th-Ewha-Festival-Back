@@ -75,6 +75,7 @@ fi
 echo "▶ 전환: $OLD_CONTAINER → $NEXT_CONTAINER"
 
 # 1. 새 컨테이너 빌드 및 시작
+$COMPOSE rm -f $NEXT_CONTAINER
 $COMPOSE up -d --build $NEXT_CONTAINER
 
 # 2. 헬스체크 (최대 45초 대기)
