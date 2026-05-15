@@ -41,7 +41,7 @@ services:
       - --worker-class=sync
       - --access-logfile=-
     expose:
-      - 8001
+      - 8000
     entrypoint:
       - sh
       - configs/docker/entrypoint.prod.sh
