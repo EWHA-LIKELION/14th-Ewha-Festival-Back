@@ -18,7 +18,7 @@ services:
     volumes:
       - static:/home/app/web/static
       - media:/home/app/web/media
-      - ./logs/gunicorn-blue:/var/log/gunicorn
+      - gunicorn_blue_log:/var/log/gunicorn
     env_file:
       - .env
 
@@ -39,7 +39,7 @@ services:
     volumes:
       - static:/home/app/web/static
       - media:/home/app/web/media
-      - ./logs/gunicorn-green:/var/log/gunicorn
+      - gunicorn_green_log:/var/log/gunicorn
     env_file:
       - .env
 
@@ -53,10 +53,13 @@ services:
     volumes:
       - static:/home/app/web/static
       - media:/home/app/web/media
-      - ./logs/nginx:/var/log/nginx
+      - nginx_log:/var/log/nginx
     environment:
       TZ: "Asia/Seoul"
 
 volumes:
   static:
   media:
+  gunicorn_blue_log:
+  gunicorn_green_log:
+  nginx_log:
