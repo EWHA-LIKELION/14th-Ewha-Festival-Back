@@ -1,10 +1,7 @@
-name: Deploy to AWS Monolithic Architecture
+name: Deploy to AWS (Monolithic Architecture)
 
 on:
   push:
-    branches:
-      - deploy/aws-ma
-  pull_request:
     branches:
       - deploy/aws-ma
 
