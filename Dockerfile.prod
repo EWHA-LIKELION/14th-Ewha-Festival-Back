@@ -47,6 +47,7 @@ ENV APP_HOME=/home/app/web
 RUN mkdir $APP_HOME
 RUN mkdir $APP_HOME/static
 RUN mkdir $APP_HOME/media
+RUN mkdir -p /var/log/gunicorn
 WORKDIR $APP_HOME
 
 # Install dependencies
@@ -72,6 +73,7 @@ COPY . $APP_HOME
 
 # Chown all the files to the app user
 RUN chown -R app:app $APP_HOME
+RUN chown -R app:app /var/log/gunicorn
 
 # Change to the app user
 USER app
