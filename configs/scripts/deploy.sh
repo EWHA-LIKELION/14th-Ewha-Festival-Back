@@ -62,8 +62,8 @@ fi
 # active/next 결정
 if [ -n "$BLUE_RUNNING" ]; then
     NEXT_CONTAINER="web_green"
-    NEXT_PORT="8001"
-    NEXT_SERVER="web_green:8001"
+    NEXT_PORT="8000"
+    NEXT_SERVER="web_green:8000"
     OLD_CONTAINER="web_blue"
 else
     NEXT_CONTAINER="web_blue"
