@@ -61,6 +61,7 @@ services:
     volumes:
       - static:/home/app/web/static
       - media:/home/app/web/media
+      - ./logs/nginx:/var/log/nginx
     environment:
       TZ: "Asia/Seoul"
 
