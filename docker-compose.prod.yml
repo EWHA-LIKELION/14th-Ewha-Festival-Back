@@ -1,7 +1,8 @@
 version: "3"
+
 services:
-  web:
-    container_name: web
+  web_blue:
+    container_name: web_blue
     build:
       context: ./
       dockerfile: Dockerfile.prod
@@ -24,10 +25,36 @@ services:
       - media:/home/app/web/media
     env_file:
       - .env
+
+  web_green:
+    container_name: web_green
+    build:
+      context: ./
+      dockerfile: Dockerfile.prod
+    command:
+      - gunicorn
+      - configs.wsgi:application
+      - --bind=0.0.0.0:8000
+      - --workers=3
+      - --keep-alive=75
+      - --timeout=120
+      - --worker-class=sync
+      - --access-logfile=-
+    expose:
+      - 8001
+    entrypoint:
+      - sh
+      - configs/docker/entrypoint.prod.sh
+    volumes:
+      - static:/home/app/web/static
+      - media:/home/app/web/media
+    env_file:
+      - .env
+
   nginx:
     container_name: nginx
     depends_on:
-      - web
+      - web_blue
     build: ./configs/nginx
     ports:
       - "80:80"
@@ -36,6 +63,7 @@ services:
       - media:/home/app/web/media
     environment:
       TZ: "Asia/Seoul"
+
 volumes:
   static:
   media:
