@@ -19,9 +19,12 @@ def record_search(keyword: str) -> None:
 def update_snapshot() -> None:
     try:
         r = get_redis_client()
-        r.zunionstore(SEARCH_RANKING_SNAPSHOT_KEY, [SEARCH_RANKING_KEY])
-        r.set("ranking:search:updated_at", datetime.now(timezone.utc).isoformat()) # 갱신 시각 저장
-        r.delete(SEARCH_RANKING_KEY)
+        updated_at = datetime.now(timezone.utc).isoformat()
+        pipeline = r.pipeline(transaction=True)
+        pipeline.zunionstore(SEARCH_RANKING_SNAPSHOT_KEY, [SEARCH_RANKING_KEY])
+        pipeline.set("ranking:search:updated_at", updated_at) # 갱신 시각 저장
+        pipeline.delete(SEARCH_RANKING_KEY)
+        pipeline.execute()
         logger.info("search snapshot updated")
     except Exception:
         logger.warning("update_snapshot failed", exc_info=True)
