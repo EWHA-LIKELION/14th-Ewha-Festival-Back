@@ -9,12 +9,7 @@ services:
     command:
       - gunicorn
       - configs.wsgi:application
-      - --bind=0.0.0.0:8000
-      - --workers=3
-      - --keep-alive=75
-      - --timeout=120
-      - --worker-class=sync
-      - --access-logfile=-
+      - --config=/home/app/web/gunicorn.conf.py
     expose:
       - 8000
     entrypoint:
@@ -23,6 +18,7 @@ services:
     volumes:
       - static:/home/app/web/static
       - media:/home/app/web/media
+      - ./logs/gunicorn-blue:/var/log/gunicorn
     env_file:
       - .env
 
@@ -34,12 +30,7 @@ services:
     command:
       - gunicorn
       - configs.wsgi:application
-      - --bind=0.0.0.0:8000
-      - --workers=3
-      - --keep-alive=75
-      - --timeout=120
-      - --worker-class=sync
-      - --access-logfile=-
+      - --config=/home/app/web/gunicorn.conf.py
     expose:
       - 8001
     entrypoint:
@@ -48,6 +39,7 @@ services:
     volumes:
       - static:/home/app/web/static
       - media:/home/app/web/media
+      - ./logs/gunicorn-green:/var/log/gunicorn
     env_file:
       - .env
 
