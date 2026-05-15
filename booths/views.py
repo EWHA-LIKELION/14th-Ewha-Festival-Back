@@ -1,13 +1,11 @@
 from django.http import HttpRequest, Http404
 from django.shortcuts import get_object_or_404
-from django.db.models import Count
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import Booth, BoothNotice, BoothScrap
 from .serializers import BoothListSerializer, BoothDetailSerializer, BoothNoticeSerializer, BoothPatchSerializer, BoothScrapSerializer
-from utils.filters_sorts import filter_and_sort
 from utils.helpers import BasePagination
 
 class BoothListView(APIView):
@@ -21,12 +19,11 @@ class BoothListView(APIView):
 
     def get(self, request, format=None):
         booths = (
-            Booth.objects.select_related("location")
-            .annotate(scraps_count=Count("booth_scrap", distinct=True))
-            .all()
+            Booth.objects
+            .with_location()
+            .with_scraps_count(program="booth")
+            .filter_and_sort(request.query_params, program="booth")
         )
-
-        booths = filter_and_sort(booths, request.query_params, program="booth")
 
         paginator = self.booth_pagination()
         paginated_booths = paginator.paginate_queryset(booths, request, view=self)
@@ -49,7 +46,7 @@ class BoothDetailView(APIView):
         try:
             return (
                 Booth.objects
-                .annotate(scraps_count=Count("booth_scrap"))
+                .with_scraps_count(program="booth")
                 .get(pk=pk)
             )
         except Booth.DoesNotExist:

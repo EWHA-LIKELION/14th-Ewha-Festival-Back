@@ -1,7 +1,8 @@
-from django.db.models import Q, Case, When, Value, IntegerField, DateTimeField
-from django.db.models.functions import Collate, Lower
-from django.db.models.expressions import RawSQL
 from datetime import datetime, timedelta
+from django.db import models
+from django.db.models import Q, Count, Value, Case, When, F, CharField, IntegerField, DateTimeField
+from django.db.models.functions import Concat, Cast, Replace, Collate, Lower
+from django.db.models.expressions import RawSQL
 from django.utils.dateparse import parse_date
 from .choices import LocationChoices
 
@@ -134,6 +135,51 @@ def base_sort(qs, sorting: str | None, *, program: str):
 
     return qs
 
-def filter_and_sort(qs, params, *, program: str):
-    qs = base_filter(qs, params, program=program)
-    return base_sort(qs, params.get("sorting"), program=program)
+class FilterSortQuerySet(models.QuerySet):
+    def with_name_no_space(self):
+        return self.annotate(
+            name_no_space=Replace(
+                F('name'),
+                Value(' '),
+                Value(''),
+            )
+        )
+    
+    def with_building_label(self):
+        return self.with_name_no_space().annotate(
+            building_label=Case(
+                *[
+                    When(location__building=choice, then=Value(label))
+                    for choice, label in LocationChoices.choices
+                ],
+                default=Value(""),
+                output_field=CharField(),
+                ),
+            ).annotate(
+                full_location=Concat(
+                    "building_label",
+                    Cast("location__number", CharField()),
+                    output_field=CharField(),
+                )
+            )
+
+    def with_location(self):
+        return self.select_related(
+            "location"
+        )
+    
+    def with_scraps_count(self, *, program: str):
+        if program == "booth":
+            return self.annotate(
+                scraps_count=Count("booth_scrap", distinct=True)
+            )     
+        elif program == "show":
+            return self.annotate(
+                scraps_count=Count("show_scrap", distinct=True)
+            )
+        
+        return self
+    
+    def filter_and_sort(self, params, *, program: str):
+        qs = base_filter(self, params, program=program)
+        return base_sort(qs, params.get("sorting"), program=program)
