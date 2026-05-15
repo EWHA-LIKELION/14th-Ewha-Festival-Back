@@ -41,6 +41,70 @@ then
     sudo chmod +x /usr/local/bin/docker-compose
 fi
 
-# Docker Compose로 서버를 빌드하고 실행한다.
-echo "Start docker-compose up: ubuntu"
-sudo docker-compose -f /home/ubuntu/srv/ubuntu/docker-compose.prod.yml up --build -d
+# -------------------------------------------------------
+# Blue/Green 무중단 배포
+# -------------------------------------------------------
+WORKDIR=/home/ubuntu/srv/ubuntu
+COMPOSE="sudo docker-compose -f $WORKDIR/docker-compose.prod.yml"
+
+# 현재 어느 쪽이 떠 있는지 판별
+BLUE_RUNNING=$(sudo docker ps --format '{{.Names}}' | grep -w web_blue || true)
+GREEN_RUNNING=$(sudo docker ps --format '{{.Names}}' | grep -w web_green || true)
+
+# 최초 배포 (아무것도 안 떠 있음)
+if [ -z "$BLUE_RUNNING" ] && [ -z "$GREEN_RUNNING" ]; then
+    echo "▶ 최초 배포: web_blue + nginx 시작"
+    $COMPOSE up -d --build web_blue nginx
+    echo "✅ 최초 배포 완료 — web_blue 서비스 중"
+    exit 0
+fi
+
+# active/next 결정
+if [ -n "$BLUE_RUNNING" ]; then
+    NEXT_CONTAINER="web_green"
+    NEXT_PORT="8001"
+    NEXT_SERVER="web_green:8001"
+    OLD_CONTAINER="web_blue"
+else
+    NEXT_CONTAINER="web_blue"
+    NEXT_PORT="8000"
+    NEXT_SERVER="web_blue:8000"
+    OLD_CONTAINER="web_green"
+fi
+
+echo "▶ 전환: $OLD_CONTAINER → $NEXT_CONTAINER"
+
+# 1. 새 컨테이너 빌드 및 시작
+$COMPOSE up -d --build $NEXT_CONTAINER
+
+# 2. 헬스체크 (최대 45초 대기)
+echo "▶ 헬스체크 시작..."
+for i in $(seq 1 15); do
+    if sudo docker exec $NEXT_CONTAINER curl -sf http://localhost:$NEXT_PORT/health/ > /dev/null 2>&1; then
+        echo "✅ 헬스체크 통과"
+        break
+    fi
+    if [ $i -eq 15 ]; then
+        echo "❌ 헬스체크 실패 — $NEXT_CONTAINER 종료, 기존 유지"
+        $COMPOSE stop $NEXT_CONTAINER
+        exit 1
+    fi
+    echo "   대기 중... ($i/15)"
+    sleep 3
+done
+
+# 3. nginx upstream 전환
+echo "▶ nginx upstream → $NEXT_SERVER"
+sudo docker exec nginx sed -i \
+    "s|server web_.*:.*;|server $NEXT_SERVER;|" \
+    /etc/nginx/conf.d/nginx.conf
+
+# 4. nginx 무중단 reload
+sudo docker exec nginx nginx -s reload
+echo "▶ nginx reload 완료"
+
+# 5. 구 컨테이너 종료
+echo "▶ $OLD_CONTAINER 종료"
+$COMPOSE stop $OLD_CONTAINER
+
+echo "✅ 배포 완료 — $NEXT_CONTAINER 서비스 중"
