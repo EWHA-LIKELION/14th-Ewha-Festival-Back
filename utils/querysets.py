@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from django.db import models
 from django.db.models import Q, Count, Value, Case, When, F, CharField, IntegerField, DateTimeField
-from django.db.models.functions import Concat, Cast, Replace, Collate, Lower
+from django.db.models.functions import Concat, Cast, Replace, Collate, Coalesce
 from django.db.models.expressions import RawSQL
 from django.utils.dateparse import parse_date
 from .choices import LocationChoices
@@ -108,12 +108,27 @@ def base_sort(qs, sorting: str | None, *, program: str):
                 When(name__regex=r'^[A-Za-z]', then=Value(1)),
                 default=Value(2),
                 output_field=IntegerField(),
-            )
+            ),
+            name_number=Coalesce(
+                Cast(
+                    RawSQL(
+                        "NULLIF(regexp_replace(name, '[^0-9]', '', 'g'), '')",
+                        ()
+                    ),
+                    output_field=IntegerField()
+                ),
+                Value(0),
+            ),
+            name_text=RawSQL(
+                "regexp_replace(name, '[0-9]', '', 'g')",
+                (),
+                output_field=CharField(),
+            ),
         )
         return qs.order_by(
             "name_priority", 
-            Collate(Lower("name"), "ko-KR-x-icu"),
-            "name", 
+            Collate("name_text", "ko-KR-x-icu"),
+            "name_number", 
             "id"
         )
     
