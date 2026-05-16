@@ -102,6 +102,8 @@ def base_sort(qs, sorting: str | None, *, program: str):
     
     # 이름순
     if sorting == "name":
+        name_column = f"{qs.model._meta.db_table}.name"
+
         qs = qs.annotate(
             name_priority = Case(
                 When(name__regex=r'^[가-힣ㄱ-ㅎㅏ-ㅣ]', then=Value(0)),
@@ -112,7 +114,7 @@ def base_sort(qs, sorting: str | None, *, program: str):
             name_number=Coalesce(
                 Cast(
                     RawSQL(
-                        "NULLIF(regexp_replace(name, '[^0-9]', '', 'g'), '')",
+                        f"NULLIF(regexp_replace({name_column}, '[^0-9]', '', 'g'), '')",
                         ()
                     ),
                     output_field=IntegerField()
@@ -120,7 +122,7 @@ def base_sort(qs, sorting: str | None, *, program: str):
                 Value(0),
             ),
             name_text=RawSQL(
-                "regexp_replace(name, '[0-9]', '', 'g')",
+                f"regexp_replace({name_column}, '[0-9]', '', 'g')",
                 (),
                 output_field=CharField(),
             ),
