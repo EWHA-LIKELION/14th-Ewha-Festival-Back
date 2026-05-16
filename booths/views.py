@@ -62,7 +62,15 @@ class BoothDetailView(APIView):
     
     def patch(self, request, pk, format=None):
         booth = self.get_object(pk)
-
+        
+        def has_permission(user, booth):
+            return user.permission_booth.filter(id=booth.id).exists()
+        if not has_permission(request.user, booth):
+            return Response(
+                {"detail": "권한이 없습니다."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+            
         patch_serializer = BoothPatchSerializer(
             booth,
             data=request.data,
