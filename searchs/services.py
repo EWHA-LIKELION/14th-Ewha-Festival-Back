@@ -7,6 +7,7 @@ logger = logging.getLogger(__name__)
 
 SEARCH_RANKING_KEY = "ranking:search"
 SEARCH_RANKING_SNAPSHOT_KEY = "ranking:search:snapshot"
+SEARCH_RANKING_UPDATED_AT_KEY = "ranking:search:updated_at"
 
 def record_search(keyword: str) -> None:
     if not keyword or not keyword.strip():
@@ -26,7 +27,7 @@ def update_snapshot() -> None:
             return
             
         r.rename(SEARCH_RANKING_KEY, SEARCH_RANKING_SNAPSHOT_KEY)
-        r.set("ranking:search:updated_at", updated_at) # 갱신 시각 저장
+        r.set(SEARCH_RANKING_UPDATED_AT_KEY, updated_at) # 갱신 시각 저장
         logger.info("search snapshot updated")
     except Exception:
         logger.warning("update_snapshot failed", exc_info=True)
@@ -40,7 +41,7 @@ def get_popular_searches(top_n: int = 10) -> dict[str, Any]:
             else SEARCH_RANKING_KEY
         )
         results = r.zrevrange(key, 0, top_n - 1, withscores=True)
-        updated_at = r.get("ranking:search:updated_at")
+        updated_at = r.get(SEARCH_RANKING_UPDATED_AT_KEY)
         return {
             "updated_at": updated_at,
             "results": [
