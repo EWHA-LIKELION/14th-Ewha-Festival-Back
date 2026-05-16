@@ -152,6 +152,20 @@ REST_FRAMEWORK = {
     ),
 }
 
+
+# djangorestframework-simplejwt
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=2),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'ROTATE_REFRESH_TOKENS': True,
+
+    'AUTH_HEADER_TYPES': ('Bearer',),
+
+    'TOKEN_USER_CLASS': AUTH_USER_MODEL,
+}
+
+
 # S3
 AWS_ACCESS_KEY_ID = env('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = env('AWS_SECRET_ACCESS_KEY')
@@ -176,21 +190,6 @@ STORAGES = {
         "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
     },
 }
-
-# djangorestframework-simplejwt
-
-SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(hours=2),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
-    'ROTATE_REFRESH_TOKENS': True,
-
-    'AUTH_HEADER_TYPES': ('Bearer',),
-
-    'TOKEN_USER_CLASS': AUTH_USER_MODEL,
-}
-
-
-
 
 
 # Media files
