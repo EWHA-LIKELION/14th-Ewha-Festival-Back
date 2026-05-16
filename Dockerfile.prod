@@ -21,8 +21,7 @@ RUN apk update && apk add --no-cache \
     build-base \
     linux-headers \
     jpeg-dev \
-    zlib-dev \
-    curl
+    zlib-dev
 
 # Install dependencies
 COPY ./requirements.txt .
@@ -57,7 +56,9 @@ RUN apk update && apk add --no-cache \
     tzdata \
     netcat-openbsd \
     jpeg-dev \
-    zlib-dev
+    zlib-dev \
+    curl
+
 COPY --from=builder /usr/src/app/wheels /wheels
 COPY --from=builder /usr/src/app/requirements.txt .
 RUN pip install --no-cache /wheels/*
