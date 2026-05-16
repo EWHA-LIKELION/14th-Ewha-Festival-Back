@@ -20,11 +20,13 @@ def update_snapshot() -> None:
     try:
         r = get_redis_client()
         updated_at = datetime.now(timezone.utc).isoformat()
-        pipeline = r.pipeline(transaction=True)
-        pipeline.zunionstore(SEARCH_RANKING_SNAPSHOT_KEY, [SEARCH_RANKING_KEY])
-        pipeline.set("ranking:search:updated_at", updated_at) # 갱신 시각 저장
-        pipeline.delete(SEARCH_RANKING_KEY)
-        pipeline.execute()
+        
+        # 원본이 없으면 스냅샷 업데이트 스킵
+        if not r.exists(SEARCH_RANKING_KEY):
+            return
+            
+        r.rename(SEARCH_RANKING_KEY, SEARCH_RANKING_SNAPSHOT_KEY)
+        r.set("ranking:search:updated_at", updated_at) # 갱신 시각 저장
         logger.info("search snapshot updated")
     except Exception:
         logger.warning("update_snapshot failed", exc_info=True)
