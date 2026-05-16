@@ -152,6 +152,30 @@ REST_FRAMEWORK = {
     ),
 }
 
+# S3
+AWS_ACCESS_KEY_ID = env('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = env('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = env('AWS_STORAGE_BUCKET_NAME')
+AWS_S3_REGION_NAME = env('AWS_S3_REGION_NAME')
+AWS_S3_CUSTOM_DOMAIN = env(
+    'AWS_S3_CUSTOM_DOMAIN',
+    default=f"{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com"
+)
+
+AWS_DEFAULT_ACL = None
+AWS_QUERYSTRING_AUTH = False
+
+STORAGES = {
+    "default": {
+        "BACKEND": "configs.storages.CustomS3Storage",
+        "OPTIONS": {
+            "location": "media",
+        },
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
 
 # djangorestframework-simplejwt
 
@@ -171,5 +195,5 @@ SIMPLE_JWT = {
 
 # Media files
 
-MEDIA_URL = '/media/'
+MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
