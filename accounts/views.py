@@ -141,14 +141,14 @@ class KakaoCallbackView(APIView):
                 str(refresh.access_token),
                 httponly=True,
                 samesite="None",
-                secure=True,
+                secure=False,
             )
             response.set_cookie(
                 "refresh",
                 str(refresh),
                 httponly=True,
                 samesite="None",
-                secure=True,
+                secure=False,
             )
             return response
 

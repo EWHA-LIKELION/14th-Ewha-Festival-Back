@@ -62,6 +62,22 @@ class ShowDetailView(APIView):
     
     def patch(self, request, pk, format=None):
         show = self.get_object(pk)
+        
+        def has_permission(user, show):
+            return user.permission_show.filter(id=show.id).exists()
+        if not has_permission(request.user, show):
+            return Response(
+                {"detail": "권한이 없습니다."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+                
+        def has_permission(user, show):
+            return user.permission_show.filter(id=show.id).exists()
+        if not has_permission(request.user, show):
+            return Response(
+                {"detail": "권한이 없습니다."},
+                status=status.HTTP_403_FORBIDDEN
+            )
 
         patch_serializer = ShowPatchSerializer(
             show,
