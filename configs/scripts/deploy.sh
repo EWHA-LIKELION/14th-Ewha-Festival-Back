@@ -98,7 +98,7 @@ done
 echo "▶ nginx upstream → $NEXT_SERVER"
 sudo docker exec nginx sed -i \
     "s|server web_.*:.*;|server $NEXT_SERVER;|" \
-    /etc/nginx/conf.d/nginx.conf
+    /etc/nginx/conf.d/default.conf
 
 # 4. nginx 무중단 reload
 sudo docker exec nginx nginx -s reload
