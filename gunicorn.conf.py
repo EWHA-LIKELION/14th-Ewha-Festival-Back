@@ -8,3 +8,10 @@ accesslog = "/var/log/gunicorn/access.log"
 errorlog = "/var/log/gunicorn/error.log"
 loglevel = "info"
 access_log_format = '%(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s %(D)s'
+
+preload_app = True
+
+def post_fork(server, worker):
+    from django.db import connections
+    for conn in connections.all():
+        conn.close()

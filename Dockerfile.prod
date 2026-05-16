@@ -21,7 +21,8 @@ RUN apk update && apk add --no-cache \
     build-base \
     linux-headers \
     jpeg-dev \
-    zlib-dev
+    zlib-dev \
+    curl
 
 # Install dependencies
 COPY ./requirements.txt .
