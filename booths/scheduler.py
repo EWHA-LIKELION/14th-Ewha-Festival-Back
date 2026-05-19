@@ -5,13 +5,12 @@ from apscheduler.triggers.date import DateTrigger
 from django_apscheduler.jobstores import DjangoJobStore
 
 def start():
-    from .models import Booth # 순환 참조 방지
     from .services import BoothService
 
     scheduler = BackgroundScheduler(timezone="Asia/Seoul")
     scheduler.add_jobstore(DjangoJobStore(), "default")
 
-    booth_service = BoothService(booth_model=Booth)
+    booth_service = BoothService()
     reset_all = dict(
         func=booth_service.reset_all,
         replace_existing=True,
