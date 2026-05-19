@@ -6,15 +6,20 @@ from django_apscheduler.jobstores import DjangoJobStore
 
 def start():
     from .services import BoothService
+    booth_service = BoothService()
 
     scheduler = BackgroundScheduler(timezone="Asia/Seoul")
     scheduler.add_jobstore(DjangoJobStore(), "default")
 
-    booth_service = BoothService()
-    reset_all = dict(
-        func=booth_service.reset_all,
+    common = dict(
         replace_existing=True,
     )
+    reset_all = dict(
+        func=booth_service.reset_all,
+    ) | common
+    reset_early_closing_buildings = dict(
+        func=booth_service.reset_early_closing_buildings,
+    ) | common
 
     scheduler.add_job(
         **reset_all,
@@ -39,6 +44,15 @@ def start():
         ),
         id="reset_booth_ongoing_20260521_1800",
         name="2026.05.21.(목) 18:00 초기화",
+    )
+    scheduler.add_job(
+        **reset_early_closing_buildings,
+        trigger=DateTrigger(
+            run_date=datetime(2026,5,22,15,0,0),
+            timezone="Asia/Seoul"
+        ),
+        id="reset_booth_ongoing_20260522_1500",
+        name="2026.05.22.(금) 15:00 초기화",
     )
     scheduler.add_job(
         **reset_all,
