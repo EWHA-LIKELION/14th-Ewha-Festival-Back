@@ -7,7 +7,10 @@ from django_apscheduler.jobstores import DjangoJobStore
 def start():
     from .services import BoothService
 
-    scheduler = BackgroundScheduler(timezone="Asia/Seoul")
+    scheduler = BackgroundScheduler(
+        timezone="Asia/Seoul",
+        job_defaults={"misfire_grace_time": 60},
+    )
     scheduler.add_jobstore(DjangoJobStore(), "default")
 
     common = dict(
