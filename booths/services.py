@@ -9,12 +9,14 @@ EARLY_CLOSING_BUILDINGS = (
 )
 
 class BoothService:
-    def reset_all(self):
+    @staticmethod
+    def reset_all():
         """모든 부스의 ongoing을 Null로 초기화"""
         updated_booths = Booth.objects.update(ongoing=None)
         return updated_booths
 
-    def reset_early_closing_buildings(self):
+    @staticmethod
+    def reset_early_closing_buildings():
         """잔디광장, 박물관, 스포츠트랙, 대강당 부스의 ongoing을 Null로 초기화"""
         updated_booths = (
             Booth.objects

@@ -6,7 +6,6 @@ from django_apscheduler.jobstores import DjangoJobStore
 
 def start():
     from .services import BoothService
-    booth_service = BoothService()
 
     scheduler = BackgroundScheduler(timezone="Asia/Seoul")
     scheduler.add_jobstore(DjangoJobStore(), "default")
@@ -14,12 +13,8 @@ def start():
     common = dict(
         replace_existing=True,
     )
-    reset_all = dict(
-        func=booth_service.reset_all,
-    ) | common
-    reset_early_closing_buildings = dict(
-        func=booth_service.reset_early_closing_buildings,
-    ) | common
+    reset_all = dict(func=BoothService.reset_all) | common
+    reset_early_closing_buildings = dict(func=BoothService.reset_early_closing_buildings) | common
 
     scheduler.add_job(
         **reset_all,
