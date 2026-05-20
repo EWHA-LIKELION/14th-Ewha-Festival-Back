@@ -23,8 +23,10 @@ def start():
             replace_existing=True,
         )
     except Exception as e:
-        # 멀티 워커 환경에서 다른 워커가 먼저 등록한 경우 중복 키 오류가 발생할 수 있음
-        logger.warning("Scheduler job registration failed (likely duplicate from another worker): %s", e)
-        return
+        if "duplicate key" in str(e).lower() or "unique constraint" in str(e).lower():
+            # 멀티 워커 환경에서 다른 워커가 먼저 등록한 경우 중복 키 오류가 발생할 수 있음
+            logger.warning("Scheduler job already registered by another worker, skipping: %s", e)
+            return
+        raise
     scheduler.start()
     logger.info("scheduler started")
