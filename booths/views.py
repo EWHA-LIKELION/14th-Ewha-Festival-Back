@@ -123,6 +123,10 @@ class BoothDetailView(APIView):
 
         booth = self.get_object(pk)  
         read_serializer = BoothDetailSerializer(booth, context={"request": request})
+
+        cache.delete_pattern("booth_list:*")
+        cache.delete_pattern(Cachekey.BOOTH_DETAIL.format(user_id="*", booth_id=pk))
+
         return Response(read_serializer.data, status=status.HTTP_200_OK)
 
 class BoothNoticeView(APIView):

@@ -127,6 +127,10 @@ class ShowDetailView(APIView):
             show,
             context={"request": request},
         )
+
+        cache.delete_pattern("show_list:*")
+        cache.delete_pattern(Cachekey.SHOW_DETAIL.format(user_id="*", show_id=pk))
+
         return Response(read_serializer.data, status=status.HTTP_200_OK)
 
 class ShowNoticeView(APIView):
