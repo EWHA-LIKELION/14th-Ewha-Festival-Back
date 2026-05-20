@@ -17,8 +17,8 @@ from urllib.parse import urlencode
 from .serializers import MyDataSerializer, PermissionSerializer
 from .services import PermissionService
 
-from booths.models import Booth, BoothScrap
-from shows.models import Show, ShowScrap
+from booths.models import Booth
+from shows.models import Show
 from searchs.views import search
 
 # Create your views here.
@@ -220,11 +220,13 @@ class MyScrapView(APIView):
         booths_qs = (
             Booth.objects.select_related("location")
             .prefetch_related("product")
-            .filter(id__in=BoothScrap.objects.filter(user=request.user).values("booth_id"))
+            .filter(booth_scrap__user=request.user)
+            .distinct()
         )
         shows_qs = (
             Show.objects.select_related("location")
-            .filter(id__in=ShowScrap.objects.filter(user=request.user).values("show_id"))
+            .filter(show_scrap__user=request.user)
+            .distinct()
         )
         result = search(
             request=request,
