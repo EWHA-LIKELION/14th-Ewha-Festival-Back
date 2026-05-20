@@ -1,3 +1,4 @@
+from django.core.cache import cache
 from django.http import HttpRequest, Http404
 from django.shortcuts import get_object_or_404
 from rest_framework import status
@@ -6,7 +7,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import Show, ShowNotice, ShowScrap
 from .serializers import ShowListSerializer, ShowDetailSerializer, ShowNoticeSerializer, ShowPatchSerializer, ShowScrapSerializer
-from utils.helpers import BasePagination
+from utils.constants import Cachekey
+from utils.helpers import BasePagination, get_user_id, calc_params_hash
 
 class ShowListView(APIView):
     # 페이지네이션 클래스 호출
@@ -18,6 +20,18 @@ class ShowListView(APIView):
         return [IsAuthenticated()]
 
     def get(self, request, format=None):
+        cache_key = Cachekey.SHOW_LIST.format(
+            user_id=get_user_id(request.user),
+            params_hash=calc_params_hash(request.query_params)
+        )
+        cached = cache.get(cache_key)
+
+        if cached is not None:
+            return Response(
+                status=status.HTTP_200_OK,
+                data=cached
+            )
+
         shows = (
             Show.objects
             .with_location()
@@ -35,7 +49,13 @@ class ShowListView(APIView):
             context={"request":request},
         ).data
 
-        return paginator.get_paginated_response(serializer)
+        response_data = paginator.get_paginated_response(serializer).data
+        cache.set(cache_key, response_data, 60*3)
+
+        return Response(
+            status=status.HTTP_200_OK,
+            data=response_data
+        )
 
 class ShowDetailView(APIView):
     def get_permissions(self):
@@ -55,13 +75,32 @@ class ShowDetailView(APIView):
             raise Http404
     
     def get(self, request:HttpRequest, pk, format=None):
+        cache_key = Cachekey.SHOW_DETAIL.format(
+            user_id=get_user_id(request.user),
+            show_id=pk
+        )
+        cached = cache.get(cache_key)
+
+        if cached is not None:
+            return Response(
+                status=status.HTTP_200_OK,
+                data=cached
+            )
+
         show = self.get_object(request, pk)
         serializer = ShowDetailSerializer(
             show,
             context={"request": request},
         )
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    
+
+        response_data = serializer.data
+        cache.set(cache_key, response_data, 60*3)
+
+        return Response(
+            status=status.HTTP_200_OK,
+            data=response_data
+        )
+
     def patch(self, request, pk, format=None):
         show = self.get_object(pk)
         
@@ -88,6 +127,10 @@ class ShowDetailView(APIView):
             show,
             context={"request": request},
         )
+
+        cache.delete_pattern("show_list:*")
+        cache.delete_pattern(Cachekey.SHOW_DETAIL.format(user_id="*", show_id=pk))
+
         return Response(read_serializer.data, status=status.HTTP_200_OK)
 
 class ShowNoticeView(APIView):
@@ -124,8 +167,10 @@ class ShowScrapView(APIView):
                 {"scrapped": False},
                 status=status.HTTP_200_OK
             )
-        
+
         serializer = ShowScrapSerializer(scrap, context={"request": request})
+        cache.delete_pattern(Cachekey.SHOW_LIST.format(user_id=request.user.id, params_hash="*"))
+        cache.delete_pattern(Cachekey.SHOW_DETAIL.format(user_id=request.user.id, show_id=pk))
 
         return Response(
             {"scrapped": True,
