@@ -45,3 +45,6 @@ class BasePagination(LimitOffsetPagination):
         },
         status=status.HTTP_200_OK,
         )
+
+def get_user_id(user):
+    return user.id if user.is_authenticated else "anonymous"
