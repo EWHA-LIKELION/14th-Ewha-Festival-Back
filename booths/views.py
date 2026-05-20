@@ -152,20 +152,18 @@ class BoothScrapView(APIView):
         scrap, created = BoothScrap.objects.get_or_create(
             user=request.user, booth=booth
         )
-        
+
         if not created:
             scrap.delete()
             return Response(
                 {"scrapped": False},
                 status=status.HTTP_200_OK
             )
-        
+
         serializer = BoothScrapSerializer(scrap, context={"request": request})
+
         return Response(
             {"scrapped": True,
              "data": serializer.data},
              status=status.HTTP_201_CREATED
         )
-
-
-    

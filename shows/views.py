@@ -163,7 +163,7 @@ class ShowScrapView(APIView):
                 {"scrapped": False},
                 status=status.HTTP_200_OK
             )
-        
+
         serializer = ShowScrapSerializer(scrap, context={"request": request})
 
         return Response(
