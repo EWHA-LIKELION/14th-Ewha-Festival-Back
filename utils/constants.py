@@ -1,10 +1,10 @@
 from enum import Enum
 
-class Example(Enum):
-    """
-    예시 코드입니다.
-    """
-    example = 'example:{value}'
+class Cachekey(Enum):
+    BOOTH_LIST = 'booth_list:{user_id}:{params_hash}'
+    BOOTH_DETAIL = 'booth_detail:{user_id}:{booth_id}'
+    SHOW_LIST = 'show_list:{user_id}:{params_hash}'
+    SHOW_DETAIL = 'show_detail:{user_id}:{show_id}'
 
     def format(self, **kwargs):
         return self.value.format(**kwargs)
