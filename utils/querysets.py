@@ -1,9 +1,12 @@
+from typing import Literal
 from datetime import datetime, timedelta
 from django.db import models
-from django.db.models import Q, Count, Value, Case, When, F, CharField, IntegerField, DateTimeField
+from django.db.models import Q, Count, Value, Case, When, F, Exists, OuterRef, CharField, IntegerField, DateTimeField, BooleanField
 from django.db.models.functions import Concat, Cast, Replace, Collate, Coalesce
 from django.db.models.expressions import RawSQL
 from django.utils.dateparse import parse_date
+from booths.models import BoothScrap
+from shows.models import ShowScrap
 from .choices import LocationChoices
 
 # 필터링
@@ -196,7 +199,27 @@ class FilterSortQuerySet(models.QuerySet):
             )
         
         return self
-    
+
+    def with_is_scraped(self, user, program:Literal['booth','show']):
+        if program == 'booth':
+            scrap_model = BoothScrap
+        elif program == 'show':
+            scrap_model = ShowScrap
+
+        if user.is_authenticated:
+            return self.annotate(
+                is_scraped=Exists(
+                    scrap_model.objects.filter(
+                        **{program: OuterRef('pk')},
+                        user=user
+                    )
+                )
+            )
+        else:
+            return self.annotate(
+                is_scraped=Value(False, output_field=BooleanField())
+            )
+
     def filter_and_sort(self, params, *, program: str):
         qs = base_filter(self, params, program=program)
         return base_sort(qs, params.get("sorting"), program=program)
