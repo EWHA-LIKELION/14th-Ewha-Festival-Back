@@ -22,7 +22,7 @@ class BoothListView(APIView):
             Booth.objects
             .with_location()
             .with_scraps_count(program="booth")
-            .with_is_scraped(request.user)
+            .with_is_scraped(request.user, program='booth')
             .filter_and_sort(request.query_params, program="booth")
         )
 
