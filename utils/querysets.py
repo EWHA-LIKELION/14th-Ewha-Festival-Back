@@ -5,8 +5,6 @@ from django.db.models import Q, Count, Value, Case, When, F, Exists, OuterRef, C
 from django.db.models.functions import Concat, Cast, Replace, Collate, Coalesce
 from django.db.models.expressions import RawSQL
 from django.utils.dateparse import parse_date
-from booths.models import BoothScrap
-from shows.models import ShowScrap
 from .choices import LocationChoices
 
 # 필터링
@@ -201,10 +199,12 @@ class FilterSortQuerySet(models.QuerySet):
         return self
 
     def with_is_scraped(self, user, program:Literal['booth','show']):
+        from django.apps import apps
+
         if program == 'booth':
-            scrap_model = BoothScrap
+            scrap_model = apps.get_model('booths', 'BoothScrap')
         elif program == 'show':
-            scrap_model = ShowScrap
+            scrap_model = apps.get_model('shows', 'ShowScrap')
 
         if user.is_authenticated:
             return self.annotate(
