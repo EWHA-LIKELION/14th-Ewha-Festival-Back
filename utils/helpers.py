@@ -1,3 +1,6 @@
+import hashlib
+import json
+from django.http import QueryDict
 from django.utils.deconstruct import deconstructible
 from django.utils import timezone
 from rest_framework.pagination import LimitOffsetPagination
@@ -48,3 +51,8 @@ class BasePagination(LimitOffsetPagination):
 
 def get_user_id(user):
     return user.id if user.is_authenticated else "anonymous"
+
+def calc_params_hash(query_params: QueryDict):
+    params = dict(sorted(query_params.lists()))
+    params_hash = hashlib.md5(json.dumps(params, ensure_ascii=False).encode()).hexdigest()
+    return params_hash
