@@ -32,8 +32,8 @@ def search(*, request, booths_qs, shows_qs):
     booths = (
         booths_qs
         .filter(booth_q)
-        .with_scraps_count(program="booth")
         .distinct()
+        .with_scraps_count(program="booth")
         .filter_and_sort(request.query_params, program="booth")
     )
 
@@ -43,8 +43,8 @@ def search(*, request, booths_qs, shows_qs):
     shows = (
         shows_qs.with_name_no_space()
         .filter(show_q)
-        .with_scraps_count(program="show")
         .distinct()
+        .with_scraps_count(program="show")
         .filter_and_sort(request.query_params, program="show")
     )
 
