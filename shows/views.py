@@ -102,7 +102,7 @@ class ShowDetailView(APIView):
         )
 
     def patch(self, request, pk, format=None):
-        show = self.get_object(pk)
+        show = self.get_object(request, pk)
         
         def has_permission(user, show):
             return user.permission_show.filter(id=show.id).exists()
@@ -121,7 +121,7 @@ class ShowDetailView(APIView):
         patch_serializer.is_valid(raise_exception=True)
         patch_serializer.save()
 
-        show = self.get_object(pk)
+        show = self.get_object(request, pk)
 
         read_serializer = ShowDetailSerializer(
             show,
