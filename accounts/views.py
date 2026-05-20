@@ -221,12 +221,10 @@ class MyScrapView(APIView):
             Booth.objects.select_related("location")
             .prefetch_related("product")
             .filter(booth_scrap__user=request.user)
-            .distinct()
         )
         shows_qs = (
             Show.objects.select_related("location")
             .filter(show_scrap__user=request.user)
-            .distinct()
         )
         result = search(
             request=request,
