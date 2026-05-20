@@ -22,6 +22,7 @@ class BoothListView(APIView):
             Booth.objects
             .with_location()
             .with_scraps_count(program="booth")
+            .with_is_scraped(request.user, program='booth')
             .filter_and_sort(request.query_params, program="booth")
         )
 
@@ -42,18 +43,19 @@ class BoothDetailView(APIView):
             return [AllowAny()]
         return [IsAuthenticated()]
     
-    def get_object(self, pk):
+    def get_object(self, request:HttpRequest, pk):
         try:
             return (
                 Booth.objects
                 .with_scraps_count(program="booth")
+                .with_is_scraped(request.user, program='booth')
                 .get(pk=pk)
             )
         except Booth.DoesNotExist:
             raise Http404
     
     def get(self, request:HttpRequest, pk, format=None):
-        booth = self.get_object(pk)
+        booth = self.get_object(request, pk)
         serializer = BoothDetailSerializer(
             booth,
             context={"request": request},

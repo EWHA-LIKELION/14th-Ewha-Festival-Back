@@ -22,6 +22,7 @@ class ShowListView(APIView):
             Show.objects
             .with_location()
             .with_scraps_count(program="show")
+            .with_is_scraped(request.user, program='show')
             .filter_and_sort(request.query_params, program="show")
         )
 
@@ -42,18 +43,19 @@ class ShowDetailView(APIView):
             return [AllowAny()]
         return [IsAuthenticated()]
     
-    def get_object(self, pk):
+    def get_object(self, request:HttpRequest, pk):
         try:
             return (
                 Show.objects
                 .with_scraps_count(program="show")
+                .with_is_scraped(request.user, program='show')
                 .get(pk=pk)
             )
         except Show.DoesNotExist:
             raise Http404
     
     def get(self, request:HttpRequest, pk, format=None):
-        show = self.get_object(pk)
+        show = self.get_object(request, pk)
         serializer = ShowDetailSerializer(
             show,
             context={"request": request},

@@ -108,9 +108,8 @@ class BaseProgramDetailSerializer(serializers.ModelSerializer):
     location = LocationSerializer(read_only=True)
     schedule = serializers.SerializerMethodField()
     scraps_count = serializers.IntegerField()
-    is_scraped = serializers.SerializerMethodField()
+    is_scraped = serializers.BooleanField(read_only=True)
     latest_notice = serializers.SerializerMethodField()
-    reviews = serializers.SerializerMethodField()
     sns = serializers.ListField(
         child=serializers.CharField(allow_blank=True, allow_null=True),
         required=False
@@ -121,20 +120,8 @@ class BaseProgramDetailSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'thumbnail', 'name', 'category', 'is_ongoing', 'scraps_count', 'is_scraped',
             'description', 'location', 'location_description', 'roadview',
-            'schedule', 'sns', 'latest_notice', 'reviews', 'updated_at',
+            'schedule', 'sns', 'latest_notice', 'updated_at',
         )
-
-    def get_is_scraped(self, obj):
-        request = self.context.get("request")
-        if not request or not request.user.is_authenticated:
-            return False
-        
-        scrap_model = self.get_scrap_model()
-        model_name = obj._meta.model_name
-        return scrap_model.objects.filter(
-            user=request.user,
-            **{model_name: obj}
-        ).exists()
 
     def get_schedule(self, obj):
         if not obj or not obj.schedule:
@@ -170,15 +157,8 @@ class BaseProgramDetailSerializer(serializers.ModelSerializer):
             if latest:
                 return self.get_notice_serializer()(latest).data
         return None
-    
-    def get_reviews(self, obj):
-        model_name = obj._meta.model_name
-        reviews = self.get_review_model().objects.filter(**{f"user__{model_name}": obj})
-        return self.get_review_serializer()(reviews, many=True).data
-    
+
     def get_notice_serializer(self): raise NotImplementedError
-    def get_review_serializer(self): raise NotImplementedError
-    def get_review_model(self): raise NotImplementedError
     def get_scrap_model(self): raise NotImplementedError
     
 class BaseProgramListSerializer(BaseProgramDetailSerializer):
