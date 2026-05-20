@@ -102,7 +102,7 @@ class BoothDetailView(APIView):
         )
 
     def patch(self, request, pk, format=None):
-        booth = self.get_object(pk)
+        booth = self.get_object(request, pk)
         
         def has_permission(user, booth):
             return user.permission_booth.filter(id=booth.id).exists()
@@ -121,7 +121,7 @@ class BoothDetailView(APIView):
         patch_serializer.is_valid(raise_exception=True)
         patch_serializer.save()
 
-        booth = self.get_object(pk)  
+        booth = self.get_object(request, pk)
         read_serializer = BoothDetailSerializer(booth, context={"request": request})
 
         cache.delete_pattern("booth_list:*")
