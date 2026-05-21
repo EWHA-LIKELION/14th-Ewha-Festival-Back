@@ -14,6 +14,7 @@ from django.shortcuts import redirect
 from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
+from rest_framework_simplejwt.settings import api_settings
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from urllib.parse import urlencode
 from .serializers import MyDataSerializer, PermissionSerializer
@@ -213,8 +214,22 @@ class Refresh(APIView):
             status=status.HTTP_200_OK,
             data={"detail": "토큰을 재발급했어요."},
         )
-        response.set_cookie("access", new_access_token, httponly=True, samesite="None", secure=True)
-        response.set_cookie("refresh", new_refresh_token, httponly=True, samesite="None", secure=True)
+        response.set_cookie(
+            key="access",
+            value=new_access_token,
+            max_age=int(api_settings.ACCESS_TOKEN_LIFETIME.total_seconds()),
+            secure=True,
+            httponly=True,
+            samesite="None",
+        )
+        response.set_cookie(
+            key="refresh",
+            value=new_refresh_token,
+            max_age=int(api_settings.REFRESH_TOKEN_LIFETIME.total_seconds()),
+            secure=True,
+            httponly=True,
+            samesite="None",
+        )
         return response
 
 class MyDataView(APIView):
