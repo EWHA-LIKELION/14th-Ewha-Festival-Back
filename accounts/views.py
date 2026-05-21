@@ -26,8 +26,6 @@ from booths.models import Booth, BoothScrap
 from shows.models import Show, ShowScrap
 from searchs.views import search
 
-# Create your views here.
-
 User = get_user_model()
 logger = logging.getLogger(__name__)
 
