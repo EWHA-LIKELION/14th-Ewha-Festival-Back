@@ -169,6 +169,7 @@ class ShowScrapView(APIView):
             )
 
         serializer = ShowScrapSerializer(scrap, context={"request": request})
+
         cache.delete_pattern(Cachekey.SHOW_LIST.format(user_id=request.user.id, params_hash="*"))
         cache.delete_pattern(Cachekey.SHOW_DETAIL.format(user_id=request.user.id, show_id=pk))
 

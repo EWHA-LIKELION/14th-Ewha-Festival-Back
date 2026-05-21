@@ -165,6 +165,7 @@ class BoothScrapView(APIView):
             )
 
         serializer = BoothScrapSerializer(scrap, context={"request": request})
+
         cache.delete_pattern(Cachekey.BOOTH_LIST.format(user_id=request.user.id, params_hash="*"))
         cache.delete_pattern(Cachekey.BOOTH_DETAIL.format(user_id=request.user.id, booth_id=pk))
 
