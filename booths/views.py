@@ -126,6 +126,7 @@ class BoothDetailView(APIView):
 
         cache.delete_pattern(Cachekey.BOOTH_LIST.format(user_id="*", params_hash="*"))
         cache.delete_pattern(Cachekey.BOOTH_DETAIL.format(user_id="*", booth_id=pk))
+        cache.delete_pattern(Cachekey.SEARCH_LIST.format(user_id="*", params_hash="*"))
 
         return Response(read_serializer.data, status=status.HTTP_200_OK)
 
@@ -168,6 +169,7 @@ class BoothScrapView(APIView):
 
         cache.delete_pattern(Cachekey.BOOTH_LIST.format(user_id=request.user.id, params_hash="*"))
         cache.delete_pattern(Cachekey.BOOTH_DETAIL.format(user_id=request.user.id, booth_id=pk))
+        cache.delete_pattern(Cachekey.SEARCH_LIST.format(user_id=request.user.id, params_hash="*"))
 
         return Response(
             {"scrapped": True,

@@ -1,5 +1,6 @@
 import re
 
+from django.core.cache import cache
 from django.db.models import Q
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -10,7 +11,8 @@ from booths.models import Booth
 from shows.models import Show
 from booths.serializers import BoothListSerializer
 from shows.serializers import ShowListSerializer
-from utils.helpers import BasePagination
+from utils.constants import Cachekey
+from utils.helpers import BasePagination, get_user_id, calc_params_hash
 from searchs.services import record_search, get_popular_searches
 
 def search(*, request, booths_qs, shows_qs):
@@ -90,6 +92,17 @@ class SearchView(APIView):
         return [IsAuthenticated()]
 
     def get(self, request, format=None):
+        cache_key = Cachekey.SEARCH_LIST.format(
+            user_id=get_user_id(request.user),
+            params_hash=calc_params_hash(request.query_params)
+        )
+        cached = cache.get(cache_key)
+        if cached is not None:
+            return Response(
+                status=status.HTTP_200_OK,
+                data=cached
+            )
+
         booths_qs = (
             Booth.objects.select_related("location")
             .prefetch_related("product")
@@ -105,6 +118,9 @@ class SearchView(APIView):
         q = (request.query_params.get("q") or "").strip()
         if q and (result["booths"]["counts"] > 0 or result["shows"]["counts"] > 0):
             record_search(q)
+
+        cache.set(cache_key, result, 60*3)
+
         return Response(
             result,
             status=status.HTTP_200_OK,

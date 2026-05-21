@@ -130,6 +130,7 @@ class ShowDetailView(APIView):
 
         cache.delete_pattern(Cachekey.SHOW_LIST.format(user_id="*", params_hash="*"))
         cache.delete_pattern(Cachekey.SHOW_DETAIL.format(user_id="*", show_id=pk))
+        cache.delete_pattern(Cachekey.SEARCH_LIST.format(user_id="*", params_hash="*"))
 
         return Response(read_serializer.data, status=status.HTTP_200_OK)
 
@@ -172,6 +173,7 @@ class ShowScrapView(APIView):
 
         cache.delete_pattern(Cachekey.SHOW_LIST.format(user_id=request.user.id, params_hash="*"))
         cache.delete_pattern(Cachekey.SHOW_DETAIL.format(user_id=request.user.id, show_id=pk))
+        cache.delete_pattern(Cachekey.SEARCH_LIST.format(user_id=request.user.id, params_hash="*"))
 
         return Response(
             {"scrapped": True,
