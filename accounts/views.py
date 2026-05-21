@@ -14,11 +14,11 @@ from django.shortcuts import redirect
 from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
-from rest_framework_simplejwt.settings import api_settings
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from urllib.parse import urlencode
 from .serializers import MyDataSerializer, PermissionSerializer
 from .services import JWTService, PermissionService
+from .helpers import response_jwt_cookie
 
 from utils.constants import Cachekey
 from utils.helpers import get_user_id, calc_params_hash
@@ -210,27 +210,12 @@ class Refresh(APIView):
         except Exception:
             raise APIException(detail="토큰 무효화 중 오류가 발생했어요.")
 
-        response = Response(
+        return response_jwt_cookie(
             status=status.HTTP_200_OK,
-            data={"detail": "토큰을 재발급했어요."},
+            detail="토큰을 재발급했어요.",
+            access_token=new_access_token,
+            refresh_token=new_refresh_token,
         )
-        response.set_cookie(
-            key="access",
-            value=new_access_token,
-            max_age=int(api_settings.ACCESS_TOKEN_LIFETIME.total_seconds()),
-            secure=True,
-            httponly=True,
-            samesite="None",
-        )
-        response.set_cookie(
-            key="refresh",
-            value=new_refresh_token,
-            max_age=int(api_settings.REFRESH_TOKEN_LIFETIME.total_seconds()),
-            secure=True,
-            httponly=True,
-            samesite="None",
-        )
-        return response
 
 class MyDataView(APIView):
     permission_classes = [IsAuthenticated]
