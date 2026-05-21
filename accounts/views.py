@@ -189,6 +189,12 @@ class KakaoLogoutView(APIView):
 
         return response
 
+class Refresh(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request:HttpRequest, format=None):
+        pass
+
 class MyDataView(APIView):
     permission_classes = [IsAuthenticated]
     
