@@ -1,3 +1,4 @@
+from django.core.cache import cache
 from django.http import HttpRequest
 from django.db.models import Count, F
 from django.db import IntegrityError
@@ -17,6 +18,8 @@ from urllib.parse import urlencode
 from .serializers import MyDataSerializer, PermissionSerializer
 from .services import PermissionService
 
+from utils.constants import Cachekey
+from utils.helpers import get_user_id, calc_params_hash
 from booths.models import Booth, BoothScrap
 from shows.models import Show, ShowScrap
 from searchs.views import search
@@ -217,6 +220,17 @@ class MyScrapView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, format=None):
+        cache_key = Cachekey.SCRAP_LIST.format(
+            user_id=get_user_id(request.user),
+            params_hash=calc_params_hash(request.query_params)
+        )
+        cached = cache.get(cache_key)
+        if cached is not None:
+            return Response(
+                status=status.HTTP_200_OK,
+                data=cached
+            )
+
         booths_qs = (
             Booth.objects.select_related("location")
             .prefetch_related("product")
@@ -231,6 +245,9 @@ class MyScrapView(APIView):
             booths_qs=booths_qs,
             shows_qs=shows_qs,
         )
+
+        cache.set(cache_key, result, 60*3)
+
         return Response(
             result,
             status=status.HTTP_200_OK,
