@@ -4,7 +4,7 @@ from django.db.models import Count, F
 from django.db import IntegrityError
 from .models import User
 from rest_framework import status
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import AuthenticationFailed, PermissionDenied, NotFound, APIException
 from rest_framework.response import Response
 from rest_framework.views import APIView
 import requests
@@ -13,18 +13,18 @@ from django.conf import settings
 from django.shortcuts import redirect 
 from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from urllib.parse import urlencode
 from .serializers import MyDataSerializer, PermissionSerializer
-from .services import PermissionService
+from .services import JWTService, PermissionService
+from .helpers import response_jwt_cookie
 
 from utils.constants import Cachekey
 from utils.helpers import get_user_id, calc_params_hash
 from booths.models import Booth, BoothScrap
 from shows.models import Show, ShowScrap
 from searchs.views import search
-
-# Create your views here.
 
 User = get_user_model()
 logger = logging.getLogger(__name__)
@@ -188,6 +188,32 @@ class KakaoLogoutView(APIView):
         response.delete_cookie("refresh")
 
         return response
+
+class Refresh(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request:HttpRequest, format=None):
+        old_refresh_token = request.COOKIES.get("refresh")
+        if not old_refresh_token:
+            raise AuthenticationFailed(detail="Refresh Token이 없어요.")
+
+        jwt_service = JWTService()
+
+        try:
+            new_access_token, new_refresh_token = jwt_service.refresh(old_refresh_token=old_refresh_token)
+        except TokenError:
+            raise AuthenticationFailed(detail="유효하지 않은 Refresh Token이에요.")
+        except User.DoesNotExist:
+            raise NotFound(detail="존재하지 않는 사용자예요.")
+        except Exception:
+            raise APIException(detail="토큰 무효화 중 오류가 발생했어요.")
+
+        return response_jwt_cookie(
+            status=status.HTTP_200_OK,
+            detail="토큰을 재발급했어요.",
+            access_token=new_access_token,
+            refresh_token=new_refresh_token,
+        )
 
 class MyDataView(APIView):
     permission_classes = [IsAuthenticated]
