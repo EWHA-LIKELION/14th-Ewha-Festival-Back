@@ -4,6 +4,13 @@ from django.shortcuts import get_object_or_404
 from booths.models import Booth
 from shows.models import Show
 
+class JWTService:
+    def __init__(self, grant_type):
+        self.grant_type = grant_type
+
+    def refresh(self, refresh_token):
+        pass
+
 class PermissionService:
     def __init__(self, request:HttpRequest, pk:int|None=None):
         self.request = request

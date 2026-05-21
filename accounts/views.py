@@ -16,7 +16,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from urllib.parse import urlencode
 from .serializers import RefreshSerializer, MyDataSerializer, PermissionSerializer
-from .services import PermissionService
+from .services import JWTService, PermissionService
 
 from utils.constants import Cachekey
 from utils.helpers import get_user_id, calc_params_hash
@@ -197,6 +197,11 @@ class Refresh(APIView):
         serializer.is_valid(raise_exception=True)
         grant_type = serializer.validated_data['grant_type']
         refresh_token = serializer.validated_data['refresh_token']
+
+        jwt_service = JWTService(grant_type=grant_type)
+        cookie = jwt_service.refresh(refresh_token=refresh_token)
+
+        return cookie
 
 class MyDataView(APIView):
     permission_classes = [IsAuthenticated]
