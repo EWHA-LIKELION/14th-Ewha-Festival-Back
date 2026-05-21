@@ -4,7 +4,7 @@ from django.db.models import Count, F
 from django.db import IntegrityError
 from .models import User
 from rest_framework import status
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import AuthenticationFailed, PermissionDenied, NotFound, APIException
 from rest_framework.response import Response
 from rest_framework.views import APIView
 import requests
@@ -196,30 +196,18 @@ class Refresh(APIView):
     def post(self, request:HttpRequest, format=None):
         old_refresh_token = request.COOKIES.get("refresh")
         if not old_refresh_token:
-            return Response(
-                status=status.HTTP_401_UNAUTHORIZED,
-                data={"detail": "Refresh Token이 없어요."},
-            )
+            raise AuthenticationFailed(detail="Refresh Token이 없어요.")
 
         jwt_service = JWTService()
 
         try:
             new_access_token, new_refresh_token = jwt_service.refresh(old_refresh_token=old_refresh_token)
         except TokenError:
-            raise Response(
-                status=status.HTTP_401_UNAUTHORIZED,
-                data={"detail": "유효하지 않은 Refresh Token이에요."},
-            )
+            raise AuthenticationFailed(detail="유효하지 않은 Refresh Token이에요.")
         except User.DoesNotExist:
-            raise Response(
-                status=status.HTTP_404_NOT_FOUND,
-                data={"detail": "존재하지 않는 사용자예요."},
-            )
+            raise NotFound(detail="존재하지 않는 사용자예요.")
         except Exception:
-            raise Response(
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                data={"detail": "토큰 무효화 중 오류가 발생했어요."},
-            )
+            raise APIException(detail="토큰 무효화 중 오류가 발생했어요.")
 
         response = Response(
             status=status.HTTP_200_OK,
