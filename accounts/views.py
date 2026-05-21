@@ -15,7 +15,7 @@ from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from urllib.parse import urlencode
-from .serializers import MyDataSerializer, PermissionSerializer
+from .serializers import RefreshSerializer, MyDataSerializer, PermissionSerializer
 from .services import PermissionService
 
 from utils.constants import Cachekey
@@ -193,7 +193,10 @@ class Refresh(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request:HttpRequest, format=None):
-        pass
+        serializer = RefreshSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        grant_type = serializer.validated_data['grant_type']
+        refresh_token = serializer.validated_data['refresh_token']
 
 class MyDataView(APIView):
     permission_classes = [IsAuthenticated]
