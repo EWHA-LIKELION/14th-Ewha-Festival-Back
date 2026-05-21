@@ -155,7 +155,6 @@ class KakaoCallbackView(APIView):
             )
             return response
 
-        
         except IntegrityError:
             return Response(
                 {"message": "사용자 생성 중 DB 오류 발생"}, 
@@ -167,7 +166,7 @@ class KakaoCallbackView(APIView):
                 {"message": "서버 내부 오류 발생"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-        
+
 class KakaoLogoutView(APIView):
     def post(self, request):
         refresh_token = request.COOKIES.get("refresh")
