@@ -1,11 +1,7 @@
 from rest_framework.response import Response
 from rest_framework_simplejwt.settings import api_settings
 
-def response_jwt_cookie(status:int, detail:str, access_token:str, refresh_token:str)->Response:
-    response = Response(
-        status=status,
-        data={"detail": detail},
-    )
+def response_jwt_cookie(response:Response, access_token:str, refresh_token:str)->Response:
     response.set_cookie(
         key="access",
         value=access_token,

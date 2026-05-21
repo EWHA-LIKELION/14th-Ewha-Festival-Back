@@ -207,8 +207,10 @@ class Refresh(APIView):
             raise APIException(detail="토큰 무효화 중 오류가 발생했어요.")
 
         return response_jwt_cookie(
-            status=status.HTTP_200_OK,
-            detail="토큰을 재발급했어요.",
+            response=Response(
+                status=status.HTTP_200_OK,
+                data={"detail": "토큰을 재발급했어요."},
+            ),
             access_token=new_access_token,
             refresh_token=new_refresh_token,
         )
