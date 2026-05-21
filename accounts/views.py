@@ -16,7 +16,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from urllib.parse import urlencode
-from .serializers import RefreshSerializer, MyDataSerializer, PermissionSerializer
+from .serializers import MyDataSerializer, PermissionSerializer
 from .services import JWTService, PermissionService
 
 from utils.constants import Cachekey
@@ -194,12 +194,14 @@ class Refresh(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request:HttpRequest, format=None):
-        serializer = RefreshSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        grant_type = serializer.validated_data['grant_type']
-        old_refresh_token = serializer.validated_data['refresh_token']
+        old_refresh_token = request.COOKIES.get("refresh")
+        if not old_refresh_token:
+            return Response(
+                status=status.HTTP_401_UNAUTHORIZED,
+                data={"detail": "Refresh Token이 없어요."},
+            )
 
-        jwt_service = JWTService(grant_type=grant_type)
+        jwt_service = JWTService()
 
         try:
             new_access_token, new_refresh_token = jwt_service.refresh(old_refresh_token=old_refresh_token)

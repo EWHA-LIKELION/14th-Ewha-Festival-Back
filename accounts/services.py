@@ -10,9 +10,6 @@ from shows.models import Show
 User = get_user_model()
 
 class JWTService:
-    def __init__(self, grant_type:str):
-        self.grant_type = grant_type
-
     def refresh(self, old_refresh_token:str)->tuple[str,str]:
         # 1. 서명·만료·blacklist 검증
         try:

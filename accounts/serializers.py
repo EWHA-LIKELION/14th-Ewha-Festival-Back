@@ -8,19 +8,6 @@ from utils.choices import LocationChoices
 from booths.serializers import BoothScrapSerializer
 from shows.serializers import ShowScrapSerializer
 
-class RefreshSerializer(serializers.Serializer):
-    grant_type = serializers.ChoiceField(
-        choices=("Bearer",),
-        required=True,
-        allow_null=False,
-        allow_blank=False,
-    )
-    refresh_token = serializers.CharField(
-        required=True,
-        allow_null=False,
-        allow_blank=False,
-    )
-
 class ManagedBoothSerializer(BaseManagedProgramSerializer):
     class Meta(BaseManagedProgramSerializer.Meta):
         model = Booth
