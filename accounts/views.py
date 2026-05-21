@@ -13,6 +13,7 @@ from django.conf import settings
 from django.shortcuts import redirect 
 from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from urllib.parse import urlencode
 from .serializers import RefreshSerializer, MyDataSerializer, PermissionSerializer
@@ -196,12 +197,35 @@ class Refresh(APIView):
         serializer = RefreshSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         grant_type = serializer.validated_data['grant_type']
-        refresh_token = serializer.validated_data['refresh_token']
+        old_refresh_token = serializer.validated_data['refresh_token']
 
         jwt_service = JWTService(grant_type=grant_type)
-        cookie = jwt_service.refresh(refresh_token=refresh_token)
 
-        return cookie
+        try:
+            new_access_token, new_refresh_token = jwt_service.refresh(old_refresh_token=old_refresh_token)
+        except TokenError:
+            raise Response(
+                status=status.HTTP_401_UNAUTHORIZED,
+                data={"detail": "유효하지 않은 Refresh Token이에요."},
+            )
+        except User.DoesNotExist:
+            raise Response(
+                status=status.HTTP_404_NOT_FOUND,
+                data={"detail": "존재하지 않는 사용자예요."},
+            )
+        except Exception:
+            raise Response(
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                data={"detail": "토큰 무효화 중 오류가 발생했어요."},
+            )
+
+        response = Response(
+            status=status.HTTP_200_OK,
+            data={"detail": "토큰을 재발급했어요."},
+        )
+        response.set_cookie("access", new_access_token, httponly=True, samesite="None", secure=True)
+        response.set_cookie("refresh", new_refresh_token, httponly=True, samesite="None", secure=True)
+        return response
 
 class MyDataView(APIView):
     permission_classes = [IsAuthenticated]
