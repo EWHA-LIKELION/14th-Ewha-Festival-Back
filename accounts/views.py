@@ -135,24 +135,14 @@ class KakaoCallbackView(APIView):
 
             #JWT 발급 
             refresh = RefreshToken.for_user(user)
+            access_token = str(refresh.access_token)
+            refresh_token = str(refresh)
 
-            response = redirect(front_url)
-
-            response.set_cookie(
-                "access",
-                str(refresh.access_token),
-                httponly=True,
-                samesite="None",
-                secure=True,
+            return response_jwt_cookie(
+                response=redirect(front_url),
+                access_token=access_token,
+                refresh_token=refresh_token,
             )
-            response.set_cookie(
-                "refresh",
-                str(refresh),
-                httponly=True,
-                samesite="None",
-                secure=True,
-            )
-            return response
 
         except IntegrityError:
             return Response(
