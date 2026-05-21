@@ -137,7 +137,6 @@ class KakaoCallbackView(APIView):
             refresh = RefreshToken.for_user(user)
 
             response = redirect(front_url)
-            #response = redirect(f"{settings.KAKAO_FRONT_REDIRECT_URL}")
 
             response.set_cookie(
                 "access",
