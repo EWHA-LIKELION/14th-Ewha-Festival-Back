@@ -135,27 +135,15 @@ class KakaoCallbackView(APIView):
 
             #JWT 발급 
             refresh = RefreshToken.for_user(user)
+            access_token = str(refresh.access_token)
+            refresh_token = str(refresh)
 
-            response = redirect(front_url)
-            #response = redirect(f"{settings.KAKAO_FRONT_REDIRECT_URL}")
-
-            response.set_cookie(
-                "access",
-                str(refresh.access_token),
-                httponly=True,
-                samesite="None",
-                secure=True,
+            return response_jwt_cookie(
+                response=redirect(front_url),
+                access_token=access_token,
+                refresh_token=refresh_token,
             )
-            response.set_cookie(
-                "refresh",
-                str(refresh),
-                httponly=True,
-                samesite="None",
-                secure=True,
-            )
-            return response
 
-        
         except IntegrityError:
             return Response(
                 {"message": "사용자 생성 중 DB 오류 발생"}, 
@@ -167,7 +155,7 @@ class KakaoCallbackView(APIView):
                 {"message": "서버 내부 오류 발생"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-        
+
 class KakaoLogoutView(APIView):
     def post(self, request):
         refresh_token = request.COOKIES.get("refresh")
@@ -209,8 +197,10 @@ class Refresh(APIView):
             raise APIException(detail="토큰 무효화 중 오류가 발생했어요.")
 
         return response_jwt_cookie(
-            status=status.HTTP_200_OK,
-            detail="토큰을 재발급했어요.",
+            response=Response(
+                status=status.HTTP_200_OK,
+                data={"detail": "토큰을 재발급했어요."},
+            ),
             access_token=new_access_token,
             refresh_token=new_refresh_token,
         )
