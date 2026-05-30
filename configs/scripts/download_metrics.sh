@@ -1,12 +1,12 @@
 #!/bin/bash
 
 # ========== 설정 (여기만 수정) ==========
-START_TIME="2026-05-16T16:00:00+09:00"  # 행사 시작일
-END_TIME="2026-05-22T23:59:59+09:00"    # 행사 종료일
-PERIOD=60                           # 1분 단위
+START_TIME="2026-05-16T16:00:00+09:00"  # 시작 일시
+END_TIME="2026-05-22T23:59:59+09:00"    # 종료 일시
+PERIOD=60                               # 1분 단위
 OUTPUT_DIR="./cloudwatch_data"
 
-REGION="ap-northeast-2"             # 서울 리전
+REGION="ap-northeast-2"
 ALB_SUFFIX="app/your-alb-name/1234567890abcdef" # ALB ARN 뒷부분
 EC2_INSTANCE_ID="i-xxxxxxxxxxxxxxxxx"
 RDS_IDENTIFIER="your-rds-identifier"
