@@ -4,9 +4,9 @@
 START_TIME="2025-05-14T00:00:00Z"   # 행사 시작일
 END_TIME="2025-05-17T00:00:00Z"     # 행사 종료일
 PERIOD=60                           # 1분 단위
-REGION="ap-northeast-2"             # 서울 리전
 OUTPUT_DIR="./cloudwatch_data"
 
+REGION="ap-northeast-2"             # 서울 리전
 ALB_SUFFIX="app/your-alb-name/1234567890abcdef" # ALB ARN 뒷부분
 EC2_INSTANCE_ID="i-xxxxxxxxxxxxxxxxx"
 RDS_IDENTIFIER="your-rds-identifier"
