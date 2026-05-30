@@ -10,7 +10,7 @@ OUTPUT_DIR="./cloudwatch_data"
 ALB_SUFFIX="app/your-alb-name/1234567890abcdef" # ALB ARN 뒷부분
 EC2_INSTANCE_ID="i-xxxxxxxxxxxxxxxxx"
 RDS_IDENTIFIER="your-rds-identifier"
-CACHE_CLUSTER_ID="your-elasticache-id"
+CACHE_CLUSTER_IDS=("ewhafesta2026-001" "ewhafesta2026-002")
 # =========================================
 
 mkdir -p $OUTPUT_DIR
@@ -79,16 +79,21 @@ fetch_metric "AWS/RDS" "WriteLatency" \
   "Name=DBInstanceIdentifier,Value=$RDS_IDENTIFIER" "Average" "rds_write_latency"
 
 # ElastiCache
-fetch_metric "AWS/ElastiCache" "CurrConnections" \
-  "Name=CacheClusterId,Value=$CACHE_CLUSTER_ID" "Maximum" "cache_connections"
+for i in "${!CACHE_CLUSTER_IDS[@]}"; do
+  CLUSTER_ID="${CACHE_CLUSTER_IDS[$i]}"
+  IDX=$((i + 1))  # 1부터 시작
 
-fetch_metric "AWS/ElastiCache" "CacheHits" \
-  "Name=CacheClusterId,Value=$CACHE_CLUSTER_ID" "Sum" "cache_hits"
+  fetch_metric "AWS/ElastiCache" "CurrConnections" \
+    "Name=CacheClusterId,Value=$CLUSTER_ID" "Maximum" "cache_connections_${IDX}"
 
-fetch_metric "AWS/ElastiCache" "CacheMisses" \
-  "Name=CacheClusterId,Value=$CACHE_CLUSTER_ID" "Sum" "cache_misses"
+  fetch_metric "AWS/ElastiCache" "CacheHits" \
+    "Name=CacheClusterId,Value=$CLUSTER_ID" "Sum" "cache_hits_${IDX}"
 
-fetch_metric "AWS/ElastiCache" "Evictions" \
-  "Name=CacheClusterId,Value=$CACHE_CLUSTER_ID" "Sum" "cache_evictions"
+  fetch_metric "AWS/ElastiCache" "CacheMisses" \
+    "Name=CacheClusterId,Value=$CLUSTER_ID" "Sum" "cache_misses_${IDX}"
+
+  fetch_metric "AWS/ElastiCache" "Evictions" \
+    "Name=CacheClusterId,Value=$CLUSTER_ID" "Sum" "cache_evictions_${IDX}"
+done
 
 echo "✅ 완료! $OUTPUT_DIR 폴더를 확인하세요."
