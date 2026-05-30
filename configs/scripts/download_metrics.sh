@@ -1,4 +1,5 @@
 #!/bin/bash
+set -uo pipefail
 
 # ========== 설정 (여기만 수정) ==========
 START_TIME="2026-05-16T16:00:00+09:00"  # 시작 일시
@@ -41,17 +42,19 @@ CACHE_METRICS=(
   "AWS/ElastiCache|Evictions|Sum|cache_evictions"
 )
 
-# ========== 슬라이싱 중 공유되는 상태 (전역) ==========
+# ========== 전역 변수 ==========
 CURRENT_OUTPUT_DIR=""
 CURRENT_START=""
 CURRENT_END=""
+ERROR_COUNT=0
 
 # ========== 함수 ==========
 fetch_metric() {
   local namespace=$1 metric=$2 dim_name=$3 dim_value=$4 stat=$5 filename=$6
+  local outfile="$CURRENT_OUTPUT_DIR/$filename.json"
 
   echo "  Downloading $metric..."
-  aws cloudwatch get-metric-statistics \
+  if aws cloudwatch get-metric-statistics \
     --namespace "$namespace" \
     --metric-name "$metric" \
     --dimensions "Name=$dim_name,Value=$dim_value" \
@@ -61,12 +64,19 @@ fetch_metric() {
     --statistics "$stat" \
     --region "$REGION" \
     --output json \
-  | jq '.Datapoints |= sort_by(.Timestamp)' > "$CURRENT_OUTPUT_DIR/$filename.json"
+  | jq '.Datapoints |= sort_by(.Timestamp)' > "$outfile"
+  then
+    :
+  else
+    echo "  ⚠️  FAILED: $metric ($filename.json)" >&2
+    rm -f "$outfile"
+    (( ERROR_COUNT++ )) || true
+  fi
 }
 
 fetch_metrics_from_list() {
   local -n metric_list=$1
-  local dim_name=$2 dim_value=$3 filename_suffix=${4:-""}  # suffix 선택적 파라미터
+  local dim_name=$2 dim_value=$3 filename_suffix=${4:-""}
 
   for entry in "${metric_list[@]}"; do
     IFS='|' read -r namespace metric stat filename <<< "$entry"
@@ -98,24 +108,32 @@ end_epoch=$(to_epoch "$END_TIME")
 while true; do
   next_date=$(date -d "$current_date + 1 day" +"%Y-%m-%d")
   next_start="${next_date}T00:00:00+09:00"
+  next_epoch=$(to_epoch "$next_start")
 
-  if (( $(to_epoch "$next_start") >= end_epoch )); then
+  if (( next_epoch >= end_epoch )); then
     end_of_day="$END_TIME"
+    is_last=1
   else
     end_of_day="$next_start"
+    is_last=0
   fi
 
-  CURRENT_OUTPUT_DIR="$BASE_OUTPUT_DIR/$(echo "$current_date" | tr -d '-')"
+  date_label=$(echo "$current_date" | tr -d '-')
+  CURRENT_OUTPUT_DIR="$BASE_OUTPUT_DIR/$date_label"
   CURRENT_START="$start_of_day"
   CURRENT_END="$end_of_day"
 
-  echo "📅 [$(echo "$current_date" | tr -d '-')] $start_of_day ~ $end_of_day"
+  echo "📅 [$date_label] $start_of_day ~ $end_of_day"
   fetch_all_metrics
 
-  (( $(to_epoch "$end_of_day") >= end_epoch )) && break
+  (( is_last )) && break
 
   current_date="$next_date"
   start_of_day="$next_start"
 done
 
-echo "✅ 완료! $BASE_OUTPUT_DIR 폴더를 확인하세요."
+if (( ERROR_COUNT > 0 )); then
+  echo "⚠️  완료 (에러 ${ERROR_COUNT}건). $BASE_OUTPUT_DIR 폴더를 확인하세요."
+else
+  echo "✅ 완료! $BASE_OUTPUT_DIR 폴더를 확인하세요."
+fi
