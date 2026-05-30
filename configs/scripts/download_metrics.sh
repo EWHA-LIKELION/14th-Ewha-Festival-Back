@@ -32,7 +32,8 @@ fetch_metric() {
     --period "$PERIOD" \
     --statistics "$stat" \
     --region "$REGION" \
-    --output json > "$OUTPUT_DIR/$filename.json"
+    --output json \
+  | jq '.Datapoints |= sort_by(.Timestamp)' > "$OUTPUT_DIR/$filename.json"
 }
 
 # ALB
