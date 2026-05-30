@@ -10,6 +10,8 @@ BASE_OUTPUT_DIR="./cloudwatch_data"
 REGION="ap-northeast-2"
 ALB_SUFFIX="app/your-alb-name/1234567890abcdef" # ALB ARN 뒷부분
 EC2_INSTANCE_ID="i-xxxxxxxxxxxxxxxxx"
+EC2_IMAGE_ID="ami-xxxxxxxxxxxxxxxxx"
+EC2_INSTANCE_TYPE="t3.micro"
 RDS_IDENTIFIER="your-rds-identifier"
 CACHE_CLUSTER_IDS=("ewhafesta2026-001" "ewhafesta2026-002")
 # =========================================
@@ -27,6 +29,8 @@ EC2_METRICS=(
   "AWS/EC2|CPUUtilization|Maximum|ec2_cpu"
   "AWS/EC2|NetworkIn|Sum|ec2_network_in"
   "AWS/EC2|NetworkOut|Sum|ec2_network_out"
+)
+CWAGENT_METRICS=(
   "CWAgent|mem_used_percent|Maximum|ec2_memory"
 )
 RDS_METRICS=(
@@ -50,14 +54,15 @@ ERROR_COUNT=0
 
 # ========== 함수 ==========
 fetch_metric() {
-  local namespace=$1 metric=$2 dim_name=$3 dim_value=$4 stat=$5 filename=$6
+  local namespace=$1 metric=$2 stat=$3 filename=$4
+  shift 4
   local outfile="$CURRENT_OUTPUT_DIR/$filename.json"
 
   echo "  Downloading $metric..."
   if aws cloudwatch get-metric-statistics \
     --namespace "$namespace" \
     --metric-name "$metric" \
-    --dimensions "Name=$dim_name,Value=$dim_value" \
+    --dimensions "$@" \
     --start-time "$CURRENT_START" \
     --end-time "$CURRENT_END" \
     --period "$PERIOD" \
@@ -76,25 +81,33 @@ fetch_metric() {
 
 fetch_metrics_from_list() {
   local -n metric_list=$1
-  local dim_name=$2 dim_value=$3 filename_suffix=${4:-""}
+  local filename_suffix=${2:-""}
+  shift 2
+  # 나머지 인자: 모든 Dimension ("Name=k,Value=v" 형태)
+  local dims=("$@")
 
   for entry in "${metric_list[@]}"; do
     IFS='|' read -r namespace metric stat filename <<< "$entry"
-    fetch_metric "$namespace" "$metric" "$dim_name" "$dim_value" "$stat" "${filename}${filename_suffix}"
+    fetch_metric "$namespace" "$metric" "$stat" \
+      "${filename}${filename_suffix}" "${dims[@]+"${dims[@]}"}"
   done
 }
 
 fetch_all_metrics() {
   mkdir -p "$CURRENT_OUTPUT_DIR"
 
-  fetch_metrics_from_list ALB_METRICS  "LoadBalancer"         "$ALB_SUFFIX"
-  fetch_metrics_from_list EC2_METRICS  "InstanceId"           "$EC2_INSTANCE_ID"
-  fetch_metrics_from_list RDS_METRICS  "DBInstanceIdentifier" "$RDS_IDENTIFIER"
+  fetch_metrics_from_list ALB_METRICS   "" "Name=LoadBalancer,Value=$ALB_SUFFIX"
+  fetch_metrics_from_list EC2_METRICS   "" "Name=InstanceId,Value=$EC2_INSTANCE_ID"
+  fetch_metrics_from_list CWAGENT_METRICS "" \
+    "Name=InstanceId,Value=$EC2_INSTANCE_ID" \
+    "Name=ImageId,Value=$EC2_IMAGE_ID" \
+    "Name=InstanceType,Value=$EC2_INSTANCE_TYPE"
+  fetch_metrics_from_list RDS_METRICS   "" "Name=DBInstanceIdentifier,Value=$RDS_IDENTIFIER"
 
   for i in "${!CACHE_CLUSTER_IDS[@]}"; do
     local cluster_id="${CACHE_CLUSTER_IDS[$i]}"
     local idx=$((i + 1))
-    fetch_metrics_from_list CACHE_METRICS "CacheClusterId" "$cluster_id" "_${idx}"
+    fetch_metrics_from_list CACHE_METRICS "_${idx}" "Name=CacheClusterId,Value=$cluster_id"
   done
 }
 
